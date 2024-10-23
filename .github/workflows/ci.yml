@@ -1,0 +1,13 @@
+name: CI
+
+on: push
+
+jobs:
+
+  ci:
+    uses: europeana/metis-actions/.github/workflows/ci.yml@main
+    with:
+      sonar_organization: europeana
+      sonar_project_key: europeana_metis-processing-engine
+    secrets:
+      SONAR_TOKEN: ${{ secrets.METIS_SONAR_TOKEN }}
