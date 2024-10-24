@@ -1,6 +1,5 @@
 package eu.europeana.cloud.repository;
 
-import eu.europeana.cloud.exception.TaskInfoNotFoundException;
 import eu.europeana.cloud.model.TaskInfo;
 import eu.europeana.cloud.retryable.Retryable;
 import eu.europeana.cloud.tool.DbConnectionProvider;
