@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-jobmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: jobmanager
+    spec:
+      serviceAccountName: flink-sa
+      imagePullSecrets:
+        - name: image-registry-pull
+      containers:
+        - name: jobmanager
+          image: registry.paas.psnc.pl/ecloud-poc/flink-rich-node-poc:latest
+          imagePullPolicy: Always
+          args: ["jobmanager"]
+          ports:
+            - containerPort: 6123
+              name: rpc
+            - containerPort: 6124
+              name: blob-server
+            - containerPort: 8081
+              name: webui
+          livenessProbe:
+            tcpSocket:
+              port: 6123
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          volumeMounts:
+            - name: flink-config-volume
+              mountPath: /opt/flink/conf
+            - name: log-volume
+              mountPath: /opt/flink/log
+            - name: jobs-config
+              mountPath: /jobs-config
+            - name: web-upload
+              mountPath: /web-upload
+            - name: working-directory
+              mountPath: /working-directory
+            - name: dumps
+              mountPath: /dumps
+            - name: flink-data
+              mountPath: /data/flink
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "1"
+              memory: 4Gi
+      volumes:
+        - name: flink-config-volume
+          configMap:
+            name: flink-config
+            defaultMode: 0777
+            items:
+              - key: flink-conf.yaml
+                path: flink-conf.yaml
+              - key: log4j-console.properties
+                path: log4j-console.properties
+        - emptyDir: { }
+          name: log-volume
+        - emptyDir: { }
+          name: conf-volume
+        - secret:
+            secretName: jobs-config
+          name: jobs-config
+        - name: working-directory
+          persistentVolumeClaim:
+            claimName: job-manager-work
+        - name: flink-data
+          persistentVolumeClaim:
+            claimName: flink-data
+        - name: web-upload
+          persistentVolumeClaim:
+            claimName: web-upload
+        - name: dumps
+          persistentVolumeClaim:
+            claimName: job-manager-dumps

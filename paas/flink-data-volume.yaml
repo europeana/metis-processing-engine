@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: cephfs.manila-cephfs.csi.openstack.org
+    volume.kubernetes.io/storage-provisioner: cephfs.manila-cephfs.csi.openstack.org
+  name: flink-data
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: manila-share
+  volumeMode: Filesystem

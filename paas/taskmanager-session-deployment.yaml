@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-taskmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: taskmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: taskmanager
+    spec:
+      serviceAccountName: flink-sa
+      imagePullSecrets:
+        - name: image-registry-pull
+      containers:
+        - name: taskmanager
+          image: registry.paas.psnc.pl/ecloud-poc/flink-rich-node-poc:latest
+          imagePullPolicy: Always
+          args: ["taskmanager"]
+          ports:
+            - containerPort: 6122
+              name: rpc
+          livenessProbe:
+            tcpSocket:
+              port: 6122
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          volumeMounts:
+            - name: flink-config-volume
+              mountPath: /opt/flink/conf
+            - name: log-volume
+              mountPath: /opt/flink/log
+            - name: dumps
+              mountPath: /dumps
+            - name: flink-data
+              mountPath: /data/flink
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "1"
+              memory: 4Gi
+      volumes:
+        - name: flink-config-volume
+          configMap:
+            name: flink-config
+            defaultMode: 0777
+            items:
+              - key: flink-conf.yaml
+                path: flink-conf.yaml
+              - key: log4j-console.properties
+                path: log4j-console.properties
+        - emptyDir: { }
+          name: log-volume
+        - name: flink-data
+          persistentVolumeClaim:
+            claimName: flink-data
+        - emptyDir: { }
+          name: conf-volume
+        - name: dumps
+          emptyDir: { }
