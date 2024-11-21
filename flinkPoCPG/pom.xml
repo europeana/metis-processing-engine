@@ -215,8 +215,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>eu.europeana.cloud.flink</groupId>
-            <artifactId>flink-poc-client</artifactId>
+            <groupId>eu.europeana.metis-processing-engine</groupId>
+            <artifactId>metis-processing-engine-client</artifactId>
             <version>1-SNAPSHOT</version>
         </dependency>
         <dependency>

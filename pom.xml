@@ -2,20 +2,60 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>flinkPoC</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+  <groupId>eu.europeana.metis-processing-engine</groupId>
+  <artifactId>metis-processing-engine-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <modules>
-        <module>flink-poc-client</module>
-        <module>flinkPoCPG</module>
-    </modules>
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <flink-version>1.18.1</flink-version>
+    <version.bytebuddy>1.14.19</version.bytebuddy>
+    <metis.version>13-SNAPSHOT</metis.version>
+
+    <jackson.version>2.16.1</jackson.version>
+  </properties>
+
+  <modules>
+    <module>commons</module>
+    <module>media</module>
+    <module>client</module>
+    <module>flinkPoCPG</module>
+    <module>validation</module>
+    <module>oai</module>
+    <module>transformation</module>
+    <module>normalization</module>
+    <module>enrichment</module>
+    <module>indexing</module>
+  </modules>
+
+  <repositories>
+    <repository>
+      <id>libs-release</id>
+      <name>libs-release</name>
+      <url>https://artifactory.eanadev.org/artifactory/libs-release</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>libs-snapshot</id>
+      <name>libs-snapshot</name>
+      <url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>

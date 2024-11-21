@@ -1,16 +1,15 @@
-package eu.europeana.cloud.job.oai;
+package eu.europeana.processing.oai;
 
-import eu.europeana.cloud.common.MetisJob;
-import eu.europeana.cloud.model.ExecutionRecord;
-import eu.europeana.cloud.model.ExecutionRecordResult;
-import eu.europeana.cloud.operator.DeletedRecordFilter;
-import eu.europeana.cloud.operator.IdAssigningOperator;
-import eu.europeana.cloud.operator.RecordHarvestingOperator;
-import eu.europeana.cloud.source.oai.OAIHeadersSource;
-
-import eu.europeana.cloud.sink.DbSinkFunction;
-import eu.europeana.cloud.flink.client.constants.postgres.JobName;
-import eu.europeana.cloud.flink.client.constants.postgres.JobParamName;
+import eu.europeana.processing.MetisJob;
+import eu.europeana.processing.oai.processor.DeletedRecordFilter;
+import eu.europeana.processing.oai.processor.IdAssigningOperator;
+import eu.europeana.processing.oai.processor.RecordHarvestingOperator;
+import eu.europeana.processing.job.JobName;
+import eu.europeana.processing.job.JobParamName;
+import eu.europeana.processing.model.ExecutionRecord;
+import eu.europeana.processing.model.ExecutionRecordResult;
+import eu.europeana.processing.sink.DbSinkFunction;
+import eu.europeana.processing.oai.reader.OAIHeadersSource;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class OAIJob extends MetisJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(OAIJob.class);
+
     protected OAIJob(String[] args) {
         super(args, JobName.OAI_HARVEST);
     }
