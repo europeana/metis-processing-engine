@@ -12,7 +12,6 @@ import java.io.IOException;
 public class OAIHeadersSource implements Source<OaiRecordHeader, OAISplit, OAIEnumeratorState>,
     ResultTypeQueryable<OaiRecordHeader> {
 
-
   private final ParameterTool parameterTool;
 
   public OAIHeadersSource(ParameterTool parameterTool) {

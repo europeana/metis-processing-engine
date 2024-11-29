@@ -25,7 +25,6 @@
     <module>commons</module>
     <module>media</module>
     <module>client</module>
-    <module>flinkPoCPG</module>
     <module>validation</module>
     <module>oai</module>
     <module>transformation</module>
