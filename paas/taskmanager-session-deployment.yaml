@@ -19,7 +19,7 @@ spec:
         - name: image-registry-pull
       containers:
         - name: taskmanager
-          image: registry.paas.psnc.pl/ecloud-poc/flink-rich-node-poc:latest
+          image: registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-flink:1.20-java21
           imagePullPolicy: Always
           args: ["taskmanager"]
           ports:
