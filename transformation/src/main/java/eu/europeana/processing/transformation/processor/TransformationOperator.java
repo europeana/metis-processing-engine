@@ -1,4 +1,4 @@
-package eu.europeana.metis;
+package eu.europeana.processing.transformation.processor;
 
 import eu.europeana.metis.transformation.service.*;
 import eu.europeana.processing.job.JobName;

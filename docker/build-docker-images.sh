@@ -9,5 +9,5 @@ docker build --no-cache -t flink:1.18.1-java21_poc .
 cd ..
 cd flink-node
 echo building :: flink-node $(pwd)
-docker build --no-cache -t metis-processing-engine-flink:1.20-java21 .
+docker build --no-cache -t metis-processing-engine-flink:1.18.1-java21 .
 

@@ -1,4 +1,4 @@
-package eu.europeana.metis;
+package eu.europeana.processing.validation.processor;
 
 import eu.europeana.metis.transformation.service.TransformationException;
 import eu.europeana.metis.transformation.service.XsltTransformer;

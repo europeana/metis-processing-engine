@@ -57,7 +57,6 @@
           <execution>
             <id>make-assembly</id>
             <configuration>
-              <finalName>media-job</finalName>
               <descriptorRefs>
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>

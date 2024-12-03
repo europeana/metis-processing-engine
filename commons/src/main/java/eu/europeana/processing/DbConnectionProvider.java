@@ -17,6 +17,7 @@ public class DbConnectionProvider implements Serializable, AutoCloseable {
 
     public DbConnectionProvider(ParameterTool parameterTool) {
         HikariConfig config=new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
         config.setJdbcUrl(parameterTool.getRequired(JobParamName.DATASOURCE_URL));
         config.setUsername(parameterTool.get(JobParamName.DATASOURCE_USERNAME));
         config.setPassword(parameterTool.get(JobParamName.DATASOURCE_PASSWORD));

@@ -1,9 +1,10 @@
-package eu.europeana.metis;
+package eu.europeana.processing.validation;
 
 import eu.europeana.processing.MetisJob;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import eu.europeana.processing.validation.processor.ValidationOperator;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
