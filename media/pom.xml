@@ -64,7 +64,7 @@
               <archive>
                 <manifest>
                   <mainClass>
-                    eu.europeana.cloud.flink.clustertest.ClusterTestJob
+                    eu.europeana.processing.media.MediaJob
                   </mainClass>
                 </manifest>
               </archive>

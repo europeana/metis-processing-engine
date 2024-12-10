@@ -48,7 +48,7 @@
               <archive>
                 <manifest>
                   <mainClass>
-                    eu.europeana.metis.transformation.TransformationJob
+                    eu.europeana.processing.transformation.TransformationJob
                   </mainClass>
                 </manifest>
               </archive>
