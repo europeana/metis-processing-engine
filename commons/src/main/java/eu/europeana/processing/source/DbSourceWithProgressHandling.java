@@ -2,11 +2,19 @@ package eu.europeana.processing.source;
 
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.model.ExecutionRecord;
-import org.apache.flink.api.connector.source.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import org.apache.flink.api.connector.source.Boundedness;
+import org.apache.flink.api.connector.source.Source;
+import org.apache.flink.api.connector.source.SourceReader;
+import org.apache.flink.api.connector.source.SourceReaderContext;
+import org.apache.flink.api.connector.source.SplitEnumerator;
+import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
-
-import java.io.*;
 
 public class DbSourceWithProgressHandling implements Source<ExecutionRecord, DataPartition, DbEnumeratorState> {
 

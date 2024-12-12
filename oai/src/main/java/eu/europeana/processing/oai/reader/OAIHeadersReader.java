@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static eu.europeana.processing.job.JobParamName.*;
+import static eu.europeana.processing.job.JobParamName.METADATA_PREFIX;
+import static eu.europeana.processing.job.JobParamName.OAI_REPOSITORY_URL;
+import static eu.europeana.processing.job.JobParamName.SET_SPEC;
 
 public class OAIHeadersReader implements SourceReader<OaiRecordHeader, OAISplit> {
 

@@ -7,17 +7,21 @@ import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.repository.TaskInfoRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
 
 public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumeratorState> {
 
@@ -176,7 +180,7 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
 
   @Override
   public void notifyCheckpointComplete(long checkpointId) {
-    LOGGER.info("Checkpoint: {} completed. Updating progress... Map:{}", checkpointId,checkpointIdToFinishedRecordCountMap);
+    LOGGER.info("Checkpoint: {} completed. Updating progress... Map:{}", checkpointId, checkpointIdToFinishedRecordCountMap);
     SortedMap<Long, Long> approvedProgresses = checkpointIdToFinishedRecordCountMap.headMap(checkpointId, true);
     Entry<Long, Long> lastApprovedProgress = approvedProgresses.lastEntry();
     if (lastApprovedProgress != null) {
@@ -246,7 +250,7 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
   }
 
   private void validateTaskExists() {
-    if(taskInfoRepo.findById(taskId).isEmpty()){
+    if (taskInfoRepo.findById(taskId).isEmpty()) {
       LOGGER.error("Task not found in the database. It should never happen.");
       System.exit(1);
     }
@@ -276,14 +280,14 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
   }
 
   /**
-   * Method trim partition to not contain already completed records. it is needed in case when we need
-   * to retry given partition for example after job restarting. The result of this method could be split
-   * with limit 0 in rare cases.
+   * Method trim partition to not contain already completed records. it is needed in case when we need to retry given partition
+   * for example after job restarting. The result of this method could be split with limit 0 in rare cases.
+   *
    * @param split - original split
    * @param info - info about progress
    * @return new trimmed split.
    */
-  private static @NotNull DataPartition createSplitWithoutCompletedRecords(DataPartition split, SplitProgressInfo info) {
+  private static DataPartition createSplitWithoutCompletedRecords(DataPartition split, SplitProgressInfo info) {
     return new DataPartition(split.offset() + info.getEmittedRecordCount(), split.limit() - info.getEmittedRecordCount());
   }
 

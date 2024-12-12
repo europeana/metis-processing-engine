@@ -3,7 +3,6 @@ package eu.europeana.processing.oai.reader;
 import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,7 @@ public class OAIHeadersSplitEnumerator implements SplitEnumerator<OAISplit, OAIE
   }
 
   @Override
-  public void handleSplitRequest(int subtaskId, @Nullable String requesterHostname) {
+  public void handleSplitRequest(int subtaskId, String requesterHostname) {
     LOGGER.info("Handling split request, subtaskId: {}, host: {}", subtaskId, requesterHostname);
     if (!state.isSplitAssigned()) {
       context.assignSplit(new OAISplit(), subtaskId);

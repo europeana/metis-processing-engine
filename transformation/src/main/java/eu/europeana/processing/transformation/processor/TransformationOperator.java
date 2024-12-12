@@ -1,6 +1,10 @@
 package eu.europeana.processing.transformation.processor;
 
-import eu.europeana.metis.transformation.service.*;
+import eu.europeana.metis.transformation.service.EuropeanaGeneratedIdsMap;
+import eu.europeana.metis.transformation.service.EuropeanaIdCreator;
+import eu.europeana.metis.transformation.service.EuropeanaIdException;
+import eu.europeana.metis.transformation.service.TransformationException;
+import eu.europeana.metis.transformation.service.XsltTransformer;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
