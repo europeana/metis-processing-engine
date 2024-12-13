@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ValidationJob" type="Application" factoryName="Application">
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
+    <option name="MAIN_CLASS_NAME" value="eu.europeana.processing.validation.ValidationJob" />
+    <module name="metis-processing-engine-validation" />
+    <option name="PROGRAM_PARAMETERS" value="--datasetId 12 --executionId 1755776870684870440 --validationType VALIDATION_INTERNAL --chunkSize 12 --datasource.url jdbc:postgresql://localhost:5432/spring-batch-metis-poc --datasource.username admin --datasource.password admin" />
+    <option name="VM_PARAMETERS" value="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="eu.europeana.metis.processing.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

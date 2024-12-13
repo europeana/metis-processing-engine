@@ -18,6 +18,10 @@ Info about running the POC on the openshift cluster:
 2.3. flink-node-with-application - flin-node image with application contained in it.
 To only update application code only the last image need to be built.
 
+``docker tag metis-processing-engine-flink:1.20-java21 registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-flink:1.20-java21``
+
+``docker push registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-flink:1.20-java21``
+
 3. Deploying on the openshift server:
 3.1. paas/update-jobs-config.sh - copy config files from the config directory to the openshift secrets
 3.2. paas/apache/deploy-apache.sh -deploys apache server used for web dashboard on a openshift cluster it needs to have file: config/apache/.htpasswd generated  
