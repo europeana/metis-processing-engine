@@ -1,0 +1,64 @@
+#DB related
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.hikari.maximumPoolSize=5
+spring.jpa.generate-ddl=true
+
+#DB cleaning related
+test.db-cleaning=NO_CLEANING
+
+#Jobs related
+job.enrichment.dereference-url=
+job.enrichment.entity-management-url=
+job.enrichment.entity-api-url=
+job.enrichment.entity-api-key=api2demo
+
+job.indexing.preserveTimestamps=false
+job.indexing.performRedirects=true
+job.indexing.mongoInstances=
+job.indexing.mongoPortNumber=27027
+job.indexing.mongoDbName=metis-preview-test
+job.indexing.mongoRedirectsDbName=metis-redirect-preview-test
+job.indexing.mongoUsername=metis_test
+job.indexing.mongoPassword=
+job.indexing.mongoAuthDB=admin
+job.indexing.mongoUseSSL=false
+job.indexing.mongoReadPreference=PRIMARY_PREFERRED
+job.indexing.mongoPoolSize=32
+job.indexing.mongoApplicationName=batch-indexing
+
+job.indexing.solrInstances=
+job.indexing.zookeeperInstances=
+job.indexing.zookeeperPortNumber=2282
+job.indexing.zookeeperChroot=/
+job.indexing.zookeeperDefaultCollection=search_test_preview
+
+#OAI related
+source.url=
+source.setSpec=Heide1000elements
+source.metadataPrefix=edm
+source.recordCount=1000
+
+#General
+test.pause-between-tests-ms=1000
+test.dataset-id=12
+
+
+#Flink related
+flink.jobManagerUrl=
+#flink.jarId=448348c0-e256-4a95-8f58-3c0f8d52dcd3_metis-processing-engine-oai-1.0-SNAPSHOT.jar
+#flink.jarId=737df145-0b52-4e0d-bdcd-cfee85ed7da3_metis-processing-engine-validation-1.0-SNAPSHOT.jar
+#flink.jarId=bb6fdf15-6650-4786-8b91-ff69535d5d8d_metis-processing-engine-transformation-1.0-SNAPSHOT.jar
+#flink.jarId=29be3bff-04ff-45a8-8ad1-f44869255cdb_metis-processing-engine-normalization-1.0-SNAPSHOT.jar
+#flink.jarId=2d4a2e0b-f7c5-4c30-8ae1-70455d68cbfa_metis-processing-engine-enrichment-1.0-SNAPSHOT.jar
+flink.jarId=8717a197-78c7-46b5-84ef-9c2f211dade2_metis-processing-engine-media-1.0-SNAPSHOT.jar
+
+flink.jobManagerUser=
+flink.jobManagerPassword=
+flink.readerParallelism=8
+flink.operatorParallelism=8
+flink.sinkParallelism=8
+flink.maxRecordPending=100
+flink.chunkSize=100
