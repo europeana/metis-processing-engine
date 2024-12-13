@@ -5,6 +5,8 @@ import eu.europeana.processing.enrichment.processor.EnrichmentOperator;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import eu.europeana.processing.enrichment.validation.EnrichmentJobParamValidator;
+import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,5 +27,10 @@ public class EnrichmentJob extends MetisJob {
     @Override
     public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator() {
         return new EnrichmentOperator();
+    }
+
+    @Override
+    public JobParamValidator getParamValidator() {
+        return new EnrichmentJobParamValidator();
     }
 }

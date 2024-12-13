@@ -6,6 +6,8 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.media.processor.MediaOperator;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import eu.europeana.processing.validation.JobParamValidator;
+import eu.europeana.processing.media.validation.MediaJobParamValidator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,11 @@ public class MediaJob extends MetisJob {
     @Override
     public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator() {
         return new MediaOperator();
+    }
+
+    @Override
+    public JobParamValidator getParamValidator() {
+        return new MediaJobParamValidator();
     }
 
 }

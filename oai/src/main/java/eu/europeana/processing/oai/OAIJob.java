@@ -10,6 +10,8 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.sink.DbSinkFunction;
 import eu.europeana.processing.oai.reader.OAIHeadersSource;
+import eu.europeana.processing.validation.JobParamValidator;
+import eu.europeana.processing.oai.validation.OAIJobParamValidator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -59,5 +61,10 @@ public class OAIJob extends MetisJob {
 
     public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator(){
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JobParamValidator getParamValidator() {
+        return new OAIJobParamValidator();
     }
 }

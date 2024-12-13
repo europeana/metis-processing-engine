@@ -1,6 +1,7 @@
-package eu.europeana.processing.validation;
+package eu.europeana.processing.oai.validation;
 
 import eu.europeana.processing.job.JobParamName;
+import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
 
 public class OAIJobParamValidator implements JobParamValidator {
