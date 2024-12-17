@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * Database key for {@link ExecutionRecord}
+ */
 @Data
 @Builder
 public class ExecutionRecordKey implements Serializable {

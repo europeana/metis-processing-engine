@@ -14,6 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Database repository responsible for <b>execution_record_exception_log</b> table
+ */
 @Retryable(delay = 5000, maxAttempts = 5)
 public class ExecutionRecordExceptionLogRepository implements DbRepository, Serializable {
 
@@ -23,15 +26,25 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
 
     private final DbConnectionProvider dbConnectionProvider;
 
-    //Needed for byte-buddy proxy
+    /**
+     * Default constructor needed for byte-buddy proxy
+     */
     public ExecutionRecordExceptionLogRepository() {
         dbConnectionProvider = null;
     }
 
+    /**
+     * Constructor used by repositories
+     * @param dbConnectionProvider database connection details
+     */
     public ExecutionRecordExceptionLogRepository(DbConnectionProvider dbConnectionProvider) {
         this.dbConnectionProvider = dbConnectionProvider;
     }
 
+    /**
+     * Saves the {@link ExecutionRecordResult} in <b>execution_record_exception_log</b> table
+     * @param executionRecordResult instance to be saved in the database
+     */
     public void save(ExecutionRecordResult executionRecordResult) {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
@@ -55,6 +68,13 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
         }
     }
 
+    /**
+     * Counts all the records in the <b>execution_record_exception_log</b> table based on the provided parameters
+     * @param datasetId dataset identifier
+     * @param executionId execution identifier
+     * @return number of elements in <b>execution_record_exception_log</b> table for specified dataset and execution
+     * @throws IOException
+     */
     public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws IOException {
 
         ResultSet resultSet;

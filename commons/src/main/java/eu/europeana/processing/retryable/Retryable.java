@@ -6,6 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * <p>Annotation describing retry policies for methods annotated</p>
+ * <p>It allows to specify maximum number of attempts and delays between attempts</p>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
@@ -30,7 +34,9 @@ public @interface Retryable {
   int delay() default DEFAULT_DELAY_BETWEEN_ATTEMPTS;
 
   /**
-   * @return
+   * Gives access to the error message that may happen during retries
+   *
+   * @return error message containing details about happened exception
    */
   String errorMessage() default "";
 }

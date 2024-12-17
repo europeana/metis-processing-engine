@@ -7,6 +7,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * State container for enumerator
+ */
 @Data
 @Builder
 public class DbEnumeratorState implements Serializable {

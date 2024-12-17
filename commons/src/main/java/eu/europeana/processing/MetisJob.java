@@ -18,6 +18,15 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * <p>Main abstract class used by all the jobs executed by Metis.</p>
+ * <p>Contains common methods for jobs. Responsible for:
+ *  <li>preparing the job</li>
+ *  <li>generating task identifier if needed</li>
+ *  <li>triggering job arguments validation</li>
+ *  <li>running the job</li>
+ * </p>
+ */
 public abstract class MetisJob {
 
     protected final StreamExecutionEnvironment flinkEnvironment;
@@ -81,6 +90,11 @@ public abstract class MetisJob {
             .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
     }
 
+    /**
+     * Executes the defined job
+     *
+     * @throws Exception in case of any failure during execution
+     */
     public void execute() throws Exception {
         validateJobParams();
         prepareJob();
