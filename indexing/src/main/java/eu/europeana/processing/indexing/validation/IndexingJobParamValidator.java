@@ -4,6 +4,10 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
 
+/**
+ * Validates parameters provided for {@link eu.europeana.processing.indexing.IndexingJob}
+ * during task startup.
+ */
 public class IndexingJobParamValidator implements JobParamValidator {
 
     @Override

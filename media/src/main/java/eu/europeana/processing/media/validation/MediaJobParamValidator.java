@@ -4,6 +4,11 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
 
+/**
+ * Validates parameters provided for {@link eu.europeana.processing.media.MediaJob}
+ * during task startup.
+ */
+
 public class MediaJobParamValidator implements JobParamValidator {
 
     @Override

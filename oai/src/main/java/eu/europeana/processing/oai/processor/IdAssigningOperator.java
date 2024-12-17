@@ -12,6 +12,10 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Operator used by {@link eu.europeana.processing.oai.OAIJob} to generate record identifiers
+ * based on Europeana policies.
+ */
 public class IdAssigningOperator extends ProcessFunction<ExecutionRecordResult, ExecutionRecordResult> {
 
   @Serial

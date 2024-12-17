@@ -30,6 +30,10 @@ import java.util.List;
 
 import static java.util.Objects.nonNull;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.media.MediaJob}.</p>
+ * <p>It uses Metis provided libraries: {@link RdfSerializer}, {@link RdfDeserializer}, {@link MediaExtractor}</p>
+ */
 public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
     @Serial

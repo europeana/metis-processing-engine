@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Date;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.indexing.IndexingJob}.</p>
+ * <p>It uses {@link Indexer} to push records to Solr and Mongo</p>
+ */
 public class IndexingOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
     @Serial

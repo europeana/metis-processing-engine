@@ -47,7 +47,6 @@ import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
 import eu.europeana.processing.config.FlinkConfigurationProperties;
 import eu.europeana.processing.config.JobsConfigurationProperties;
 import eu.europeana.processing.job.JobParamValue;
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,7 +78,7 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
   }
 
   @Test
-  public void step1_shouldExecuteOAIHarvestComplietellyWithoutErrors() throws Exception {
+  void step1_shouldExecuteOAIHarvestComplietellyWithoutErrors() throws Exception {
 
     executeStep(1, "eu.europeana.processing.oai.OAIJob",
         Map.of(OAI_REPOSITORY_URL, sourceProperties.getUrl(), SET_SPEC, sourceProperties.getSetSpec(), METADATA_PREFIX,
@@ -87,32 +86,32 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
   }
 
   @Test
-  public void step2_shouldExecuteExternalValidationWithoutErrors() throws Exception {
+  void step2_shouldExecuteExternalValidationWithoutErrors() throws Exception {
     executeStep(2, "eu.europeana.processing.validation.ValidationJob",
         Map.of(VALIDATION_TYPE, JobParamValue.VALIDATION_EXTERNAL));
   }
 
 
   @Test
-  public void step3_shouldExecuteXsltTransformationWithoutErrors() throws Exception {
+  void step3_shouldExecuteXsltTransformationWithoutErrors() throws Exception {
     executeStep(3, "eu.europeana.processing.transformation.TransformationJob",
         Map.of(METIS_DATASET_NAME, "idA_metisDatasetNameA", METIS_DATASET_COUNTRY, "Greece", METIS_DATASET_LANGUAGE, "el",
             METIS_XSLT_URL, "https://metis-core-rest.test.eanadev.org/datasets/xslt/6204e5e2514e773e6745f7e9"));
   }
 
   @Test
-  public void step4_shouldExecuteIternalValidationWithoutErrors() throws Exception {
+  void step4_shouldExecuteIternalValidationWithoutErrors() throws Exception {
     executeStep(4, "eu.europeana.processing.validation.ValidationJob",
         Map.of(VALIDATION_TYPE, JobParamValue.VALIDATION_INTERNAL));
   }
 
   @Test
-  public void step5_shouldExecuteNormalizationWithoutErrors() throws Exception {
+  void step5_shouldExecuteNormalizationWithoutErrors() throws Exception {
     executeStep(5, "eu.europeana.processing.normalization.NormalizationJob", Collections.emptyMap());
   }
 
   @Test
-  public void step6_shouldExecuteEnrichmentWithoutErrors() throws Exception {
+  void step6_shouldExecuteEnrichmentWithoutErrors() throws Exception {
     executeStep(6, "eu.europeana.processing.enrichment.EnrichmentJob",
         Map.of(DEREFERENCE_SERVICE_URL, jobsConfigurationProperties.getEnrichment().getDereferenceUrl(),
             ENRICHMENT_ENTITY_MANAGEMENT_URL, jobsConfigurationProperties.getEnrichment().getEntityManagementUrl(),
@@ -122,12 +121,12 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
   }
 
   @Test
-  public void step7_shouldExecuteMediaWithoutErrors() throws Exception {
+  void step7_shouldExecuteMediaWithoutErrors() throws Exception {
     executeStep(7, "eu.europeana.processing.media.MediaJob", Collections.emptyMap());
   }
 
   @Test
-  public void step8_shouldExecuteIndexingWithoutErrors() throws Exception {
+  void step8_shouldExecuteIndexingWithoutErrors() throws Exception {
     Map<String, String> specialParameters = new HashMap<>();
     specialParameters.put(INDEXING_PRESERVETIMESTAMPS, jobsConfigurationProperties.getIndexing().getPreserveTimestamps());
     specialParameters.put(INDEXING_PERFORMREDIRECTS, jobsConfigurationProperties.getIndexing().getPerformRedirects());
@@ -153,7 +152,7 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
     executeStep(8, "eu.europeana.cloud.job.indexing.IndexingJobWithPostgresMultiThreadedOperation", specialParameters);
   }
 
-  public void executeStep(int stepNumber, String jobClass, Map<String, String> specialParameters)
+  void executeStep(int stepNumber, String jobClass, Map<String, String> specialParameters)
       throws Exception {
     beforeEach(stepNumber);
     String datasetId = testProperties.getDatasetId();

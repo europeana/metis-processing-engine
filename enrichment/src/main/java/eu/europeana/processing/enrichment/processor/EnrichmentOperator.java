@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.enrichment.EnrichmentJob}.</p>
+ * <p>It is responsible for enriching records using {@link EnrichmentWorker}</p>
+ */
 public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
     @Serial

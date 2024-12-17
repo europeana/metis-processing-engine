@@ -15,6 +15,10 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.normalization.NormalizationJob}.</p>
+ * <p>It uses Metis provided {@link Normalizer}</p>
+ */
 public class NormalizationOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
     @Serial

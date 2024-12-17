@@ -29,6 +29,10 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
+/**
+ * Operator used by {@link eu.europeana.processing.oai.OAIJob} responsible for downloading records
+ * via OAI endpoint.
+ */
 public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, ExecutionRecordResult> {
 
   @Serial
