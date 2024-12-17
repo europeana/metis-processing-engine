@@ -37,7 +37,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     @Override
     public void open(Configuration parameters) throws Exception {
         LOGGER.info("Opening validation operator");
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
         Properties validationProperties = prepareProperties();
         switch (parameterTool.get(JobParamName.VALIDATION_TYPE)) {

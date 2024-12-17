@@ -44,7 +44,7 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
 
         final RdfConverterFactory rdfConverterFactory = new RdfConverterFactory();
         rdfDeserializer = rdfConverterFactory.createRdfDeserializer();

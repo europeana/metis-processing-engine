@@ -32,7 +32,7 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
     }
 
     @Override

@@ -31,7 +31,7 @@ public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        ParameterTool parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        ParameterTool parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         dbConnectionProvider = new DbConnectionProvider(parameterTool);
         executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
         executionRecordExceptionLogRepository =

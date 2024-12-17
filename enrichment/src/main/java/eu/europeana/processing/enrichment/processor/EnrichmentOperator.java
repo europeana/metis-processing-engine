@@ -31,7 +31,7 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
 
         String dereferenceURL = parameterTool.getRequired(JobParamName.DEREFERENCE_SERVICE_URL);
         String enrichmentEntityManagementUrl = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_MANAGEMENT_URL);

@@ -35,7 +35,7 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
         indexingSettings = prepareIndexingSetting(parameterTool);
         recordDate = new Date();

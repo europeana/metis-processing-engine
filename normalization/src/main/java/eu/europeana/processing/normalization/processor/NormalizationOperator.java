@@ -28,7 +28,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
     @Override
     public void open(Configuration parameters) throws Exception {
         normalizerFactory = new NormalizerFactory();
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         LOGGER.info("Created normalization operator.");
     }
 
