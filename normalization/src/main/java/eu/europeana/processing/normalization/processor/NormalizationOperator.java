@@ -34,7 +34,10 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
 
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
 
         final Normalizer normalizer = normalizerFactory.getNormalizer();
 

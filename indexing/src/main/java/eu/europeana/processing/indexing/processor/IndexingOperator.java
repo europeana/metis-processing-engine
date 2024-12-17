@@ -48,7 +48,10 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
 
         LOGGER.info("Indexing record: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
 

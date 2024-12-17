@@ -36,7 +36,10 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         ExecutionRecordResult result;
         try {
             final XsltTransformer xsltTransformer = prepareXsltTransformer();

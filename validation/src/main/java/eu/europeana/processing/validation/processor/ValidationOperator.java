@@ -58,7 +58,11 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
+
         LOGGER.debug("Validating record with id {} on instance: {}", sourceRecord.getExecutionRecordKey().getRecordId(), this);
         ExecutionRecordResult resultRecord = prepareResultRecord(sourceRecord);
         String sortedDocument = reorderFileContent(resultRecord);

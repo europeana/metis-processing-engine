@@ -26,7 +26,12 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionRecordExceptionLogRepository.class);
 
-    private static final String NO_OF_ELEMENTS = "select count(*) as elements from \"batch-framework\".execution_record_exception_log where dataset_id = ? and execution_id = ?";
+    private static final String NO_OF_ELEMENTS =
+        """
+            select count(*) as elements
+                from "batch-framework".execution_record_exception_log
+                where dataset_id = ? and execution_id = ?
+        """;
 
     private final DbConnectionProvider dbConnectionProvider;
 

@@ -55,7 +55,10 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
 
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         final byte[] rdfBytes = sourceExecutionRecord.getRecordData().getBytes(Charset.defaultCharset());
         final EnrichedRdf enrichedRdf;
         enrichedRdf = getEnrichedRdf(rdfBytes);

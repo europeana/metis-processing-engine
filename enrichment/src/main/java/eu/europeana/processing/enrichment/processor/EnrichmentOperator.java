@@ -49,9 +49,11 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
         LOGGER.debug("Created enrichment operator.");
     }
 
-
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         ProcessedResult<String> enrichmentResult =
                 enrichmentWorker.process(sourceExecutionRecord.getRecordData());
         if (enrichmentResult.getRecordStatus() != ProcessedResult.RecordStatus.CONTINUE) {

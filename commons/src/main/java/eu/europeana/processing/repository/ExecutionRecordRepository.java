@@ -27,12 +27,23 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
     @Serial
     private static final long serialVersionUID = 1;
 
+    private static final String NO_OF_ELEMENTS =
+        """
+            select count(*) as elements
+                from "batch-framework".execution_record
+                where dataset_id = ? and execution_id = ?
+        """;
+
+    private static final String LIMIT =
+        """
+            select * 
+                from "batch-framework".execution_record 
+                where dataset_id = ? and execution_id = ? offset ? limit ?;
+        """;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionRecordRepository.class);
 
     private final DbConnectionProvider dbConnectionProvider;
-
-    private static final String NO_OF_ELEMENTS = "select count(*) as elements from \"batch-framework\".execution_record where dataset_id = ? and execution_id = ?";
-    private static final String LIMIT = "select * from \"batch-framework\".execution_record where dataset_id = ? and execution_id = ? offset ? limit ?;";
 
     /**
      * Default constructor needed for byte-buddy proxy
@@ -117,7 +128,11 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
      * @throws IOException in case of any DB exception
      */
     //TODO to be changed, returned list may be really big
-    public List<ExecutionRecord> getByDatasetIdAndExecutionIdAndOffsetAndLimit(String datasetId, String executionId, long offset, long limit) throws IOException {
+    public List<ExecutionRecord> getByDatasetIdAndExecutionIdAndOffsetAndLimit(
+        String datasetId,
+        String executionId,
+        long offset,
+        long limit) throws IOException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(LIMIT)) {
 
