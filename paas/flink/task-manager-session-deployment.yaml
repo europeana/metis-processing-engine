@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flink-taskmanager
+  name: flink-task-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: flink
-      component: taskmanager
+      component: task-manager
   template:
     metadata:
       labels:
         app: flink
-        component: taskmanager
+        component: task-manager
     spec:
       serviceAccountName: flink-sa
       imagePullSecrets:
         - name: image-registry-pull
       containers:
-        - name: taskmanager
+        - name: task-manager
           image: registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-flink:1.20-java21
           imagePullPolicy: Always
           args: ["taskmanager"]

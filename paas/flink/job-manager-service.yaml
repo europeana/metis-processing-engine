@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: flink-jobmanager
+  name: flink-job-manager
 spec:
   type: ClusterIP
   ports:
@@ -13,4 +13,4 @@ spec:
       port: 8081
   selector:
     app: flink
-    component: jobmanager
+    component: job-manager
