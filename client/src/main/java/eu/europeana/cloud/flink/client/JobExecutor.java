@@ -26,6 +26,12 @@ public class JobExecutor {
   private static final Set<String> END_STATES = Set.of(STATE_FINISHED, STATE_FAILED, STATE_CANCELED);
   public static final int MAX_RETRIES = 20;
   public static final long SLEEP_BETWEEN_RETRIES = 15000L;
+  private static final int CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
+  private static final int READ_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
+  private static final int CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
+  private static final int READ_TIMEOUT_FOR_PORGRESS_REQUEST = 10_000;
+  private static final long WAIT_BEFORE_PROGRESS_CHECK_IN_MILLIS = 200;
+  private static final long PROGRESS_PRINT_INTERVAL = 5;
 
   private final String jarId;
   private final RestTemplate submitRestTemplate;
@@ -64,9 +70,9 @@ public class JobExecutor {
     JobDetails details;
     int i = 0;
     do {
-      Thread.sleep(200L);
+      Thread.sleep(WAIT_BEFORE_PROGRESS_CHECK_IN_MILLIS);
       details = getProgressWithRetry(jobId);
-      if (++i % 5 == 0) {
+      if (++i % PROGRESS_PRINT_INTERVAL == 0) {
         LOGGER.info("Progress: {}", details);
       }
     } while (!END_STATES.contains(details.getState()));
@@ -116,8 +122,8 @@ public class JobExecutor {
   private RestTemplate createSubmitRestTemplate() {
     final RestTemplate restTemplate = new RestTemplate();
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-    requestFactory.setConnectTimeout(60_000);
-    requestFactory.setReadTimeout(60_000);
+    requestFactory.setConnectTimeout(CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST);
+    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_SUBMIT_REQUEST);
     restTemplate.setRequestFactory(requestFactory);
     return restTemplate;
   }
@@ -125,8 +131,8 @@ public class JobExecutor {
   private RestTemplate createProgressRestTemplate() {
     final RestTemplate restTemplate = new RestTemplate();
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-    requestFactory.setConnectTimeout(10_000);
-    requestFactory.setReadTimeout(10_000);
+    requestFactory.setConnectTimeout(CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST);
+    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_PORGRESS_REQUEST);
     restTemplate.setRequestFactory(requestFactory);
     return restTemplate;
   }

@@ -29,6 +29,9 @@ import java.util.Random;
  */
 public abstract class MetisJob {
 
+    private static final long CHECKPOINT_INTERVAL_IN_MILLIS = 2000;
+    private static final long MIN_PAUSE_BETWEEN_CHECKPOINTS = 1000;
+
     protected final StreamExecutionEnvironment flinkEnvironment;
     protected String jobName;
     protected ParameterTool tool;
@@ -53,8 +56,8 @@ public abstract class MetisJob {
         env.setParallelism(1);
         generateTaskIdIfNeeded();
         env.getConfig().setGlobalJobParameters(tool);
-        env.enableCheckpointing(2000);
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(1000);
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_IN_MILLIS);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(MIN_PAUSE_BETWEEN_CHECKPOINTS);
         return env;
     }
 
