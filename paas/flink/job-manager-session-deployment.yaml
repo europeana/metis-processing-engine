@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flink-jobmanager
+  name: flink-job-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: flink
-      component: jobmanager
+      component: job-manager
   template:
     metadata:
       labels:
         app: flink
-        component: jobmanager
+        component: job-manager
     spec:
       serviceAccountName: flink-sa
       imagePullSecrets:
         - name: image-registry-pull
       containers:
-        - name: jobmanager
+        - name: job-manager
           image: registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-flink:1.20-java21
           imagePullPolicy: Always
           args: ["jobmanager"]

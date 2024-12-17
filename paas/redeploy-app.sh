@@ -7,15 +7,15 @@ oc project | grep ecloud-flink-poc
 echo Project OK
 
 # Remove the deployments for the cluster
-oc delete -f jobmanager-session-deployment.yaml
-oc delete -f taskmanager-session-deployment.yaml
+oc delete -f flink/job-manager-session-deployment.yaml
+oc delete -f flink/task-manager-session-deployment.yaml
 
 # Remove client
-oc delete -f flink-client.yaml
+oc delete -f flink/flink-client.yaml
 
 # Create the deployments for the cluster
-oc apply -f jobmanager-session-deployment.yaml
-oc apply -f taskmanager-session-deployment.yaml
+oc apply -f flink/job-manager-session-deployment.yaml
+oc apply -f flink/task-manager-session-deployment.yaml
 
 # Create client
-oc apply -f flink-client.yaml
+oc apply -f flink/flink-client.yaml
