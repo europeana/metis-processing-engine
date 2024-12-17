@@ -5,6 +5,7 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.retryable.Retryable;
+import java.io.Serial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,9 @@ import java.util.List;
  */
 @Retryable(delay = 5000, maxAttempts = 5)
 public class ExecutionRecordRepository implements DbRepository, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionRecordRepository.class);
 

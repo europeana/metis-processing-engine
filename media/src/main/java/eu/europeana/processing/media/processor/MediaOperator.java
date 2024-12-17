@@ -16,6 +16,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -30,6 +31,9 @@ import java.util.List;
 import static java.util.Objects.nonNull;
 
 public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaOperator.class);
 

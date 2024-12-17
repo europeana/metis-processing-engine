@@ -4,6 +4,7 @@ package eu.europeana.processing;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import eu.europeana.processing.job.JobParamName;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 
 import java.io.Serializable;
@@ -11,6 +12,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DbConnectionProvider implements Serializable, AutoCloseable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final HikariDataSource dataSource;
 

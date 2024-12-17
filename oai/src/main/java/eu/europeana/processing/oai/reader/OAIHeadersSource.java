@@ -1,6 +1,7 @@
 package eu.europeana.processing.oai.reader;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
+import java.io.Serial;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.connector.source.Source;
@@ -16,6 +17,9 @@ import java.io.IOException;
 
 public class OAIHeadersSource implements Source<OaiRecordHeader, OAISplit, OAIEnumeratorState>,
     ResultTypeQueryable<OaiRecordHeader> {
+
+  @Serial
+  private static final long serialVersionUID = 1;
 
   private final ParameterTool parameterTool;
 

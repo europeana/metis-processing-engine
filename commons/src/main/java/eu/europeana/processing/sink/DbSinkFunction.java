@@ -5,6 +5,7 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.repository.ExecutionRecordExceptionLogRepository;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
+import java.io.Serial;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -18,6 +19,9 @@ import java.io.IOException;
  * Stores processed records in the database
  */
 public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbSinkFunction.class);
 

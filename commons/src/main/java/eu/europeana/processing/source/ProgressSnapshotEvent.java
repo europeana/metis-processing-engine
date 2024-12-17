@@ -1,6 +1,7 @@
 package eu.europeana.processing.source;
 
 import eu.europeana.processing.model.DataPartition;
+import java.io.Serial;
 import lombok.Value;
 import org.apache.flink.api.connector.source.SourceEvent;
 
@@ -11,6 +12,10 @@ import org.apache.flink.api.connector.source.SourceEvent;
  */
 @Value
 public class ProgressSnapshotEvent implements SourceEvent {
+
+  @Serial
+  private static final long serialVersionUID = 1;
+
   long checkpointId;
   DataPartition split;
   int emittedRecordCount;

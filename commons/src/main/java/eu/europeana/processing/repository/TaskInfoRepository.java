@@ -4,6 +4,7 @@ import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.retryable.Retryable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +17,9 @@ import java.util.Optional;
  */
 @Retryable(delay = 5000, maxAttempts = 5)
 public class TaskInfoRepository implements DbRepository, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final DbConnectionProvider dbConnectionProvider;
 

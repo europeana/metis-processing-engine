@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serial;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.connector.source.Source;
 import org.apache.flink.api.connector.source.SourceReader;
@@ -17,6 +18,9 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
 
 public class DbSourceWithProgressHandling implements Source<ExecutionRecord, DataPartition, DbEnumeratorState> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private final ParameterTool parameterTool;
 

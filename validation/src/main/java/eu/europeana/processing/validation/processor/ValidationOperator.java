@@ -8,6 +8,7 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.validation.model.ValidationResult;
 import eu.europeana.validation.service.ValidationExecutionService;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -19,6 +20,9 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 public class ValidationOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationOperator.class);
     private static final String EDM_SORTER_FILE_URL = "http://ftp.eanadev.org/schema_zips/edm_sorter_20230809.xsl";

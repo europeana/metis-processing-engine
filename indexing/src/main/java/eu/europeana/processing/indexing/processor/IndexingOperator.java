@@ -9,6 +9,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -20,6 +21,9 @@ import java.util.Collections;
 import java.util.Date;
 
 public class IndexingOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexingOperator.class);
     private transient IndexingSettings indexingSettings;

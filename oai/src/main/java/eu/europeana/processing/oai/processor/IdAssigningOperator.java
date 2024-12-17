@@ -6,12 +6,16 @@ import eu.europeana.metis.transformation.service.EuropeanaIdException;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IdAssigningOperator extends ProcessFunction<ExecutionRecordResult, ExecutionRecordResult> {
+
+  @Serial
+  private static final long serialVersionUID = 1;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdAssigningOperator.class);
 
