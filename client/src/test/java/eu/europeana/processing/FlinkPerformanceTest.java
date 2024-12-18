@@ -45,6 +45,7 @@ import static eu.europeana.processing.job.JobParamName.VALIDATION_TYPE;
 import eu.europeana.cloud.flink.client.JobExecutor;
 import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
 import eu.europeana.processing.config.FlinkConfigurationProperties;
+import eu.europeana.processing.config.JarIdsProperties;
 import eu.europeana.processing.config.JobsConfigurationProperties;
 import eu.europeana.processing.job.JobParamValue;
 import java.lang.invoke.MethodHandles;
@@ -52,7 +53,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.jupiter.api.BeforeAll;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,56 +64,52 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static JobExecutor executor;
-
   @Autowired
   private FlinkConfigurationProperties flinkConfigurationProperties;
 
   @Autowired
   protected JobsConfigurationProperties jobsConfigurationProperties;
 
-  @BeforeAll
-  public static void createExecutor(@Autowired FlinkConfigurationProperties properties) {
-    executor = new JobExecutor(properties.getJobManagerUrl(), properties.getJobManagerUser(), properties.getJobManagerPassword(),
-        properties.getJarId());
-  }
+  @Autowired
+  protected JarIdsProperties jarIdsProperties;
 
   @Test
   void step1_shouldExecuteOAIHarvestComplietellyWithoutErrors() throws Exception {
 
-    executeStep(1, "eu.europeana.processing.oai.OAIJob",
+    executeStep(1, jarIdsProperties.getOai(), "eu.europeana.processing.oai.OAIJob",
         Map.of(OAI_REPOSITORY_URL, sourceProperties.getUrl(), SET_SPEC, sourceProperties.getSetSpec(), METADATA_PREFIX,
             sourceProperties.getMetadataPrefix()));
   }
 
   @Test
   void step2_shouldExecuteExternalValidationWithoutErrors() throws Exception {
-    executeStep(2, "eu.europeana.processing.validation.ValidationJob",
+    executeStep(2, jarIdsProperties.getValidation(), "eu.europeana.processing.validation.ValidationJob",
         Map.of(VALIDATION_TYPE, JobParamValue.VALIDATION_EXTERNAL));
   }
 
 
   @Test
   void step3_shouldExecuteXsltTransformationWithoutErrors() throws Exception {
-    executeStep(3, "eu.europeana.processing.transformation.TransformationJob",
+    executeStep(3, jarIdsProperties.getTransformation(), "eu.europeana.processing.transformation.TransformationJob",
         Map.of(METIS_DATASET_NAME, "idA_metisDatasetNameA", METIS_DATASET_COUNTRY, "Greece", METIS_DATASET_LANGUAGE, "el",
             METIS_XSLT_URL, "https://metis-core-rest.test.eanadev.org/datasets/xslt/6204e5e2514e773e6745f7e9"));
   }
 
   @Test
   void step4_shouldExecuteIternalValidationWithoutErrors() throws Exception {
-    executeStep(4, "eu.europeana.processing.validation.ValidationJob",
+    executeStep(4, jarIdsProperties.getValidation(), "eu.europeana.processing.validation.ValidationJob",
         Map.of(VALIDATION_TYPE, JobParamValue.VALIDATION_INTERNAL));
   }
 
   @Test
   void step5_shouldExecuteNormalizationWithoutErrors() throws Exception {
-    executeStep(5, "eu.europeana.processing.normalization.NormalizationJob", Collections.emptyMap());
+    executeStep(5, jarIdsProperties.getNormalization(), "eu.europeana.processing.normalization.NormalizationJob",
+        Collections.emptyMap());
   }
 
   @Test
   void step6_shouldExecuteEnrichmentWithoutErrors() throws Exception {
-    executeStep(6, "eu.europeana.processing.enrichment.EnrichmentJob",
+    executeStep(6, jarIdsProperties.getEnrichment(), "eu.europeana.processing.enrichment.EnrichmentJob",
         Map.of(DEREFERENCE_SERVICE_URL, jobsConfigurationProperties.getEnrichment().getDereferenceUrl(),
             ENRICHMENT_ENTITY_MANAGEMENT_URL, jobsConfigurationProperties.getEnrichment().getEntityManagementUrl(),
             ENRICHMENT_ENTITY_API_URL, jobsConfigurationProperties.getEnrichment().getEntityApiUrl(), ENRICHMENT_ENTITY_API_KEY,
@@ -122,7 +119,7 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
 
   @Test
   void step7_shouldExecuteMediaWithoutErrors() throws Exception {
-    executeStep(7, "eu.europeana.processing.media.MediaJob", Collections.emptyMap());
+    executeStep(7, jarIdsProperties.getMedia(), "eu.europeana.processing.media.MediaJob", Collections.emptyMap());
   }
 
   @Test
@@ -149,11 +146,15 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
     specialParameters.put(INDEXING_MONGOAPPLICATIONNAME,
         jobsConfigurationProperties.getIndexing().getZookeeperDefaultCollection());
 
-    executeStep(8, "eu.europeana.cloud.job.indexing.IndexingJobWithPostgresMultiThreadedOperation", specialParameters);
+    executeStep(8, jarIdsProperties.getIndexing(),
+        "eu.europeana.cloud.job.indexing.IndexingJobWithPostgresMultiThreadedOperation", specialParameters);
   }
 
-  void executeStep(int stepNumber, String jobClass, Map<String, String> specialParameters)
+  void executeStep(int stepNumber, String jarId, String jobClass, Map<String, String> specialParameters)
       throws Exception {
+    JobExecutor executor = new JobExecutor(flinkConfigurationProperties.getJobManagerUrl(),
+        flinkConfigurationProperties.getJobManagerUser(),
+        flinkConfigurationProperties.getJobManagerPassword(), jarId);
     beforeEach(stepNumber);
     String datasetId = testProperties.getDatasetId();
     String taskId = String.valueOf(stepNumber);

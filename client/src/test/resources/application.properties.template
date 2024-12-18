@@ -48,12 +48,13 @@ test.dataset-id=12
 
 #Flink related
 flink.jobManagerUrl=
-#flink.jarId=448348c0-e256-4a95-8f58-3c0f8d52dcd3_metis-processing-engine-oai-1.0-SNAPSHOT.jar
-#flink.jarId=737df145-0b52-4e0d-bdcd-cfee85ed7da3_metis-processing-engine-validation-1.0-SNAPSHOT.jar
-#flink.jarId=bb6fdf15-6650-4786-8b91-ff69535d5d8d_metis-processing-engine-transformation-1.0-SNAPSHOT.jar
-#flink.jarId=29be3bff-04ff-45a8-8ad1-f44869255cdb_metis-processing-engine-normalization-1.0-SNAPSHOT.jar
-#flink.jarId=2d4a2e0b-f7c5-4c30-8ae1-70455d68cbfa_metis-processing-engine-enrichment-1.0-SNAPSHOT.jar
-flink.jarId=8717a197-78c7-46b5-84ef-9c2f211dade2_metis-processing-engine-media-1.0-SNAPSHOT.jar
+flink.jar.id.oai=3c2af5ad-3005-4f5c-bb38-8eea9482171c_metis-processing-engine-oai-1.0-SNAPSHOT.jar
+flink.jar.id.validation=58b42250-5795-4835-8b6a-651d0fed5ca8_metis-processing-engine-validation-1.0-SNAPSHOT.jar
+flink.jar.id.transformation=5c88e975-cd98-4996-8e24-c58a6b1394b4_metis-processing-engine-transformation-1.0-SNAPSHOT.jar
+flink.jar.id.normalization=063ee029-b1eb-4523-93f6-c2b4a355e3e4_metis-processing-engine-normalization-1.0-SNAPSHOT.jar
+flink.jar.id.enrichment=4f6de8e7-dc78-4945-acd0-50b040ed1912_metis-processing-engine-enrichment-1.0-SNAPSHOT.jar
+flink.jar.id.media=407bbb55-35c0-4c39-b17b-fb244126f1e2_metis-processing-engine-media-1.0-SNAPSHOT.jar
+flink.jar.id.indexing=20cc3068-9caf-4939-871a-fd9722ca0f9c_metis-processing-engine-indexing-1.0-SNAPSHOT.jar
 
 flink.jobManagerUser=
 flink.jobManagerPassword=
