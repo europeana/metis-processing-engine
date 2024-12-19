@@ -4,8 +4,10 @@ import com.zaxxer.hikari.HikariConfig;
 import eu.europeana.processing.config.OaiSourceConfigurationProperties;
 import eu.europeana.processing.config.TestConfigurationProperties;
 import eu.europeana.processing.config.TestsConfig;
-import eu.europeana.processing.repository.ExecutionRecordExceptionLogRepository;
-import eu.europeana.processing.repository.ExecutionRecordRepository;
+import eu.europeana.processing.config.db.entity.ExecutionRecord;
+import eu.europeana.processing.config.db.entity.ExecutionRecordExceptionLog;
+import eu.europeana.processing.config.db.repositories.ExecutionRecordExceptionLogRepository;
+import eu.europeana.processing.config.db.repositories.ExecutionRecordRepository;
 import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -31,11 +33,12 @@ public abstract class AbstractPerformanceTest {
   @Autowired
   protected HikariConfig dbConfig;
 
-  @Resource
-  protected ExecutionRecordRepository executionRecordRepository;
 
   @Resource
-  protected ExecutionRecordExceptionLogRepository executionRecordExceptionLogRepository;
+  protected ExecutionRecordRepository<ExecutionRecord> executionRecordRepository;
+
+  @Resource
+  protected ExecutionRecordExceptionLogRepository<ExecutionRecordExceptionLog> executionRecordExceptionLogRepository;
 
   private static boolean firstTest = true;
 

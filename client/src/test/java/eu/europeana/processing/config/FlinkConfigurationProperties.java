@@ -12,7 +12,6 @@ public class FlinkConfigurationProperties {
   String jobManagerUrl;
   String jobManagerUser;
   String jobManagerPassword;
-  String jarId;
   int readerParallelism;
   int operatorParallelism;
   int sinkParallelism;

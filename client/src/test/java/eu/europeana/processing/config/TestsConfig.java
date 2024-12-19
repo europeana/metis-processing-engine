@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
     OaiSourceConfigurationProperties.class,
     FlinkConfigurationProperties.class,
     TestConfigurationProperties.class,
-    JobsConfigurationProperties.class})
+    JobsConfigurationProperties.class,
+    JarIdsProperties.class})
 public class TestsConfig {
 
   @Bean
