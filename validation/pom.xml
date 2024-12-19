@@ -20,6 +20,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients</artifactId>
+      <version>${flink-version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
       <version>1.0-SNAPSHOT</version>

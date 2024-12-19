@@ -1,15 +1,16 @@
 package eu.europeana.processing.transformation.validation;
 
 import eu.europeana.processing.job.JobParamName;
-import eu.europeana.processing.validation.JobParamValidator;
+import eu.europeana.processing.validation.AbstractInternalSourceJobValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
 
-public class TransformationJobParamValidator implements JobParamValidator {
-    @Override
-    public void validate(ParameterTool parameterTool) {
+/**
+ * Validates parameters provided for {@link eu.europeana.processing.transformation.TransformationJob} during task startup.
+ */
+public class TransformationJobParamValidator extends AbstractInternalSourceJobValidator {
 
-        parameterTool.getRequired(JobParamName.DATASET_ID);
-        parameterTool.getRequired(JobParamName.EXECUTION_ID);
+    @Override
+    public void validateJobSpecificParameters(ParameterTool parameterTool) {
         parameterTool.getRequired(JobParamName.METIS_DATASET_NAME);
         parameterTool.getRequired(JobParamName.METIS_DATASET_COUNTRY);
         parameterTool.getRequired(JobParamName.METIS_DATASET_LANGUAGE);

@@ -4,10 +4,10 @@ package eu.europeana.processing.media;
 import eu.europeana.processing.MetisJob;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.media.processor.MediaOperator;
+import eu.europeana.processing.media.validation.MediaJobParamValidator;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.validation.JobParamValidator;
-import eu.europeana.processing.media.validation.MediaJobParamValidator;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
  * <p>Job can be executed by starting main method with all needed arguments</p>
  * <p>The following args are required:</p>
  *
- *<ul>
+ * <ul>
  *  <li>datasetId</li>
  *  <li>executionId</li>
  *  <li>datasource.url</li>
  *  <li>datasource.username</li>
  *  <li>datasource.password</li>
- *</ul>
+ * </ul>
  *
  * <p>The following args are optional:</p>
  * <ul>
@@ -53,31 +53,31 @@ import org.slf4j.LoggerFactory;
  */
 public class MediaJob extends MetisJob {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MediaJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MediaJob.class);
 
-    protected MediaJob(String[] args) {
-        super(args, JobName.MEDIA);
-    }
+  protected MediaJob(String[] args) {
+    super(args, JobName.MEDIA);
+  }
 
-    /**
-     * Entry point for job
-     *
-     * @param args list of all required and optional arguments for job
-     * @throws Exception in case of any Exception
-     */
-    public static void main(String[] args) throws Exception {
-        LOGGER.info("Starting {}...", MediaJob.class.getSimpleName());
-        new MediaJob(args).execute();
-    }
+  /**
+   * Entry point for job
+   *
+   * @param args list of all required and optional arguments for job
+   * @throws Exception in case of any Exception
+   */
+  public static void main(String[] args) throws Exception {
+    LOGGER.info("Starting {}...", MediaJob.class.getSimpleName());
+    new MediaJob(args).execute();
+  }
 
-    @Override
-    public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator() {
-        return new MediaOperator();
-    }
+  @Override
+  public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator() {
+    return new MediaOperator();
+  }
 
-    @Override
-    public JobParamValidator getParamValidator() {
-        return new MediaJobParamValidator();
-    }
+  @Override
+  public JobParamValidator getParamValidator() {
+    return new MediaJobParamValidator();
+  }
 
 }
