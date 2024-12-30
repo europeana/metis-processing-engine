@@ -87,7 +87,7 @@ data:
       #
       # Note also that unless all TaskManagers are running on the same machine, this address needs to be
       # configured separately for each TaskManager.
-      host: localhost
+      #host: localhost
       # The number of task slots that each TaskManager offers. Each slot runs one parallel pipeline.
       numberOfTaskSlots: 2
       memory:
