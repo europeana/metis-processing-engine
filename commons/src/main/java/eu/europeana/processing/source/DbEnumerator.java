@@ -47,11 +47,23 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
   private long finishedRecordCount;
   private final NavigableMap<Long, Long> checkpointIdToFinishedRecordCountMap = new TreeMap<>();
   private long commitCount;
-  private final List<DataPartition> returnedPartitions;
+  private List<DataPartition> returnedPartitions;
   private final Map<DataPartition, SplitProgressInfo> executingPartitions = new LinkedHashMap<>();
 
   /**
-   * Default constructor
+   *
+   * Constructor used when state restoration is not needed;
+   *
+   * @param context context for enumerator
+   * @param parameterTool parameter tool
+   */
+  public DbEnumerator(SplitEnumeratorContext<DataPartition> context,
+      ParameterTool parameterTool) {
+    this(context, null, parameterTool);
+  }
+
+  /**
+   * Constructor used when state restoration is needed;
    *
    * @param context context for enumerator
    * @param state enumerator state container
@@ -64,26 +76,33 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     this.chunkSize = parameterTool.getInt(JobParamName.CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
     if (state != null) {
-      recordsToBeProcessed = state.getRecordsToBeProcessed();
-      allPartitionCount = state.getAllPartitionCount();
-      startedPartitionCount = state.getStartedPartitionCount();
-      finishedRecordCount = state.getFinishedRecordCount();
-      commitCount = state.getCommitCount();
-      returnedPartitions = state.getIncompletePartitions();
-      LOGGER.info(
-          "Created DbEnumerator with finished: {} records, and: {} of: {} all partitions, {} started, from which: {} are incomplete: {}",
-          finishedRecordCount, getFinishedPartitionCount(), allPartitionCount, startedPartitionCount, returnedPartitions.size(),
-          returnedPartitions);
+      restoreEnumeratorFromState(state);
     } else {
-      recordsToBeProcessed = NOT_EVALUATED;
-      allPartitionCount = NOT_EVALUATED;
-      startedPartitionCount = 0;
-      finishedRecordCount = 0;
-      commitCount = 0;
-      returnedPartitions = new ArrayList<>();
-      LOGGER.info("Created DbEnumerator with no fetched partitions");
+      initEnumerator();
     }
+  }
 
+  private void initEnumerator() {
+    recordsToBeProcessed = NOT_EVALUATED;
+    allPartitionCount = NOT_EVALUATED;
+    startedPartitionCount = 0;
+    finishedRecordCount = 0;
+    commitCount = 0;
+    returnedPartitions = new ArrayList<>();
+    LOGGER.info("Created DbEnumerator with no fetched partitions");
+  }
+
+  private void restoreEnumeratorFromState(DbEnumeratorState state) {
+    recordsToBeProcessed = state.getRecordsToBeProcessed();
+    allPartitionCount = state.getAllPartitionCount();
+    startedPartitionCount = state.getStartedPartitionCount();
+    finishedRecordCount = state.getFinishedRecordCount();
+    commitCount = state.getCommitCount();
+    returnedPartitions = state.getIncompletePartitions();
+    LOGGER.info(
+        "Created DbEnumerator with finished: {} records, and: {} of: {} all partitions, {} started, from which: {} are incomplete: {}",
+        finishedRecordCount, getFinishedPartitionCount(), allPartitionCount, startedPartitionCount, returnedPartitions.size(),
+        returnedPartitions);
   }
 
   @Override

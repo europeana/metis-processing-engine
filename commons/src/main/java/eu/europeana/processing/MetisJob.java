@@ -10,9 +10,11 @@ import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.sink.DbSinkFunction;
 import eu.europeana.processing.source.DbSourceWithProgressHandling;
 import eu.europeana.processing.validation.JobParamValidator;
-import java.util.Set;
+import java.time.Duration;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 
@@ -29,6 +31,9 @@ import java.util.Random;
  * </p>
  */
 public abstract class MetisJob {
+
+    private static final int RESTART_ATTEMPTS = 3;
+    private static final int RESTART_DELAY_IN_SECONDS = 10;
 
     private static final long CHECKPOINT_INTERVAL_IN_MILLIS = 2000;
     private static final long MIN_PAUSE_BETWEEN_CHECKPOINTS = 1000;
@@ -51,8 +56,14 @@ public abstract class MetisJob {
     }
 
     protected StreamExecutionEnvironment prepareEnvironment() {
+
+        Configuration config = new Configuration();
+        config.set(RestartStrategyOptions.RESTART_STRATEGY, "fixed-delay");
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS, RESTART_ATTEMPTS);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, Duration.ofSeconds(RESTART_DELAY_IN_SECONDS));
+
         final StreamExecutionEnvironment env =
-                StreamExecutionEnvironment.getExecutionEnvironment();
+                StreamExecutionEnvironment.getExecutionEnvironment(config);
 
         env.setParallelism(1);
         generateTaskIdIfNeeded();
