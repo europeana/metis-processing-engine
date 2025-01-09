@@ -251,3 +251,7 @@ $RECYCLE.BIN/
 *.jks
 
 .vscode/settings.json
+
+/config/
+
+/client/src/test/resources/application.properties

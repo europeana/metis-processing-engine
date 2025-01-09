@@ -1,0 +1,5 @@
+#!/bin/bash
+export FLINK_API_USER=
+export FLINK_API_PASSWORD=
+export FLINK_API_URL=
+export FLINK_JAR_VERSION=1.0-SNAPSHOT
