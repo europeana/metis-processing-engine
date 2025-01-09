@@ -10,6 +10,7 @@ import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.sink.DbSinkFunction;
 import eu.europeana.processing.source.DbSourceWithProgressHandling;
 import eu.europeana.processing.validation.JobParamValidator;
+import java.util.Set;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -112,8 +113,9 @@ public abstract class MetisJob {
         return "dbSource (dataset: " + tool.get(JobParamName.DATASET_ID) + ", executionId: " + tool.get(JobParamName.EXECUTION_ID) + ")";
     }
 
-
     public abstract ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator();
+
+//    public abstract Set<String> getJobRequiredParameters();
 
     public abstract JobParamValidator getParamValidator();
 

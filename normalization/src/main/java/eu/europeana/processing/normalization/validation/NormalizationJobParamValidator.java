@@ -1,19 +1,12 @@
 package eu.europeana.processing.normalization.validation;
 
-import eu.europeana.processing.job.JobParamName;
-import eu.europeana.processing.validation.JobParamValidator;
-import org.apache.flink.api.java.utils.ParameterTool;
+import eu.europeana.processing.validation.AbstractInternalSourceJobValidator;
 
 /**
  * Validates parameters provided for {@link eu.europeana.processing.normalization.NormalizationJob}
  * during task startup.
  */
 
-public class NormalizationJobParamValidator implements JobParamValidator {
-    @Override
-    public void validate(ParameterTool parameterTool) {
+public class NormalizationJobParamValidator extends AbstractInternalSourceJobValidator {
 
-        parameterTool.getRequired(JobParamName.DATASET_ID);
-        parameterTool.getRequired(JobParamName.EXECUTION_ID);
-    }
 }

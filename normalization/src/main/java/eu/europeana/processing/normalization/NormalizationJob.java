@@ -2,11 +2,13 @@ package eu.europeana.processing.normalization;
 
 import eu.europeana.processing.MetisJob;
 import eu.europeana.processing.job.JobName;
+import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.normalization.processor.NormalizationOperator;
 import eu.europeana.processing.validation.JobParamValidator;
 import eu.europeana.processing.normalization.validation.NormalizationJobParamValidator;
+import java.util.Set;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
