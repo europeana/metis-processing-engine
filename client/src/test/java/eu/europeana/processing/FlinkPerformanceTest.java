@@ -147,7 +147,7 @@ public class FlinkPerformanceTest extends AbstractPerformanceTest {
         jobsConfigurationProperties.getIndexing().getZookeeperDefaultCollection());
 
     executeStep(8, jarIdsProperties.getIndexing(),
-        "eu.europeana.cloud.job.indexing.IndexingJobWithPostgresMultiThreadedOperation", specialParameters);
+        "eu.europeana.processing.indexing.IndexingJob", specialParameters);
   }
 
   void executeStep(int stepNumber, String jarId, String jobClass, Map<String, String> specialParameters)
