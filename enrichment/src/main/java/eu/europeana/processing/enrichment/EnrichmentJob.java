@@ -4,11 +4,9 @@ import eu.europeana.processing.MetisJob;
 import eu.europeana.processing.enrichment.processor.EnrichmentOperator;
 import eu.europeana.processing.enrichment.validation.EnrichmentJobParamValidator;
 import eu.europeana.processing.job.JobName;
-import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.validation.JobParamValidator;
-import java.util.Set;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  *
- * <p>Example list of arguments for specific execution may in the following way:</p>
+ * <p>Example list of arguments for specific execution may be defined in the following way:</p>
  * <blockquote>
  *  --datasetId 12
  *  --executionId 261

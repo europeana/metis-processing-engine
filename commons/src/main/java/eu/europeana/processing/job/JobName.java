@@ -1,7 +1,7 @@
 package eu.europeana.processing.job;
 
 /**
- * List of all possible job names used be Metis
+ * List of all possible job names used by Metis
  */
 public class JobName {
 

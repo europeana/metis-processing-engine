@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class SubmitJobResponse {
 
-  private String jobid;
+  private String jobId;
 
 }

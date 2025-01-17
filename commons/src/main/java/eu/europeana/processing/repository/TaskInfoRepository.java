@@ -13,7 +13,11 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 /**
- * Database repository responsible for <b>task_info</b> table
+ * Database repository responsible for <b>task_info</b> table.
+ * <br/>
+ * Some of the methods here (for example {@link TaskInfoRepository#incrementWriteCount}) may not work
+ * for databases with non-atomic updates.
+ * Postgresql supports atomic updates, so should be fine.
  */
 @Retryable(delay = 5000, maxAttempts = 5)
 public class TaskInfoRepository implements DbRepository, Serializable {

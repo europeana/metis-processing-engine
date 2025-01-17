@@ -29,7 +29,7 @@ public class JobExecutor {
   private static final int CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int READ_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
-  private static final int READ_TIMEOUT_FOR_PORGRESS_REQUEST = 10_000;
+  private static final int READ_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
   private static final long WAIT_BEFORE_PROGRESS_CHECK_IN_MILLIS = 200;
   private static final long PROGRESS_PRINT_INTERVAL = 5;
 
@@ -76,7 +76,6 @@ public class JobExecutor {
         LOGGER.info("Progress: {}", details);
       }
     } while (!END_STATES.contains(details.getState()));
-    System.out.println("");
     if(!details.getState().equals(STATE_FINISHED)) {
       throw new RuntimeException("Job execution finished with state: " + details.getState());
     }
@@ -116,7 +115,7 @@ public class JobExecutor {
         serverUrl + "/jars/" + jarId + "/run?entry-class=" + request.getEntryClass()
         , HttpMethod.POST, new HttpEntity<>(request, httpHeader), SubmitJobResponse.class).getBody();
     LOGGER.info("Submitted Job: {} Submission result:\n{}\nExecuting...", request, result);
-    return result.getJobid();
+    return result.getJobId();
   }
 
   private RestTemplate createSubmitRestTemplate() {
@@ -132,7 +131,7 @@ public class JobExecutor {
     final RestTemplate restTemplate = new RestTemplate();
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
     requestFactory.setConnectTimeout(CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST);
-    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_PORGRESS_REQUEST);
+    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_PROGRESS_REQUEST);
     restTemplate.setRequestFactory(requestFactory);
     return restTemplate;
   }
