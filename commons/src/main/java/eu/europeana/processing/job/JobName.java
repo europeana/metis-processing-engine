@@ -13,6 +13,7 @@ public class JobName {
     public static final String MEDIA = "MEDIA";
     public static final String INDEXING = "INDEXING";
     public static final String OAI_HARVEST = "OAI_HARVEST";
+    public static final String HTTP_HARVEST = "HTTP_HARVEST";
 
     private JobName() {
     }

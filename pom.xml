@@ -16,13 +16,14 @@
 
     <flink-version>1.20.0</flink-version>
     <version.bytebuddy>1.14.19</version.bytebuddy>
-    <metis.version>13-SNAPSHOT</metis.version>
+    <metis.version>15-SNAPSHOT</metis.version>
 
     <jackson.version>2.16.1</jackson.version>
   </properties>
 
   <modules>
     <module>commons</module>
+    <module>harvesting-commons</module>
     <module>media</module>
     <module>client</module>
     <module>validation</module>
@@ -31,6 +32,7 @@
     <module>normalization</module>
     <module>enrichment</module>
     <module>indexing</module>
+    <module>http</module>
   </modules>
 
   <dependencyManagement>

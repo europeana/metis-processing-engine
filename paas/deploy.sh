@@ -12,6 +12,7 @@ oc apply -f web-upload-volume.yaml
 oc apply -f job-manager-working-volume.yaml
 oc apply -f job-manager-dumps-volume.yaml
 oc apply -f flink-data-volume.yaml
+oc apply -f http-jobs-volume.yaml
 
 #Configure service account used by Flink to manipulate Kubernetes
 oc apply -f service-account/flink-sa-role.yaml

@@ -49,6 +49,8 @@ spec:
               mountPath: /dumps
             - name: flink-data
               mountPath: /data/flink
+            - name: http-jobs
+              mountPath: /http-jobs
           resources:
             limits:
               cpu: "2"
@@ -85,3 +87,6 @@ spec:
         - name: dumps
           persistentVolumeClaim:
             claimName: job-manager-dumps
+        - name: http-jobs
+          persistentVolumeClaim:
+            claimName: http-jobs

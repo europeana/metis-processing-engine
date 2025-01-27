@@ -25,6 +25,7 @@ buildTime=$(date +"%Y-%m-%dT%H:%M:%S%Z")
 
 #To upload select jars comment the lines starting from upload-jar (below)
 upload-jar "flink.jar.id.oai" "oai/target/metis-processing-engine-oai-$FLINK_JAR_VERSION.jar"
+upload-jar "flink.jar.id.http" "http/target/metis-processing-engine-http-$FLINK_JAR_VERSION.jar"
 upload-jar "flink.jar.id.validation" "validation/target/metis-processing-engine-validation-$FLINK_JAR_VERSION.jar"
 upload-jar "flink.jar.id.transformation" "transformation/target/metis-processing-engine-transformation-$FLINK_JAR_VERSION.jar"
 upload-jar "flink.jar.id.normalization" "normalization/target/metis-processing-engine-normalization-$FLINK_JAR_VERSION.jar"

@@ -1,8 +1,8 @@
 package eu.europeana.processing.oai;
 
 import eu.europeana.processing.MetisJob;
+import eu.europeana.processing.harvesting.processor.IdAssigningOperator;
 import eu.europeana.processing.oai.processor.DeletedRecordFilter;
-import eu.europeana.processing.oai.processor.IdAssigningOperator;
 import eu.europeana.processing.oai.processor.RecordHarvestingOperator;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;

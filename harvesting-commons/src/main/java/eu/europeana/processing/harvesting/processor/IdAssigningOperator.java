@@ -1,4 +1,4 @@
-package eu.europeana.processing.oai.processor;
+package eu.europeana.processing.harvesting.processor;
 
 import eu.europeana.metis.transformation.service.EuropeanaGeneratedIdsMap;
 import eu.europeana.metis.transformation.service.EuropeanaIdCreator;
