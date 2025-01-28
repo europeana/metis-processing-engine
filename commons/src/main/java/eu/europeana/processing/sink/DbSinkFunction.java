@@ -5,6 +5,7 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.repository.ExecutionRecordExceptionLogRepository;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
+import java.io.Serial;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -19,6 +20,9 @@ import java.io.IOException;
  */
 public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
 
+    @Serial
+    private static final long serialVersionUID = 1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DbSinkFunction.class);
 
     private ExecutionRecordRepository executionRecordRepository;
@@ -27,7 +31,7 @@ public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        ParameterTool parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        ParameterTool parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         dbConnectionProvider = new DbConnectionProvider(parameterTool);
         executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
         executionRecordExceptionLogRepository =

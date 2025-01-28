@@ -16,6 +16,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -29,7 +30,14 @@ import java.util.List;
 
 import static java.util.Objects.nonNull;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.media.MediaJob}.</p>
+ * <p>It uses Metis provided libraries: {@link RdfSerializer}, {@link RdfDeserializer}, {@link MediaExtractor}</p>
+ */
 public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaOperator.class);
 
@@ -40,7 +48,7 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
 
         final RdfConverterFactory rdfConverterFactory = new RdfConverterFactory();
         rdfDeserializer = rdfConverterFactory.createRdfDeserializer();
@@ -51,7 +59,10 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
 
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         final byte[] rdfBytes = sourceExecutionRecord.getRecordData().getBytes(Charset.defaultCharset());
         final EnrichedRdf enrichedRdf;
         enrichedRdf = getEnrichedRdf(rdfBytes);

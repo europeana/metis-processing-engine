@@ -9,7 +9,8 @@ import eu.europeana.processing.repository.TaskInfoRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.sink.DbSinkFunction;
 import eu.europeana.processing.source.DbSourceWithProgressHandling;
-import eu.europeana.processing.validation.JobParamValidatorFactory;
+import eu.europeana.processing.validation.JobParamValidator;
+import java.util.Set;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -18,7 +19,19 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * <p>Main abstract class used by all the jobs executed by Metis.</p>
+ * <p>Contains common methods for jobs. Responsible for:
+ *  <li>preparing the job</li>
+ *  <li>generating task identifier if needed</li>
+ *  <li>triggering job arguments validation</li>
+ *  <li>running the job</li>
+ * </p>
+ */
 public abstract class MetisJob {
+
+    private static final long CHECKPOINT_INTERVAL_IN_MILLIS = 2000;
+    private static final long MIN_PAUSE_BETWEEN_CHECKPOINTS = 1000;
 
     protected final StreamExecutionEnvironment flinkEnvironment;
     protected String jobName;
@@ -44,13 +57,13 @@ public abstract class MetisJob {
         env.setParallelism(1);
         generateTaskIdIfNeeded();
         env.getConfig().setGlobalJobParameters(tool);
-        env.enableCheckpointing(2000);
-        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(1000);
+        env.enableCheckpointing(CHECKPOINT_INTERVAL_IN_MILLIS);
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(MIN_PAUSE_BETWEEN_CHECKPOINTS);
         return env;
     }
 
     protected void validateJobParams() {
-        JobParamValidatorFactory.getValidator(jobName).validate(tool);
+        getParamValidator().validate(tool);
     }
 
     protected void generateTaskIdIfNeeded() {
@@ -81,6 +94,11 @@ public abstract class MetisJob {
             .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
     }
 
+    /**
+     * Executes the defined job
+     *
+     * @throws Exception in case of any failure during execution
+     */
     public void execute() throws Exception {
         validateJobParams();
         prepareJob();
@@ -95,7 +113,10 @@ public abstract class MetisJob {
         return "dbSource (dataset: " + tool.get(JobParamName.DATASET_ID) + ", executionId: " + tool.get(JobParamName.EXECUTION_ID) + ")";
     }
 
-
     public abstract ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator();
+
+//    public abstract Set<String> getJobRequiredParameters();
+
+    public abstract JobParamValidator getParamValidator();
 
 }

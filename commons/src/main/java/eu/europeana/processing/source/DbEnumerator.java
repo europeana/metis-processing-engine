@@ -23,6 +23,9 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Flink enumerator that provides splits for Metis jobs
+ */
 public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumeratorState> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DbEnumerator.class);
@@ -47,6 +50,13 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
   private final List<DataPartition> returnedPartitions;
   private final Map<DataPartition, SplitProgressInfo> executingPartitions = new LinkedHashMap<>();
 
+  /**
+   * Default constructor
+   *
+   * @param context context for enumerator
+   * @param state enumerator state container
+   * @param parameterTool parameter tool
+   */
   public DbEnumerator(SplitEnumeratorContext<DataPartition> context, DbEnumeratorState state,
       ParameterTool parameterTool) {
     this.context = context;

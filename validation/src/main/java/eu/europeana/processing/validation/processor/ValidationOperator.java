@@ -8,6 +8,7 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.validation.model.ValidationResult;
 import eu.europeana.validation.service.ValidationExecutionService;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -19,6 +20,9 @@ import java.io.StringWriter;
 import java.util.Properties;
 
 public class ValidationOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationOperator.class);
     private static final String EDM_SORTER_FILE_URL = "http://ftp.eanadev.org/schema_zips/edm_sorter_20230809.xsl";
@@ -33,7 +37,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     @Override
     public void open(Configuration parameters) throws Exception {
         LOGGER.info("Opening validation operator");
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
         Properties validationProperties = prepareProperties();
         switch (parameterTool.get(JobParamName.VALIDATION_TYPE)) {
@@ -54,7 +58,11 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
+
         LOGGER.debug("Validating record with id {} on instance: {}", sourceRecord.getExecutionRecordKey().getRecordId(), this);
         ExecutionRecordResult resultRecord = prepareResultRecord(sourceRecord);
         String sortedDocument = reorderFileContent(resultRecord);

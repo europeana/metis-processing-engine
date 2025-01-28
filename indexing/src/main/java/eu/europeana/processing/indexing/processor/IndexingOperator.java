@@ -9,6 +9,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -19,7 +20,14 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Date;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.indexing.IndexingJob}.</p>
+ * <p>It uses {@link Indexer} to push records to Solr and Mongo</p>
+ */
 public class IndexingOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexingOperator.class);
     private transient IndexingSettings indexingSettings;
@@ -31,7 +39,7 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
         indexingSettings = prepareIndexingSetting(parameterTool);
         recordDate = new Date();
@@ -44,7 +52,10 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
 
         LOGGER.info("Indexing record: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
 

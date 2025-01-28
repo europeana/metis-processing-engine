@@ -1,15 +1,23 @@
 package eu.europeana.processing.source;
 
 import eu.europeana.processing.model.DataPartition;
+import java.io.Serial;
 import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * State container for enumerator
+ */
 @Data
 @Builder
 public class DbEnumeratorState implements Serializable {
+
+  @Serial
+  private static final long serialVersionUID = 1;
+
   private long recordsToBeProcessed;
   private long allPartitionCount;
   private long startedPartitionCount;

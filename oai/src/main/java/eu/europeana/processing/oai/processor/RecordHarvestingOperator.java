@@ -17,6 +17,7 @@ import eu.europeana.processing.model.ExecutionRecord.ExecutionRecordBuilder;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -28,8 +29,14 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-
+/**
+ * Operator used by {@link eu.europeana.processing.oai.OAIJob} responsible for downloading records
+ * via OAI endpoint.
+ */
 public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, ExecutionRecordResult> {
+
+  @Serial
+  private static final long serialVersionUID = 1;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RecordHarvestingOperator.class);
 

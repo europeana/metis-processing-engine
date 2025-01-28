@@ -4,6 +4,7 @@ import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.retryable.Retryable;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,20 +12,38 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
+/**
+ * Database repository responsible for <b>task_info</b> table
+ */
 @Retryable(delay = 5000, maxAttempts = 5)
 public class TaskInfoRepository implements DbRepository, Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1;
+
     private final DbConnectionProvider dbConnectionProvider;
 
-    //Needed for byte-buddy proxy
+    /**
+     * Default constructor needed for byte-buddy proxy
+     */
     public TaskInfoRepository() {
         dbConnectionProvider = null;
     }
 
+    /**
+     * Constructor used by repositories
+     *
+     * @param dbConnectionProvider database connection details
+     */
     public TaskInfoRepository(DbConnectionProvider dbConnectionProvider) {
         this.dbConnectionProvider = dbConnectionProvider;
     }
 
+    /**
+     * Saves the {@link TaskInfo} in <b>task_info</b> table
+     *
+     * @param taskInfo instance to be saved in the database
+     */
     public void save(TaskInfo taskInfo) {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
@@ -40,6 +59,11 @@ public class TaskInfoRepository implements DbRepository, Serializable {
         }
     }
 
+    /**
+     * Updates the {@link TaskInfo} in <b>task_info</b> table
+     *
+     * @param taskInfo instance to be updated in the database
+     */
     public void update(TaskInfo taskInfo) {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
@@ -55,6 +79,12 @@ public class TaskInfoRepository implements DbRepository, Serializable {
         }
     }
 
+    /**
+     * Increments task's write_count by specified number and commit_count by one
+     *
+     * @param taskId task's identifier that should be used for counter increment
+     * @param writeCountIncrement increment value
+     */
     public void incrementWriteCount(long taskId, long writeCountIncrement) {
         try (Connection con = dbConnectionProvider.getConnection();
              /*
@@ -72,6 +102,12 @@ public class TaskInfoRepository implements DbRepository, Serializable {
         }
     }
 
+    /**
+     * Finds the {@link TaskInfo} instance in <b>task_info</b> table based on the task identifier
+     *
+     * @param taskId instance to be saved in the database
+     * @return found {@link TaskInfo} instance wrapped in optional or empty optional
+     */
     public Optional<TaskInfo> findById(long taskId) {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(

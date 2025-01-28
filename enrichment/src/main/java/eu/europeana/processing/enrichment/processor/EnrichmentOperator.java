@@ -9,6 +9,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -18,7 +19,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
+/**
+ * <p>Main operator for {@link eu.europeana.processing.enrichment.EnrichmentJob}.</p>
+ * <p>It is responsible for enriching records using {@link EnrichmentWorker}</p>
+ */
 public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentOperator.class);
 
@@ -27,7 +35,7 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
 
         String dereferenceURL = parameterTool.getRequired(JobParamName.DEREFERENCE_SERVICE_URL);
         String enrichmentEntityManagementUrl = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_MANAGEMENT_URL);
@@ -45,9 +53,11 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
         LOGGER.debug("Created enrichment operator.");
     }
 
-
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         ProcessedResult<String> enrichmentResult =
                 enrichmentWorker.process(sourceExecutionRecord.getRecordData());
         if (enrichmentResult.getRecordStatus() != ProcessedResult.RecordStatus.CONTINUE) {

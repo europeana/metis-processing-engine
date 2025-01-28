@@ -9,6 +9,7 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import java.io.Serial;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -22,17 +23,23 @@ import java.nio.charset.StandardCharsets;
 
 public class TransformationOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
+    @Serial
+    private static final long serialVersionUID = 1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TransformationOperator.class);
 
     private ParameterTool parameterTool;
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        parameterTool = ParameterTool.fromMap(getRuntimeContext().getExecutionConfig().getGlobalJobParameters().toMap());
+        parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
     }
 
     @Override
-    public void processElement(ExecutionRecord sourceExecutionRecord, ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) throws Exception {
+    public void processElement(
+        ExecutionRecord sourceExecutionRecord,
+        ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
+        Collector<ExecutionRecordResult> out) throws Exception {
         ExecutionRecordResult result;
         try {
             final XsltTransformer xsltTransformer = prepareXsltTransformer();

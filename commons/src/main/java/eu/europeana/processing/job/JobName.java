@@ -1,5 +1,8 @@
 package eu.europeana.processing.job;
 
+/**
+ * List of all possible job names used be Metis
+ */
 public class JobName {
 
     public static final String VALIDATION_INTERNAL = "VALIDATION_INTERNAL";

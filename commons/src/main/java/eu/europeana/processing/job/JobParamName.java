@@ -1,5 +1,8 @@
 package eu.europeana.processing.job;
 
+/**
+ * List of all possible param names for jobs
+ */
 public class JobParamName {
 
     public static final String OPERATOR_PARALLELISM = "OPERATOR_PARALLELISM";
