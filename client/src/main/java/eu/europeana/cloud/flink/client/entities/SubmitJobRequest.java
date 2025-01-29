@@ -6,15 +6,18 @@ import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Value;
 
+/**
+ * Describes arguments used while submitting job to the JobManager
+ */
 @Value
 @Builder
 public class SubmitJobRequest {
 
-  private String entryClass;
-  private String parallelism;
-  private String programArgs;
-  private String savepointPath;
-  private boolean allowNonRestoredState;
+  String entryClass;
+  String parallelism;
+  String programArgs;
+  String savepointPath;
+  boolean allowNonRestoredState;
 
   public static class SubmitJobRequestBuilder {
 

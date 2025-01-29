@@ -21,7 +21,7 @@
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
-      <version>1.0-SNAPSHOT</version>
+      <version>${parent.version}</version>
     </dependency>
 
     <dependency>

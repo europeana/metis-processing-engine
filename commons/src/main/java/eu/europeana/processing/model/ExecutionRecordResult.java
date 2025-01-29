@@ -25,6 +25,12 @@ public class ExecutionRecordResult {
         return executionRecord.getExecutionRecordKey().getRecordId();
     }
 
+    /**
+     * Prepares the instance of class {@link ExecutionRecordResult} based on the instance of {@link ExecutionRecord}
+     *
+     * @param executionRecord source object
+     * @return ExecutionRecordResult assigned to provided {@link ExecutionRecord} instance
+     */
     public static ExecutionRecordResult from(ExecutionRecord executionRecord) {
         return ExecutionRecordResult
                 .builder()
@@ -32,6 +38,14 @@ public class ExecutionRecordResult {
                 .build();
     }
 
+    /**
+     * Prepares the instance of class {@link ExecutionRecordResult} based on provided arguments
+     *
+     * @param sourceRecord source object
+     * @param taskId task identifier
+     * @param stepName job name
+     * @return ExecutionRecordResult containing provided values
+     */
     public static ExecutionRecordResult from(ExecutionRecord sourceRecord, long taskId, String stepName) {
         ExecutionRecordResult resultRecord = ExecutionRecordResult.from(sourceRecord);
         resultRecord.getExecutionRecord().getExecutionRecordKey().setExecutionId(taskId + "");
@@ -39,6 +53,16 @@ public class ExecutionRecordResult {
         return resultRecord;
     }
 
+    /**
+     * Prepares the instance of class {@link ExecutionRecordResult} based on provided arguments
+     *
+     * @param executionRecord source object
+     * @param executionId task identifier
+     * @param executionName job name
+     * @param recordData currently processed xml file
+     * @param exception exception occurred during processing
+     * @return ExecutionRecordResult containing provided values
+     */
     public static ExecutionRecordResult from(
             ExecutionRecord executionRecord,
             String executionId,
