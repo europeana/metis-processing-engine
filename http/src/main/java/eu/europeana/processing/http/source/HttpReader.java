@@ -1,8 +1,9 @@
 package eu.europeana.processing.http.source;
 
-import static eu.europeana.processing.job.JobName.OAI_HARVEST;
+import static eu.europeana.processing.job.JobName.HTTP_HARVEST;
 import static eu.europeana.processing.job.JobParamName.DATASET_ID;
 
+import eu.europeana.processing.http.source.exception.HttpSourceException;
 import eu.europeana.processing.http.source.extractor.ArchiveContentExtractor;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
@@ -39,8 +40,8 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   public HttpReader(SourceReaderContext context, ParameterTool parameterTool) {
     this.context = context;
-    datasetId = parameterTool.get(DATASET_ID);
-    taskId = parameterTool.get(JobParamName.TASK_ID);
+    datasetId = parameterTool.getRequired(DATASET_ID);
+    taskId = parameterTool.getRequired(JobParamName.TASK_ID);
   }
 
   @Override
@@ -72,7 +73,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   private void emitRecord(ReaderOutput<ExecutionRecordResult> output, String fileName) {
     ExecutionRecordKey key = ExecutionRecordKey.builder().datasetId(datasetId).executionId(taskId).recordId(fileName).build();
-    ExecutionRecordBuilder executionRecordBuilder = ExecutionRecord.builder().executionRecordKey(key).executionName(OAI_HARVEST);
+    ExecutionRecordBuilder executionRecordBuilder = ExecutionRecord.builder().executionRecordKey(key).executionName(HTTP_HARVEST);
     ExecutionRecordResultBuilder executionRecordResultBuilder = ExecutionRecordResult.builder();
 
     try {
@@ -127,7 +128,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   private void assertAllowOnlySingleSplitAssignment(List<HttpSourceSplit> splits) {
     if ((assignedSplit != null) || splits.size() > 1) {
-      throw new RuntimeException("Cannot assign more than one split at once! currently assigned split: "
+      throw new HttpSourceException("Cannot assign more than one split at once! currently assigned split: "
           + assignedSplit + " new splits to assign, " + splits);
     }
   }

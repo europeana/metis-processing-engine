@@ -16,7 +16,7 @@
 *.war
 *.nar
 *.ear
-*.zip
+#*.zip - it is needed for tests
 *.tar.gz
 *.rar
 

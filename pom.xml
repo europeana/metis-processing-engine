@@ -19,6 +19,7 @@
     <metis.version>15-SNAPSHOT</metis.version>
 
     <jackson.version>2.16.1</jackson.version>
+    <jupiter.version>5.10.5</jupiter.version>
   </properties>
 
   <modules>

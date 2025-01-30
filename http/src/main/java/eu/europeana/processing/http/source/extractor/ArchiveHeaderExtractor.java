@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public class ArchiveHeaderExtractor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveHeaderExtractor.class);
-  private static final String EXTRACTED_SUB_DIR_NAME = "extracted";
+  public static final String EXTRACTED_SUB_DIR_NAME = "extracted";
 
   private final Path downloadedFile;
   private final Path extractedDirectory;

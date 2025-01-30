@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:cc="http://creativecommons.org/ns#"
+         xmlns:crm="http://www.cidoc-crm.org/cidoc-crm/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms="http://purl.org/dc/terms/"
+         xmlns:doap="http://usefulinc.com/ns/doap#"
+         xmlns:edm="http://www.europeana.eu/schemas/edm/"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:ore="http://www.openarchives.org/ore/terms/"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdau="http://www.rdaregistry.info/Elements/u/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+         xmlns:svcs="http://rdfs.org/sioc/services#"
+         xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <edm:ProvidedCHO rdf:about="http://www.manuscriptorium.com/object/NLS2__RS_664______2WGTWS8">
+      <dc:date>1569-1570</dc:date>
+      <dc:date>1973</dc:date>
+      <dc:description>ресавски правопис</dc:description>
+      <dc:description>Четворојеванђеље са Теофилактовим предговорима и садржајем испред сваког јеванђеља, као и са месецословом, синаксаром и другим уобичајеним додацима (поредак евангелских чтења у разним приликама).</dc:description>
+      <dc:description>Четрдесетпет тетрада, означених на средини доње маргине предње стране првог л.</dc:description>
+      <dc:description>Потпун, добро очуван кодекс.</dc:description>
+      <dc:description>21,5 х 12,5</dc:description>
+      <dc:description>Полууставно писмо; један писар (?).</dc:description>
+      <dc:description>По пет заставица и крупних преплетних иницијала.</dc:description>
+      <dc:description>На л. 359v: из 1570, писарев запис о настанку књиге старањем игумана Силивестра и братије храма Вазнесења под Овчаром; на л. 6r: о власништву (храм св. Козме и Дамјана у Нештину); на л. Ir: запис бившег власника, Алексе Ивића, о прибављању књиге разменом од Ђурице Михајловића из Старе Пазове, 1946.</dc:description>
+      <dc:description>Некада је постојао сребрни оков, који данас недостаје.</dc:description>
+      <dc:description>Представа Распећа на предњој корици, изведена техником слепог отиска.</dc:description>
+      <dc:identifier>Рс 664 </dc:identifier>
+      <dc:language>cu</dc:language>
+      <dc:title>Ивићево четворојеванђеље</dc:title>
+      <dc:format xml:lang="en">codex</dc:format>
+      <dcterms:created>1569-1570</dcterms:created>
+      <dcterms:created>1973</dcterms:created>
+      <dcterms:extent>20,5 x 29,2</dcterms:extent>
+      <dcterms:isReferencedBy>Љ. Штављанин-Ђорђевић, М. Гроздановић-Пајић, Л. Цернић, Опис ћирилских рукописа Народне библиотеке Србије. Књига прва, Београд 1986, 376-378. </dcterms:isReferencedBy>
+      <dcterms:medium xml:lang="en">chart</dcterms:medium>
+      <dcterms:spatial xml:lang="sr">Србија</dcterms:spatial>
+      <dcterms:spatial xml:lang="sr">манастир Вазнесења Господњег под планином Овчаром</dcterms:spatial>
+      <edm:currentLocation>Belgrade</edm:currentLocation>
+      <edm:type>TEXT</edm:type>
+   </edm:ProvidedCHO>
+   <edm:WebResource rdf:about="https://imagines.manuscriptorium.com/loris/NLS___-NLS2__RS_664______2WGTWS8-sr/id_001/full/full/0/default.jpg">
+      <dc:format>image/jpg</dc:format>
+      <dc:type>text</dc:type>
+      <dc:type>images</dc:type>
+      <dcterms:conformsTo>TEI P5 ENRICH Schema</dcterms:conformsTo>
+      <edm:rights rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/"/>
+      <dcterms:isReferencedBy rdf:resource="https://collectiones.manuscriptorium.com/assorted/NLS___/NLS2__/8/NLS___-NLS2__RS_664______2WGTWS8-sr"/>
+      <svcs:has_service rdf:resource="https://imagines.manuscriptorium.com/loris/NLS___-NLS2__RS_664______2WGTWS8-sr/id_001/"/>
+   </edm:WebResource>
+   <ore:Aggregation rdf:about="http://www.manuscriptorium.com/apps/index.php?direct=record&amp;pid=NLS___-NLS2__RS_664______2WGTWS8-sr">
+      <edm:aggregatedCHO rdf:resource="http://www.manuscriptorium.com/object/NLS2__RS_664______2WGTWS8"/>
+      <edm:dataProvider>National library of Serbia</edm:dataProvider>
+      <edm:isShownAt rdf:resource="http://www.manuscriptorium.com/apps/index.php?direct=record&amp;pid=NLS___-NLS2__RS_664______2WGTWS8-sr"/>
+      <edm:isShownBy rdf:resource="https://imagines.manuscriptorium.com/loris/NLS___-NLS2__RS_664______2WGTWS8-sr/id_001/full/full/0/default.jpg"/>
+      <edm:object rdf:resource="https://imagines.manuscriptorium.com/loris/NLS___-NLS2__RS_664______2WGTWS8-sr/id_001/full/!400,400/0/default.jpg"/>
+      <edm:provider>Manuscriptorium - National Library of the Czech Republic</edm:provider>
+      <edm:rights rdf:resource="http://creativecommons.org/licenses/by-nc-sa/4.0/"/>
+   </ore:Aggregation>
+   <svcs:Service rdf:about="https://imagines.manuscriptorium.com/loris/NLS___-NLS2__RS_664______2WGTWS8-sr/id_001/">
+      <dcterms:conformsTo rdf:resource="http://iiif.io/api/image"/>
+      <doap:implements rdf:resource="http://iiif.io/api/image/2/level2.json"/>
+   </svcs:Service>
+</rdf:RDF>

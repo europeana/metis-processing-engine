@@ -132,13 +132,16 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
     for (int i = 0; i < chunkSize && notStartedFilesIterator.hasNext(); i++) {
       fileNames.add(notStartedFilesIterator.next());
     }
+
+    HttpSourceSplit split = HttpSourceSplit.builder()
+                                           .extractionMode(extractionMode)
+                                           .downloadedArchiveFile(downloadedFile.toString())
+                                           .fileNames(fileNames)
+                                           .firstFileIndex(startedFilesCount)
+                                           .build();
+
     startedFilesCount += fileNames.size();
-    return HttpSourceSplit.builder()
-                          .extractionMode(extractionMode)
-                          .downloadedArchiveFile(downloadedFile.toString())
-                          .fileNames(fileNames)
-                          .firstFileIndex(startedFilesCount)
-                          .build();
+    return split;
   }
 
   //////////////////////////////////////////////////////////////////////////////////
