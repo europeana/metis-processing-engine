@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "flink.jar.id")
 public class JarIdsProperties {
   private String oai;
+  private String http;
   private String validation;
   private String transformation;
   private String normalization;
