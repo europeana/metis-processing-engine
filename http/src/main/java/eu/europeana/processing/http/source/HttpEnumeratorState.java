@@ -12,5 +12,6 @@ public class HttpEnumeratorState implements Serializable {
   private String downloadedFile;
   private ExtractionMode extractionMode;
   private int startedFilesCount;
+  private int completedFilesCount;
   private List<HttpSourceSplit> returnedPartitions;
 }

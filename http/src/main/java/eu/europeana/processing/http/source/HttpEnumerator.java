@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -22,11 +23,14 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
   private static final int DEFAULT_CHUNK_SIZE = 1000;
 
   private final SplitEnumeratorContext<HttpSourceSplit> context;
+  private final ParameterTool parameterTool;
   private final int chunkSize;
   private final long taskId;
   private final String jobDirectoryPath;
   private final String archiveUrl;
+  private ProgressUpdater progressUpdater;
   private int startedFilesCount;
+  private int emittedFilesCount;
   private Path downloadedFile;
   private ExtractionMode extractionMode;
   private Iterator<String> notStartedFilesIterator;
@@ -36,6 +40,7 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
   public HttpEnumerator(SplitEnumeratorContext<HttpSourceSplit> context, HttpEnumeratorState state,
       ParameterTool parameterTool, String jobDirectoryPath) {
     this.context = context;
+    this.parameterTool=parameterTool;
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     this.jobDirectoryPath = jobDirectoryPath;
     this.chunkSize = parameterTool.getInt(JobParamName.CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
@@ -45,11 +50,13 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
       downloadedFile = Optional.ofNullable(state.getDownloadedFile()).map(Path::of).orElse(null);
       extractionMode = state.getExtractionMode();
       startedFilesCount = state.getStartedFilesCount();
+      emittedFilesCount = state.getCompletedFilesCount();
       returnedPartitions = state.getReturnedPartitions();
     } else {
       downloadedFile = null;
       extractionMode = null;
       startedFilesCount = 0;
+      emittedFilesCount = 0;
       returnedPartitions = new LinkedList<>();
     }
     LOGGER.info("Created enumerator for the http task id: {}. Previous state: {}", taskId, state);
@@ -59,8 +66,10 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
   @Override
   public void start() {
     LOGGER.info("Starting HttpEnumerator for task id: {}, downloaded file: {}, extractionMode: {},"
-            + " already started files count: {}, returned partitions: {}",
-        taskId, downloadedFile, extractionMode, startedFilesCount, returnedPartitions);
+            + " already started files count: {}, completed count files: {},  returned partitions: {}",
+        taskId, downloadedFile, extractionMode, startedFilesCount, emittedFilesCount, returnedPartitions);
+
+    progressUpdater = new ProgressUpdater(parameterTool, emittedFilesCount);
 
     downloadArchive();
 
@@ -109,9 +118,10 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
                                                    .downloadedFile(downloadedFile.toString())
                                                    .extractionMode(extractionMode)
                                                    .startedFilesCount(startedFilesCount)
+                                                   .completedFilesCount(emittedFilesCount)
                                                    .returnedPartitions(returnedPartitions)
                                                    .build();
-
+    progressUpdater.snapshotEmittedFilesCount(emittedFilesCount);
     LOGGER.info("Created snapshot of task: {} state for the checkpoint: {}. State: {}",
         taskId, checkpointId, state);
     return state;
@@ -144,6 +154,30 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
     return split;
   }
 
+  @Override
+  public void handleSourceEvent(int subtaskId, SourceEvent sourceEvent) {
+    LOGGER.info("Received event: {} from subtask: {}", sourceEvent, subtaskId);
+    if(sourceEvent instanceof SplitEmittedEvent splitEmittedEvent){
+      handleSplitEmittedEvent(splitEmittedEvent);
+    }
+  }
+
+  private void handleSplitEmittedEvent(SplitEmittedEvent splitEmittedEvent) {
+    emittedFilesCount += splitEmittedEvent.getSplitSize();
+  }
+
+  @Override
+  public void notifyCheckpointComplete(long checkpointId) {
+    LOGGER.info("Task: {}, checkpoint: {} completed. Updating progress...", taskId, checkpointId);
+    progressUpdater.saveProgressInDB();
+  }
+
+  @Override
+  public void close() {
+    LOGGER.info("Closing HttpEnumerator");
+    progressUpdater.close();
+  }
+
   //////////////////////////////////////////////////////////////////////////////////
   //    Not currently used methods from the interface - only logging events      ///
   //////////////////////////////////////////////////////////////////////////////////
@@ -154,18 +188,8 @@ public class HttpEnumerator implements SplitEnumerator<HttpSourceSplit, HttpEnum
   }
 
   @Override
-  public void notifyCheckpointComplete(long checkpointId) {
-    LOGGER.info("Checkpoint: {} completed.", checkpointId);
-  }
-
-  @Override
   public void notifyCheckpointAborted(long checkpointId) {
     LOGGER.info("Checkpoint aborted: {}!", checkpointId);
-  }
-
-  @Override
-  public void close() {
-    LOGGER.info("Closing HttpEnumerator");
   }
 
 }

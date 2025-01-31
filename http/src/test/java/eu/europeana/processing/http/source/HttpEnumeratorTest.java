@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import eu.europeana.processing.http.source.extractor.ExtractionMode;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -59,9 +62,11 @@ class HttpEnumeratorTest {
   private HttpSourceSplit expectedSplit1;
   private HttpSourceSplit expectedSplit2;
   private Path tempDirectory;
+  private MockedConstruction<ProgressUpdater> progressUpdaterConstruction;
 
   @BeforeEach
   public void setup() throws Exception {
+    progressUpdaterConstruction = Mockito.mockConstruction(ProgressUpdater.class);
     tempDirectory = Files.createTempDirectory(HttpEnumeratorTest.class.getSimpleName());
     jobDirectory = tempDirectory.resolve("task-dir").toString();
     downLoadedFile = Path.of(jobDirectory).resolve(ZIP_FILE_NAME).toString();
@@ -122,7 +127,8 @@ class HttpEnumeratorTest {
         HttpSourceSplit.builder()
                        .downloadedArchiveFile(downLoadedFile)
                        .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
-                       .fileNames(List.of(Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ).toString()))
+                       .fileNames(
+                           List.of(Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ).toString()))
                        .firstFileIndex(0)
                        .build();
     verify(context).assignSplit(expectedTarSplit, SUBTASK0_ID);
@@ -233,6 +239,32 @@ class HttpEnumeratorTest {
   }
 
   @Test
+  public void shouldProperlyEvaluateProgressAndPassItToTheUpdater() throws IOException {
+    createCompleteDownloadedFile();
+    HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
+                                                   .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
+                                                   .completedFilesCount(20)
+                                                   .build();
+
+    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+      enumerator.start();
+      ProgressUpdater progressUpdater = progressUpdaterConstruction.constructed().getFirst();
+
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitEmittedEvent("0", 10));
+      enumerator.snapshotState(0);
+      enumerator.notifyCheckpointComplete(0);
+      verify(progressUpdater).snapshotEmittedFilesCount(30);
+      verify(progressUpdater).saveProgressInDB();
+
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitEmittedEvent("0", 7));
+      enumerator.snapshotState(0);
+      enumerator.notifyCheckpointComplete(0);
+      verify(progressUpdater).snapshotEmittedFilesCount(37);
+      verify(progressUpdater, times(2)).saveProgressInDB();
+    }
+  }
+
+  @Test
   public void shouldNotFailOnNotUsedNotifications() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
@@ -242,7 +274,6 @@ class HttpEnumeratorTest {
     try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
       enumerator.start();
       enumerator.addReader(SUBTASK0_ID);
-      enumerator.notifyCheckpointComplete(0);
       enumerator.notifyCheckpointAborted(0);
     }
 
@@ -264,6 +295,7 @@ class HttpEnumeratorTest {
 
   @AfterEach
   public void cleanup() throws IOException {
+    progressUpdaterConstruction.close();
     FileUtils.deleteDirectory(tempDirectory.toFile());
   }
 

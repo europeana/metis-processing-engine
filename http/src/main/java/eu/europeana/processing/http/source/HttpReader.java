@@ -64,7 +64,6 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   }
 
   private InputStatus orderNewSplitAndWait() {
-    assignedSplit = null;
     context.sendSplitRequest();
     blockReader();
     LOGGER.info("Ordered new split from the enumerator.");
@@ -72,6 +71,14 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   }
 
   private void emitRecord(ReaderOutput<ExecutionRecordResult> output, String fileName) {
+    ExecutionRecordResult record = prepareRecord(fileName);
+    output.collect(record);
+    if(!fileNameIterator.hasNext()){
+      wholeSplitEmitted();
+    }
+  }
+
+  private ExecutionRecordResult prepareRecord(String fileName) {
     ExecutionRecordKey key = ExecutionRecordKey.builder().datasetId(datasetId).executionId(taskId).recordId(fileName).build();
     ExecutionRecordBuilder executionRecordBuilder = ExecutionRecord.builder().executionRecordKey(key).executionName(HTTP_HARVEST);
     ExecutionRecordResultBuilder executionRecordResultBuilder = ExecutionRecordResult.builder();
@@ -85,7 +92,12 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
     }
 
     executionRecordResultBuilder.executionRecord(executionRecordBuilder.build());
-    output.collect(executionRecordResultBuilder.build());
+    return executionRecordResultBuilder.build();
+  }
+
+  private void wholeSplitEmitted() {
+    context.sendSourceEventToCoordinator(new SplitEmittedEvent(assignedSplit.splitId(), assignedSplit.getFileNames().size()));
+    assignedSplit = null;
   }
 
   @Override

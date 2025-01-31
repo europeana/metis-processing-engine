@@ -111,6 +111,7 @@ class HttpReaderTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedRecordFromZip2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
+    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 2));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -137,6 +138,7 @@ class HttpReaderTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedExtractedRecord2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
+    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 2));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -159,6 +161,7 @@ class HttpReaderTest {
     assertEquals(State.SUCCESS, reader.isAvailable().state());
     assertEquals(badFilePath.toString(), emitCaptor.getValue().getRecordId());
     assertNotNull(emitCaptor.getValue().getException());
+    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 1));
   }
 
   @Test
