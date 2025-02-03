@@ -1,10 +1,10 @@
 package eu.europeana.processing.http.source.dowloader;
 
+import eu.europeana.metis.harvesting.HarvesterException;
 import eu.europeana.metis.harvesting.HarvesterFactory;
 import eu.europeana.metis.harvesting.http.HttpHarvester;
 import eu.europeana.processing.http.source.exception.HttpSourceException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ public class HttpSourceFileDownloader {
       Path fileName = harvester.downloadFile(archiveUrl, jobDirectoryPath);
       LOGGER.info("Downloaded file: {} from the url: {}", fileName, archiveUrl);
       return fileName;
-    } catch (IOException | URISyntaxException e) {
+    } catch (IOException | HarvesterException e) {
       throw new HttpSourceException("Could not download archive file: " + archiveUrl, e);
     }
   }

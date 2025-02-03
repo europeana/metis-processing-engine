@@ -1,11 +1,10 @@
 package eu.europeana.processing.http.source.extractor;
 
 import eu.europeana.metis.harvesting.HarvesterException;
-import eu.europeana.metis.harvesting.HarvesterFactory;
 import eu.europeana.metis.harvesting.ReportingIteration.IterationResult;
-import eu.europeana.metis.harvesting.http.HttpHarvester;
-import eu.europeana.metis.harvesting.http.HttpHarvesterImpl.PathIterator;
+import eu.europeana.metis.harvesting.http.PathIterator;
 import eu.europeana.metis.utils.CompressedFileExtension;
+import eu.europeana.metis.utils.CompressedFileHandler;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,12 +102,11 @@ public class ArchiveHeaderExtractor {
     return getNamesFromZipHeader().stream().noneMatch(CompressedFileExtension::hasCompressedFileExtension);
   }
 
-  private void extractFilesToDirectory() throws IOException, HarvesterException {
+  private void extractFilesToDirectory() throws IOException {
     LOGGER.info("Creating extracted dir: {}", extractedDirectory);
     Files.createDirectory(extractedDirectory);
     LOGGER.info("Extracting the archive: {}", downloadedFile);
-    HttpHarvester harvester = HarvesterFactory.createHttpHarvester();
-    harvester.extractArchive(downloadedFile, extractedDirectory);
+    CompressedFileHandler.extractFile(downloadedFile, extractedDirectory);
     LOGGER.info("The archive file successfully extracted into the directory: {}", extractedDirectory);
   }
 
