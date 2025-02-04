@@ -57,7 +57,11 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) {
+        enrichRecord(sourceExecutionRecord, out);
+    }
+
+    private void enrichRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) {
         ProcessedResult<String> enrichmentResult =
                 enrichmentWorker.process(sourceExecutionRecord.getRecordData());
         if (enrichmentResult.getRecordStatus() != ProcessedResult.RecordStatus.CONTINUE) {
@@ -67,7 +71,7 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
                             sourceExecutionRecord,
                             parameterTool.get(JobParamName.TASK_ID),
                             JobName.ENRICHMENT,
-                            "",
+                            ExecutionRecord.EMPTY,
                             reportString)
             );
         } else {

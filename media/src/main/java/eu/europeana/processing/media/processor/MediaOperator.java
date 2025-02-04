@@ -13,10 +13,13 @@ import eu.europeana.metis.mediaprocessing.model.RdfResourceEntry;
 import eu.europeana.metis.mediaprocessing.model.ResourceExtractionResult;
 import eu.europeana.metis.mediaprocessing.model.Thumbnail;
 import eu.europeana.processing.job.JobName;
+import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
+
+import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -63,6 +66,27 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
         Collector<ExecutionRecordResult> out) throws Exception {
+        try {
+            RetryableMethodExecutor.execute("Error while media processing record",
+                    JobParam.DEFAULT_OPERATOR_RETRIES,
+                    JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
+                    () -> {
+                        mediaProcessRecord(sourceExecutionRecord, out);
+                        return null;
+                    });
+        } catch(RdfDeserializationException | RdfSerializationException e) {
+            out.collect(
+                    ExecutionRecordResult.from(
+                            sourceExecutionRecord,
+                            parameterTool.get(JobParamName.TASK_ID),
+                            JobName.MEDIA,
+                            ExecutionRecord.EMPTY,
+                            e.getMessage())
+            );
+        }
+    }
+
+    private void mediaProcessRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) throws RdfDeserializationException, RdfSerializationException {
         final byte[] rdfBytes = sourceExecutionRecord.getRecordData().getBytes(Charset.defaultCharset());
         final EnrichedRdf enrichedRdf;
         enrichedRdf = getEnrichedRdf(rdfBytes);

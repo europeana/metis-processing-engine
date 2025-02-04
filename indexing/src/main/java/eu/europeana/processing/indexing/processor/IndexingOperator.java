@@ -6,10 +6,11 @@ import eu.europeana.indexing.IndexingSettings;
 import eu.europeana.indexing.exception.IndexingException;
 import eu.europeana.processing.indexing.tool.IndexingSettingsGenerator;
 import eu.europeana.processing.job.JobName;
+import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
-import java.io.Serial;
+import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -17,6 +18,8 @@ import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.Date;
 
@@ -55,18 +58,36 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) throws IOException {
 
         LOGGER.info("Indexing record: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
 
         try(Indexer indexer = new IndexerFactory(indexingSettings).getIndexer()) {
-            final var properties = new eu.europeana.indexing.IndexingProperties(
-                    recordDate, preserveTimestamps, Collections.emptyList(), performRedirect, true);
+            RetryableMethodExecutor.execute("Error occurred when indexing record",
+                    JobParam.DEFAULT_OPERATOR_RETRIES,
+                    JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
+                    () -> {
+                        indexRecord(sourceExecutionRecord, out, indexer);
+                        return null;
+                    });
+        } catch (IndexingException e) {
+                out.collect(ExecutionRecordResult.from(
+                        sourceExecutionRecord,
+                        parameterTool.get(JobParamName.TASK_ID),
+                        parameterTool.get(JobName.INDEXING),
+                        ExecutionRecord.EMPTY,
+                        e.getMessage()));
+            }
+    }
 
-            LOGGER.info("Indexing: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
-            indexer.index(sourceExecutionRecord.getRecordData(), properties, tier -> true);
-            LOGGER.info("Indexed: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
-            out.collect(ExecutionRecordResult.from(sourceExecutionRecord, taskId, parameterTool.get(JobName.INDEXING)));
-        }
+    private void indexRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out, Indexer indexer) throws IndexingException {
+        final var properties = new eu.europeana.indexing.IndexingProperties(
+                recordDate, preserveTimestamps, Collections.emptyList(), performRedirect, true);
+        LOGGER.info("Indexing: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
+        indexer.index(sourceExecutionRecord.getRecordData(), properties, tier -> true);
+        LOGGER.info("Indexed: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
+        out.collect(ExecutionRecordResult.from(sourceExecutionRecord,
+                taskId,
+                parameterTool.get(JobName.INDEXING)));
     }
 }
