@@ -6,6 +6,7 @@ import eu.europeana.normalization.model.NormalizationResult;
 import eu.europeana.normalization.util.NormalizationConfigurationException;
 import eu.europeana.normalization.util.NormalizationException;
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ class NormalizerFactoryTest {
   }
 
   @Test
+  @Disabled("It takes to much time and there is no need to run it every time.")
   void testMultiThreadPerformance() throws InterruptedException {
     LOGGER.info("Starting test of normalization speed with {} threads and {} tries", THREAD_COUNT, TRIES_COUNT);
     ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT, r -> new Thread(r, "Background"));

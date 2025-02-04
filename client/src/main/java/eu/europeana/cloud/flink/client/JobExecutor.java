@@ -3,6 +3,7 @@ package eu.europeana.cloud.flink.client;
 import eu.europeana.cloud.flink.client.entities.JobDetails;
 import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
 import eu.europeana.cloud.flink.client.entities.SubmitJobResponse;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
@@ -29,7 +31,7 @@ public class JobExecutor {
   private static final int CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int READ_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
-  private static final int READ_TIMEOUT_FOR_PORGRESS_REQUEST = 10_000;
+  private static final int READ_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
   private static final long WAIT_BEFORE_PROGRESS_CHECK_IN_MILLIS = 200;
   private static final long PROGRESS_PRINT_INTERVAL = 5;
 
@@ -76,7 +78,6 @@ public class JobExecutor {
         LOGGER.info("Progress: {}", details);
       }
     } while (!END_STATES.contains(details.getState()));
-    System.out.println("");
     if(!details.getState().equals(STATE_FINISHED)) {
       throw new RuntimeException("Job execution finished with state: " + details.getState());
     }
@@ -112,11 +113,15 @@ public class JobExecutor {
   }
 
   private String submitJob(SubmitJobRequest request) {
-    SubmitJobResponse result = submitRestTemplate.exchange(
+    ResponseEntity<SubmitJobResponse> response = submitRestTemplate.exchange(
         serverUrl + "/jars/" + jarId + "/run?entry-class=" + request.getEntryClass()
-        , HttpMethod.POST, new HttpEntity<>(request, httpHeader), SubmitJobResponse.class).getBody();
-    LOGGER.info("Submitted Job: {} Submission result:\n{}\nExecuting...", request, result);
-    return result.getJobid();
+        , HttpMethod.POST, new HttpEntity<>(request, httpHeader), SubmitJobResponse.class);
+    SubmitJobResponse responseBody = response.getBody();
+
+    LOGGER.info("Submitted Job: {}\nSubmission result status code: {} response body:\n{}\nExecuting...",
+        request, response.getStatusCode(), responseBody);
+
+    return Optional.ofNullable(responseBody).map(SubmitJobResponse::getJobid).orElseThrow();
   }
 
   private RestTemplate createSubmitRestTemplate() {
@@ -132,7 +137,7 @@ public class JobExecutor {
     final RestTemplate restTemplate = new RestTemplate();
     SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
     requestFactory.setConnectTimeout(CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST);
-    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_PORGRESS_REQUEST);
+    requestFactory.setReadTimeout(READ_TIMEOUT_FOR_PROGRESS_REQUEST);
     restTemplate.setRequestFactory(requestFactory);
     return restTemplate;
   }

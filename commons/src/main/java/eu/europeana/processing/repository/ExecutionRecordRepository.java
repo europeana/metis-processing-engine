@@ -63,6 +63,8 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
 
     /**
      * Saves the {@link ExecutionRecordResult} in <b>execution_record</b> table
+     * <br/>
+     * In case of conflict (try to insert the same record twice) the method does nothing.
      *
      * @param executionRecordResult instance to be saved in the database
      * @throws IOException in case of any DB exception

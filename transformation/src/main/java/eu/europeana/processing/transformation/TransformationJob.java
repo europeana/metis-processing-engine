@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  *
- * <p>Example list of arguments for specific execution may in the following way:</p>
+ * <p>Example list of arguments for specific execution may be defined in the following way:</p>
  * <blockquote>
  *  --datasetId 12
  *  --executionId 261

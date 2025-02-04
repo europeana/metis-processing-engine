@@ -35,7 +35,7 @@ public class DbSourceWithProgressHandling implements Source<ExecutionRecord, Dat
 
     @Override
     public SplitEnumerator<DataPartition, DbEnumeratorState> createEnumerator(SplitEnumeratorContext<DataPartition> enumContext) throws Exception {
-        return new DbEnumerator(enumContext, null, parameterTool);
+        return new DbEnumerator(enumContext, parameterTool);
     }
 
     @Override

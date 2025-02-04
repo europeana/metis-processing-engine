@@ -96,7 +96,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
         } else {
             LOGGER.info("Validation Failure for datasetId {}, recordId {}", executionRecordResult.getExecutionRecord().getExecutionRecordKey().getDatasetId(),
                     executionRecordResult.getRecordId());
-            executionRecordResult.setRecordData("");
+            executionRecordResult.setRecordData(ExecutionRecord.EMPTY);
             executionRecordResult.setException(result.getMessage());
         }
     }

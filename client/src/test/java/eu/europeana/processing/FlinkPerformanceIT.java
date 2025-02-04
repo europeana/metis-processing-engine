@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public class FlinkPerformanceTest extends AbstractPerformanceTest {
+public class FlinkPerformanceIT extends AbstractPerformanceIT {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

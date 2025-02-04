@@ -26,7 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = {TestsConfig.class})
 @EnableAutoConfiguration
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public abstract class AbstractPerformanceTest {
+public abstract class AbstractPerformanceIT {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

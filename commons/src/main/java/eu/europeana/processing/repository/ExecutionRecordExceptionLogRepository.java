@@ -51,7 +51,10 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
     }
 
     /**
-     * Saves the {@link ExecutionRecordResult} in <b>execution_record_exception_log</b> table
+     * Saves the {@link ExecutionRecordResult} in <b>execution_record_exception_log</b> table.
+     * <br/>
+     *  In case of conflict (try to insert the same record twice) the method does nothing.
+     *
      * @param executionRecordResult instance to be saved in the database
      */
     public void save(ExecutionRecordResult executionRecordResult) {

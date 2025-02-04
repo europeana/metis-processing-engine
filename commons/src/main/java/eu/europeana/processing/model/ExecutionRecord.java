@@ -19,6 +19,8 @@ import lombok.Data;
 @Builder
 public class ExecutionRecord {
 
+    public static final String EMPTY = "";
+
     private ExecutionRecordKey executionRecordKey;
     private String executionName;
     private String recordData;
