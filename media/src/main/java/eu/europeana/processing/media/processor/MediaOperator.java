@@ -63,10 +63,11 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) {
         try {
             mediaProcessRecord(sourceExecutionRecord, out);
         } catch(RdfDeserializationException | RdfSerializationException e) {
+            LOGGER.warn("During media extraction of record with id: {}, Exception: {} was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(
                     ExecutionRecordResult.from(
                             sourceExecutionRecord,

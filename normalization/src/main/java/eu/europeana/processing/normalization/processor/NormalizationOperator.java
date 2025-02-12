@@ -51,6 +51,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
         try {
             normalizeRecord(sourceExecutionRecord, out, normalizer);
         } catch(NormalizationException e){
+            LOGGER.warn("During process of normalization of record with id: {}, Exception: {} were put in report", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(
                     ExecutionRecordResult.from(
                             sourceExecutionRecord,

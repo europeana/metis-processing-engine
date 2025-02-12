@@ -9,8 +9,6 @@ public class JobParam {
     public static final int DEFAULT_READER_PARALLELISM = 4;
     public static final int DEFAULT_SINK_PARALLELISM = 4;
     public static final int DEFAULT_READER_MAX_RECORD_PENDING_COUNT = 100;
-    public static final int DEFAULT_OPERATOR_RETRIES = 5;
-    public static final int DEFAULT_OPERATOR_RETRY_DELAY = 1000;
 
     private JobParam() {
     }

@@ -44,7 +44,7 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
         try {
             out.collect(transformRecord(sourceExecutionRecord));
         } catch (TransformationException | EuropeanaIdException e) {
-            LOGGER.warn("{} exception: {}", getClass().getName(), sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
+            LOGGER.warn("During transformation of record with id: {}, Exception: {} was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(ExecutionRecordResult.from(
                 sourceExecutionRecord,
                 parameterTool.get(JobParamName.TASK_ID),
