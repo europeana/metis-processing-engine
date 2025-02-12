@@ -12,7 +12,6 @@ import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecord;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.metis.harvesting.oaipmh.OaiRepository;
-import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecord.ExecutionRecordBuilder;
@@ -21,7 +20,6 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
 import java.io.Serial;
 
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -65,14 +63,8 @@ public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, E
     ExecutionRecordBuilder executionRecordBuilder = ExecutionRecord.builder().executionRecordKey(key).executionName(OAI_HARVEST);
     ExecutionRecordResultBuilder executionRecordResultBuilder = ExecutionRecordResult.builder();
     try {
-      RetryableMethodExecutor.execute("Error occurred when harvesting record",
-            JobParam.DEFAULT_OPERATOR_RETRIES,
-            JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
-            () -> {
-              OaiRecord oaiRecord = harvestRecordsContent(header);
-              executionRecordBuilder.recordData(new String(oaiRecord.getContent().readAllBytes(), StandardCharsets.UTF_8));
-              return null;
-            });
+      OaiRecord oaiRecord = harvestRecordsContent(header);
+      executionRecordBuilder.recordData(new String(oaiRecord.getContent().readAllBytes(), StandardCharsets.UTF_8));
     } catch (HarvesterException e) {
       executionRecordBuilder.recordData(ExecutionRecord.EMPTY);
       executionRecordResultBuilder.exception(ExceptionUtils.stringifyException(e));

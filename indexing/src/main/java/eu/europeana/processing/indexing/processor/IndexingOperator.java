@@ -6,11 +6,9 @@ import eu.europeana.indexing.IndexingSettings;
 import eu.europeana.indexing.exception.IndexingException;
 import eu.europeana.processing.indexing.tool.IndexingSettingsGenerator;
 import eu.europeana.processing.job.JobName;
-import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -63,13 +61,7 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
         LOGGER.info("Indexing record: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
 
         try(Indexer indexer = new IndexerFactory(indexingSettings).getIndexer()) {
-            RetryableMethodExecutor.execute("Error occurred when indexing record",
-                    JobParam.DEFAULT_OPERATOR_RETRIES,
-                    JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
-                    () -> {
-                        indexRecord(sourceExecutionRecord, out, indexer);
-                        return null;
-                    });
+            indexRecord(sourceExecutionRecord, out, indexer);
         } catch (IndexingException e) {
                 out.collect(ExecutionRecordResult.from(
                         sourceExecutionRecord,

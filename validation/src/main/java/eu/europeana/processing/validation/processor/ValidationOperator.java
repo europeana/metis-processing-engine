@@ -2,12 +2,10 @@ package eu.europeana.processing.validation.processor;
 
 import eu.europeana.metis.transformation.service.TransformationException;
 import eu.europeana.metis.transformation.service.XsltTransformer;
-import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.job.JobParamValue;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.validation.model.ValidationResult;
 import eu.europeana.validation.service.ValidationExecutionService;
 import java.io.Serial;
@@ -65,14 +63,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
         Collector<ExecutionRecordResult> out) {
         try {
-            RetryableMethodExecutor.execute(
-                    "Error while validating record with id " + sourceRecord.getExecutionRecordKey().getRecordId(),
-                    JobParam.DEFAULT_OPERATOR_RETRIES,
-                    JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
-                    () ->  {
-                        validateRecord(sourceRecord, out);
-                        return null;
-                    });
+            validateRecord(sourceRecord, out);
         } catch (TransformationException e) {
             out.collect(ExecutionRecordResult.from(
                     sourceRecord,

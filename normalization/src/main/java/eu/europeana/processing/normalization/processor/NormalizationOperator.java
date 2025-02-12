@@ -6,13 +6,11 @@ import eu.europeana.normalization.model.NormalizationResult;
 import eu.europeana.normalization.util.NormalizationConfigurationException;
 import eu.europeana.normalization.util.NormalizationException;
 import eu.europeana.processing.job.JobName;
-import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
 
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -51,13 +49,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
         final Normalizer normalizer = normalizerFactory.getNormalizer();
 
         try {
-            RetryableMethodExecutor.execute("Error occurred while normalizing record",
-                    JobParam.DEFAULT_OPERATOR_RETRIES,
-                    JobParam.DEFAULT_OPERATOR_RETRY_DELAY,
-                    () -> {
-                        normalizeRecord(sourceExecutionRecord, out, normalizer);
-                        return null;
-                    });
+            normalizeRecord(sourceExecutionRecord, out, normalizer);
         } catch(NormalizationException e){
             out.collect(
                     ExecutionRecordResult.from(
