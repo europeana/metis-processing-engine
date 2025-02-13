@@ -66,7 +66,7 @@ public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, E
       OaiRecord oaiRecord = harvestRecordsContent(header);
       executionRecordBuilder.recordData(new String(oaiRecord.getContent().readAllBytes(), StandardCharsets.UTF_8));
     } catch (HarvesterException e) {
-      LOGGER.warn("During OAI harvesting of record with id: {}, Exception {} was caught", externalRecordId, e);
+      LOGGER.warn("During OAI harvesting of record with id: {}, Exception was caught", externalRecordId, e);
       executionRecordBuilder.recordData(ExecutionRecord.EMPTY);
       executionRecordResultBuilder.exception(ExceptionUtils.stringifyException(e));
     }

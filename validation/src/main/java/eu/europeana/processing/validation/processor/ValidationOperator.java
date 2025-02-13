@@ -65,7 +65,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
         try {
             validateRecord(sourceRecord, out);
         } catch (TransformationException e) {
-            LOGGER.warn("During process of validation of record with id: {}, Exception: {} was caught", sourceRecord.getExecutionRecordKey().getRecordId(), e);
+            LOGGER.warn("During process of validation of record with id: {}, Exception was caught", sourceRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(ExecutionRecordResult.from(
                     sourceRecord,
                     parameterTool.get(JobParamName.TASK_ID),

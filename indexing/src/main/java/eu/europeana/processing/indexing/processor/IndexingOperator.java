@@ -63,7 +63,7 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
         try(Indexer indexer = new IndexerFactory(indexingSettings).getIndexer()) {
             indexRecord(sourceExecutionRecord, out, indexer);
         } catch (IndexingException e) {
-            LOGGER.warn("During indexing record with id: {}, Exception: {} was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
+            LOGGER.warn("During indexing record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(ExecutionRecordResult.from(
                     sourceExecutionRecord,
                     parameterTool.get(JobParamName.TASK_ID),

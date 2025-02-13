@@ -66,7 +66,7 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
                 enrichmentWorker.process(sourceExecutionRecord.getRecordData());
         if (enrichmentResult.getRecordStatus() != ProcessedResult.RecordStatus.CONTINUE) {
             String reportString = enrichmentResult.getReport().stream().map(Object::toString).collect(Collectors.joining("\n"));
-            LOGGER.warn("During process of enrichment of record with id: {}, Exception: {} were put in report", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), reportString);
+            LOGGER.warn("During process of enrichment of record with id: {}, Exceptions: {} were put in report", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), reportString);
             out.collect(
                     ExecutionRecordResult.from(
                             sourceExecutionRecord,
