@@ -64,6 +64,8 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>42.7.3</version>
+      <!--We should not import postgres and embed it into job jars cause MET-6331-->
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>

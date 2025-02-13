@@ -16,7 +16,7 @@
 
     <flink-version>1.20.0</flink-version>
     <version.bytebuddy>1.14.19</version.bytebuddy>
-    <metis.version>13-SNAPSHOT</metis.version>
+    <metis.version>15-SNAPSHOT</metis.version>
 
     <jackson.version>2.16.1</jackson.version>
   </properties>
