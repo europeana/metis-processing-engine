@@ -59,22 +59,15 @@
           <artifactId>org.apache.logging.log4j</artifactId>
           <groupId>log4j-slf4j-impl</groupId>
         </exclusion>
+        <!--We need to exclude the libraries cause of memory leaks - MET-6311-->
         <exclusion>
           <groupId>io.projectreactor.netty</groupId>
           <artifactId>reactor-netty-http</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>co.elastic.apm</groupId>
-          <artifactId>apm-agent-attach</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>io.projectreactor</groupId>
           <artifactId>reactor-core</artifactId>
         </exclusion>
-        <!--exclusion>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-web</artifactId>
-        </exclusion-->
       </exclusions>
     </dependency>
   </dependencies>

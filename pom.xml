@@ -23,6 +23,7 @@
   </properties>
 
   <modules>
+    <module>docker/metis-processing-engine-flink/shared-libs</module>
     <module>commons</module>
     <module>media</module>
     <module>client</module>
@@ -32,7 +33,6 @@
     <module>normalization</module>
     <module>enrichment</module>
     <module>indexing</module>
-    <module>docker/metis-processing-engine-flink/shared-libs</module>
   </modules>
 
   <dependencyManagement>

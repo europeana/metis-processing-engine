@@ -19,43 +19,28 @@
   </properties>
 
   <dependencies>
+    <!--Postgres is in shared library cause its Driver was multiple time loaded by ChildFirstClassLoader and registered
+     in DriverManager causing memory leak - MET-6311-->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgres.version}</version>
     </dependency>
-    <!--dependency>
-      <groupId>io.projectreactor.netty</groupId>
-      <artifactId>reactor-netty-http</artifactId>
-      <version>1.0.19</version>
-    </dependency-->
-    <dependency>
-      <groupId>co.elastic.apm</groupId>
-      <artifactId>apm-agent-attach</artifactId>
-      <version>1.48.1</version>
-    </dependency>
+
+
+    <!--Netty loaded by projectreactor, caused Memory leaks in enrichemnt job - MET-6311-->
     <dependency>
       <groupId>io.projectreactor</groupId>
       <artifactId>reactor-core</artifactId>
       <version>3.6.4</version>
     </dependency>
-    <!--dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents.core5</groupId>
-      <artifactId>httpcore5</artifactId>
-      <version>5.2.4</version>
-    </dependency-->
 
-    <!--For indexing job-->
+    <!--Netty used in the indexing job caused memory leaks - MET-6311-->
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-buffer</artifactId>
       <version>${netty.version}</version>
     </dependency>
-
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec</artifactId>
@@ -91,29 +76,20 @@
       <artifactId>netty-transport-native-unix-common</artifactId>
       <version>${netty.version}</version>
     </dependency>
-    <!--dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-solrj</artifactId>
-      <version>8.8.2</version>
-    </dependency-->
 
-    <!--version>9.4.57.v20241219</version-->
-    <!--dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-client</artifactId>
-      <version>11.0.24</version>
-    </dependency-->
+    <!--Mongo used in the indexing job caused memory leaks - MET-6311-->
     <dependency>
       <groupId>dev.morphia.morphia</groupId>
       <artifactId>morphia-core</artifactId>
       <version>2.4.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
-
   </dependencies>
-
-
-
 
   <build>
     <plugins>

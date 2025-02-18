@@ -52,14 +52,13 @@
           <artifactId>org.apache.logging.log4j</artifactId>
           <groupId>log4j-slf4j-impl</groupId>
         </exclusion>
+        <!--Netty used in the indexing job caused memory leaks - MET-6311 moved to shared lib-->
         <exclusion>
           <groupId>io.netty</groupId>
           <artifactId>*</artifactId>
         </exclusion>
-        <!--exclusion>
-          <groupId>org.apache.solr</groupId>
-          <artifactId>solr-solrj</artifactId>
-        </exclusion-->
+        <!--Mongo client used in the indexing job caused memory leaks - MET-6311,
+        so moved the whole morphia and flapdoodle to shared lib-->
         <exclusion>
           <groupId>de.flapdoodle.embed</groupId>
           <artifactId>de.flapdoodle.embed.mongo</artifactId>
@@ -69,12 +68,6 @@
           <artifactId>morphia-core</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>eu.europeana.metis-processing-engine</groupId>
-      <artifactId>flink-node-shared-libs</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 
