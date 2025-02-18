@@ -56,7 +56,12 @@
       <artifactId>metis-harvesting</artifactId>
       <version>${metis.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>flink-node-shared-libs</artifactId>
+      <version>${parent.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

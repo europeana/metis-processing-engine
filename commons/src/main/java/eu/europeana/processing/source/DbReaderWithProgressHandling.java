@@ -208,7 +208,9 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
 
     @Override
     public void close() throws Exception {
-        dbConnectionProvider.close();
+        if (dbConnectionProvider != null) {
+            dbConnectionProvider.close();
+        }
     }
 
     private void updatePendingRecordsState(long completedCheckpointId) {

@@ -13,7 +13,9 @@ echo building :: flink-node $(pwd)
 docker build --no-cache -t flink-with-tools:1.20.0-java21 .
 cd ..
 
-cd metis-processing-engine-flink
+cd metis-processing-engine-flink/shared-libs
+mvn clean install
+cd ..
 echo building :: flink-node $(pwd)
 docker build --no-cache -t metis-processing-engine-flink:1.20.0-java21 .
 cd ..
