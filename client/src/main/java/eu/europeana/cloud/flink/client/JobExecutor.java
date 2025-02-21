@@ -1,11 +1,12 @@
 package eu.europeana.cloud.flink.client;
 
-import eu.europeana.cloud.flink.client.entities.JobDetails;
-import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
-import eu.europeana.cloud.flink.client.entities.SubmitJobResponse;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import eu.europeana.cloud.flink.client.entities.*;
+
+import java.util.*;
+
+import eu.europeana.cloud.flink.client.entities.JobConfigResponse.ExecutionConfig;
+import eu.europeana.cloud.flink.client.entities.JobConfigResponse.ExecutionConfig.UserConfig;
+import eu.europeana.cloud.flink.client.entities.JobOverviewResponse.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.AbstractEnvironment;
@@ -26,14 +27,15 @@ public class JobExecutor {
   private static final String STATE_CANCELED = "CANCELED";
   private static final String STATE_FAILED = "FAILED";
   private static final Set<String> END_STATES = Set.of(STATE_FINISHED, STATE_FAILED, STATE_CANCELED);
-  public static final int MAX_RETRIES = 20;
-  public static final long SLEEP_BETWEEN_RETRIES = 15000L;
+  public static final int MAX_RETRIES = 30;
+  public static final long SLEEP_BETWEEN_RETRIES = 200L;
   private static final int CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int READ_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
   private static final int READ_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
   private static final long WAIT_BEFORE_PROGRESS_CHECK_IN_MILLIS = 200;
   private static final long PROGRESS_PRINT_INTERVAL = 5;
+  private static final int RECENT_TASK_THRESHOLD = 10 * 60 * 1000;
 
   private final String jarId;
   private final RestTemplate submitRestTemplate;
@@ -68,7 +70,6 @@ public class JobExecutor {
 
   public void execute(SubmitJobRequest request) throws InterruptedException {
     String jobId = submitJob(request);
-
     JobDetails details;
     int i = 0;
     do {
@@ -112,16 +113,82 @@ public class JobExecutor {
     return progressRestTemplate.exchange(serverUrl+"/jobs/" + jobId, HttpMethod.GET, new HttpEntity(httpHeader), JobDetails.class).getBody();
   }
 
-  private String submitJob(SubmitJobRequest request) {
-    ResponseEntity<SubmitJobResponse> response = submitRestTemplate.exchange(
-        serverUrl + "/jars/" + jarId + "/run?entry-class=" + request.getEntryClass()
-        , HttpMethod.POST, new HttpEntity<>(request, httpHeader), SubmitJobResponse.class);
-    SubmitJobResponse responseBody = response.getBody();
+  private String submitJob(SubmitJobRequest request) throws InterruptedException {
+    UUID localJobId = request.getLocalJobId();
+    try {
+      ResponseEntity<SubmitJobResponse> response = submitRestTemplate.exchange(
+          serverUrl + "/jars/" + jarId + "/run?entry-class=" + request.getEntryClass()
+          , HttpMethod.POST, new HttpEntity<>(request, httpHeader), SubmitJobResponse.class);
+      SubmitJobResponse responseBody = response.getBody();
+      LOGGER.info("Submitted Job: {}\nSubmission result status code: {} response body:\n{}\nExecuting...",
+          request, response.getStatusCode(), responseBody);
+      return Optional.ofNullable(responseBody).map(SubmitJobResponse::getJobid).orElseThrow();
+    } catch(RestClientException e) {
+      return attemptTaskReconnectWithRetries(localJobId, e);
 
-    LOGGER.info("Submitted Job: {}\nSubmission result status code: {} response body:\n{}\nExecuting...",
-        request, response.getStatusCode(), responseBody);
+    }
+  }
 
-    return Optional.ofNullable(responseBody).map(SubmitJobResponse::getJobid).orElseThrow();
+  private String attemptTaskReconnectWithRetries(UUID localJobId, RestClientException e) throws InterruptedException {
+    int i = 0;
+    while (true) {
+      List<String> recentJobIds = getRecentTasksJobIds();
+      String externalJobId = checkRecentTasksLocalJobIds(localJobId, recentJobIds);
+      if (externalJobId == null){
+        if (++i > MAX_RETRIES) {
+            throw e;
+          }
+        Thread.sleep(SLEEP_BETWEEN_RETRIES);
+        LOGGER.warn("Exception while submitting task! Waiting for retry", e);
+        continue;
+      }
+      return externalJobId;
+    }
+  }
+
+  private String checkRecentTasksLocalJobIds(UUID localJobId, List<String> recentJobIds) {
+    for (String jobId : recentJobIds) {
+      ResponseEntity<JobConfigResponse> configResponse = submitRestTemplate.exchange(
+              serverUrl + "/jobs/" + jobId + "/config",
+              HttpMethod.GET, new HttpEntity<>(httpHeader),
+              JobConfigResponse.class);
+      //Checks if job local id is matching with response local id
+      boolean isMatchingJob = Optional.ofNullable(configResponse.getBody())
+              .map(JobConfigResponse::getExecutionConfig)
+              .map(ExecutionConfig::getUserConfig)
+              .map(UserConfig::getLocalJobId)
+              .map(responseLocalJobId -> responseLocalJobId.equals(localJobId))
+              .orElse(false);
+      if(isMatchingJob) {
+        return jobId;
+      }
+    }
+    return null;
+  }
+
+  private List<String> getRecentTasksJobIds() {
+    ResponseEntity<JobOverviewResponse> response = submitRestTemplate.exchange(
+          serverUrl + "/jobs/overview", HttpMethod.GET,
+            new HttpEntity<>(httpHeader),
+            JobOverviewResponse.class);
+
+    long currentTimestamp = System.currentTimeMillis();
+    long recentTimeThresholdTimestamp = currentTimestamp - RECENT_TASK_THRESHOLD;
+    //Gets all recent tasks job ids
+    return Optional.ofNullable(response.getBody())
+            .map(JobOverviewResponse::getJobs)
+            .map(jobs -> filterRecentJobs(recentTimeThresholdTimestamp, jobs))
+            .map(JobExecutor::collectJobIds).orElse(Collections.emptyList());
+  }
+
+  private static List<String> collectJobIds(List<Job> jobs) {
+    return jobs.stream()
+            .map(Job::getJid).toList();
+  }
+
+  private static List<Job> filterRecentJobs(long recentTimeThresholdTimestamp, List<Job> jobs) {
+    return jobs.stream()
+            .filter(job -> job.getStartTime() > recentTimeThresholdTimestamp).toList();
   }
 
   private RestTemplate createSubmitRestTemplate() {
