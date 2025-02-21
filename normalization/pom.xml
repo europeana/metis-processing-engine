@@ -33,6 +33,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-s3-fs-presto</artifactId>
+      <version>${flink-version}</version>
+    </dependency>
+
+
+    <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
       <version>${parent.version}</version>
