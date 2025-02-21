@@ -1,8 +1,12 @@
-package eu.europeana.processing.validation;
+package eu.europeana.processing.http.validation;
 
 import eu.europeana.processing.job.JobParamName;
+import eu.europeana.processing.validation.AbstractExternalSourceJobValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
 
+/**
+ * Validator for the HttpHarvestingJob
+ */
 public class HttpJobParamValidator extends AbstractExternalSourceJobValidator {
 
     @Override

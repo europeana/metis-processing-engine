@@ -1,9 +1,11 @@
-package eu.europeana.processing.http.source;
+package eu.europeana.processing.http.reader;
 
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.source.ObjectStreamVersionedSerializer;
+import java.io.Serial;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.UUID;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.connector.source.Source;
@@ -20,15 +22,21 @@ import org.apache.flink.core.io.SimpleVersionedSerializer;
  * file is extracted on fly, or full if the file is initially extracted in the directory on the cluster.
  */
 public class HttpSource implements Source<ExecutionRecordResult, HttpSourceSplit, HttpEnumeratorState> {
+  @Serial
+  private static final long serialVersionUID = 1;
 
   private static final String METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME = "METIS_PROCESSING_HTTP_JOBS_DIR";
-  private static final String HTTP_JOBS_DIR = System.getenv(METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME) != null ?
-      System.getenv(METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME) : "/http-jobs";
+  private static final String HTTP_JOBS_DIR =
+      Optional.ofNullable(System.getenv(METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME)).orElse("/http-jobs");
 
   private final ParameterTool parameterTool;
   private final String jobDirectoryPath;
 
 
+  /**
+   * Creates HttpSource
+   * @param parameterTool - all the command line parameters of the job
+   */
   public HttpSource(ParameterTool parameterTool) {
     this.parameterTool = parameterTool;
     long taskId = parameterTool.getLong(JobParamName.TASK_ID);

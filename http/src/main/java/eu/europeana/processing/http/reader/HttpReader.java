@@ -1,17 +1,16 @@
-package eu.europeana.processing.http.source;
+package eu.europeana.processing.http.reader;
 
 import static eu.europeana.processing.job.JobName.HTTP_HARVEST;
 import static eu.europeana.processing.job.JobParamName.DATASET_ID;
 
-import eu.europeana.processing.http.source.exception.HttpSourceException;
-import eu.europeana.processing.http.source.extractor.ArchiveContentExtractor;
+import eu.europeana.processing.http.reader.exception.HttpSourceException;
+import eu.europeana.processing.http.reader.extractor.ArchiveContentExtractor;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecord.ExecutionRecordBuilder;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -26,9 +25,13 @@ import org.apache.flink.util.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The SourceReader implementation for HttpSource. It emits content of the files from the compressed archive.
+ * Every file is emitted as separate record.
+ */
 public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourceSplit> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HttpEnumerator.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(HttpReader.class);
   private final SourceReaderContext context;
   private final String datasetId;
   private final String taskId;
@@ -38,6 +41,11 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   private CompletableFuture<Void> readerAvailable = new CompletableFuture<>();
   private boolean noMoreSplits;
 
+  /**
+   * Creates HttpReader
+   * @param context - Flink engine SourceReaderContext context
+   * @param parameterTool - all the command line parameters of the job
+   */
   public HttpReader(SourceReaderContext context, ParameterTool parameterTool) {
     this.context = context;
     datasetId = parameterTool.getRequired(DATASET_ID);
@@ -46,7 +54,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   @Override
   public void start() {
-    LOGGER.info("Started " + this.getClass().getSimpleName());
+    LOGGER.info("Started {}" , this.getClass().getSimpleName());
   }
 
   @Override
@@ -66,13 +74,13 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   private InputStatus orderNewSplitAndWait() {
     context.sendSplitRequest();
     blockReader();
-    LOGGER.info("Ordered new split from the enumerator.");
+    LOGGER.debug("Ordered new split from the enumerator.");
     return InputStatus.NOTHING_AVAILABLE;
   }
 
   private void emitRecord(ReaderOutput<ExecutionRecordResult> output, String fileName) {
-    ExecutionRecordResult record = prepareRecord(fileName);
-    output.collect(record);
+    ExecutionRecordResult theRecord = prepareRecord(fileName);
+    output.collect(theRecord);
     if(!fileNameIterator.hasNext()){
       wholeSplitEmitted();
     }
@@ -85,7 +93,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
     try {
       executionRecordBuilder.recordData(extractor.getExtractedFileContent(fileName));
-    } catch (IOException e) {
+    } catch (HttpSourceException e) {
       LOGGER.warn("Error extracting file: {}", fileName, e);
       executionRecordBuilder.recordData("");
       executionRecordResultBuilder.exception(ExceptionUtils.stringifyException(e));
@@ -113,7 +121,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   @Override
   public void notifyNoMoreSplits() {
-    LOGGER.info("Notified reader of task: {} about no more splits.", taskId);
+    LOGGER.debug("Notified reader of task: {} about no more splits.", taskId);
     noMoreSplits = true;
     unblockReader();
   }
@@ -121,14 +129,14 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   @Override
   public List<HttpSourceSplit> snapshotState(long checkpointId) {
     List<HttpSourceSplit> snapshot = Optional.ofNullable(assignedSplit).stream().toList();
-    LOGGER.info("Created reader snapshot for task: {} for the checkpoint: {}, snapshot: {}",
+    LOGGER.debug("Created reader snapshot for task: {} for the checkpoint: {}, snapshot: {}",
         taskId, checkpointId, snapshot);
     return snapshot;
   }
 
   @Override
   public void notifyCheckpointComplete(long checkpointId) {
-    LOGGER.info("Reader of task: {}, notified about checkpoint: {} completion.", taskId, checkpointId);
+    LOGGER.debug("Reader of task: {}, notified about checkpoint: {} completion.", taskId, checkpointId);
   }
 
   @Override

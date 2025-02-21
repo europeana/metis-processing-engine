@@ -1,6 +1,6 @@
-package eu.europeana.processing.http.source;
+package eu.europeana.processing.http.reader;
 
-import static eu.europeana.processing.http.source.extractor.ArchiveHeaderExtractor.EXTRACTED_SUB_DIR_NAME;
+import static eu.europeana.processing.http.reader.extractor.ArchiveFileNamesExtractor.EXTRACTED_SUB_DIR_NAME;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,8 +9,9 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
-import eu.europeana.processing.http.source.extractor.ExtractionMode;
+import eu.europeana.processing.http.reader.extractor.ExtractionMode;
 import eu.europeana.processing.job.JobParamName;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.util.FileUtils;
+import org.apache.flink.shaded.guava31.com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 @ExtendWith(MockitoExtension.class)
-class HttpEnumeratorTest {
+class HttpEnumeratorTest extends AbstractUnpackingTest {
 
   private static final int SUBTASK0_ID = 0;
   private static final int SUBTASK1_ID = 1;
@@ -61,13 +62,11 @@ class HttpEnumeratorTest {
   private String downLoadedFile;
   private HttpSourceSplit expectedSplit1;
   private HttpSourceSplit expectedSplit2;
-  private Path tempDirectory;
   private MockedConstruction<ProgressUpdater> progressUpdaterConstruction;
 
   @BeforeEach
-  public void setup() throws Exception {
+  void setup() {
     progressUpdaterConstruction = Mockito.mockConstruction(ProgressUpdater.class);
-    tempDirectory = Files.createTempDirectory(HttpEnumeratorTest.class.getSimpleName());
     jobDirectory = tempDirectory.resolve("task-dir").toString();
     downLoadedFile = Path.of(jobDirectory).resolve(ZIP_FILE_NAME).toString();
     parameterTool = ParameterTool.fromMap(Map.of(
@@ -79,25 +78,25 @@ class HttpEnumeratorTest {
     expectedSplit1 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(List.of(FILE1, FILE2, FILE3))
+                                    .fileNames(Lists.newArrayList(FILE1, FILE2, FILE3))
                                     .firstFileIndex(0)
                                     .build();
     expectedSplit2 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(List.of(FILE4))
+                                    .fileNames(Lists.newArrayList(FILE4))
                                     .firstFileIndex(3)
                                     .build();
     expectedSplit2 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(List.of(FILE4))
+                                    .fileNames(Lists.newArrayList(FILE4))
                                     .firstFileIndex(3)
                                     .build();
   }
 
   @Test
-  public void shouldAssignSplitsForRegularZip() {
+  void shouldAssignSplitsForRegularZip() {
     try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
@@ -109,7 +108,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldAssignSplitsForTarFile() {
+  void shouldAssignSplitsForTarFile() {
     downLoadedFile = Path.of(jobDirectory).resolve(TGZ_FILE_NAME).toString();
     parameterTool = ParameterTool.fromMap(Map.of(
         JobParamName.HTTP_ARCHIVE_URL,
@@ -128,7 +127,9 @@ class HttpEnumeratorTest {
                        .downloadedArchiveFile(downLoadedFile)
                        .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
                        .fileNames(
-                           List.of(Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ).toString()))
+                           Lists.newArrayList(
+                               Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ)
+                                   .toString()))
                        .firstFileIndex(0)
                        .build();
     verify(context).assignSplit(expectedTarSplit, SUBTASK0_ID);
@@ -136,7 +137,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldProperlyDetectWhenAllSplitStarted() {
+  void shouldProperlyDetectWhenAllSplitStarted() {
     try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
@@ -153,7 +154,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldAssignSplitsWhenFileIsDownloadedIncompletely() throws IOException {
+  void shouldAssignSplitsWhenFileIsDownloadedIncompletely() throws IOException {
     createIncompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().returnedPartitions(new LinkedList<>()).build();
 
@@ -169,7 +170,7 @@ class HttpEnumeratorTest {
 
 
   @Test
-  public void shouldAssignSplitsWhenFileIsAlreadyDownloadedCompletely() throws IOException {
+  void shouldAssignSplitsWhenFileIsAlreadyDownloadedCompletely() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .returnedPartitions(new LinkedList<>()).build();
@@ -185,7 +186,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldAssignOnlyNotStartedSplits() throws IOException {
+  void shouldAssignOnlyNotStartedSplits() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
@@ -203,7 +204,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldAssignSplitReturnedBackOnTaskManagerFail() throws IOException {
+  void shouldAssignSplitReturnedBackOnTaskManagerFail() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
@@ -222,7 +223,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldProperlySnapshotState() throws IOException {
+  void shouldProperlySnapshotState() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState initialState = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                           .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
@@ -239,7 +240,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldProperlyEvaluateProgressAndPassItToTheUpdater() throws IOException {
+  void shouldProperlyEvaluateProgressAndPassItToTheUpdater() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
@@ -265,7 +266,7 @@ class HttpEnumeratorTest {
   }
 
   @Test
-  public void shouldNotFailOnNotUsedNotifications() throws IOException {
+  void shouldNotFailOnNotUsedNotifications() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
@@ -277,6 +278,7 @@ class HttpEnumeratorTest {
       enumerator.notifyCheckpointAborted(0);
     }
 
+    verifyNoInteractions(context);
   }
 
   private void createCompleteDownloadedFile() throws IOException {
@@ -294,9 +296,8 @@ class HttpEnumeratorTest {
   }
 
   @AfterEach
-  public void cleanup() throws IOException {
+  void cleanup() {
     progressUpdaterConstruction.close();
-    FileUtils.deleteDirectory(tempDirectory.toFile());
   }
 
 }

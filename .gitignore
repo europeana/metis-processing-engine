@@ -17,7 +17,7 @@
 *.nar
 *.ear
 #*.zip - it is needed for tests
-*.tar.gz
+#*.tar.gz - it is needed for tests
 *.rar
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml

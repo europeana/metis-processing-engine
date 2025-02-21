@@ -1,30 +1,28 @@
-package eu.europeana.processing.http.source;
+package eu.europeana.processing.http.reader;
 
-import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
-import eu.europeana.processing.http.source.extractor.ExtractionMode;
+import eu.europeana.processing.http.reader.extractor.ExtractionMode;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future.State;
-import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.connector.source.ReaderOutput;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.io.InputStatus;
-import org.apache.flink.util.FileUtils;
+import org.apache.flink.shaded.guava31.com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class HttpReaderTest {
+class HttpReaderTest extends AbstractUnpackingTest {
 
   public static final String TASK_ID = "1";
   public static final String DATASET_ID = "dataset-id";
@@ -49,7 +47,6 @@ class HttpReaderTest {
   @Captor
   private ArgumentCaptor<ExecutionRecordResult> emitCaptor;
 
-  private Path tempDirectory;
   private HttpReader reader;
   private Path zipFile;
   private Path extractedFile1;
@@ -63,7 +60,6 @@ class HttpReaderTest {
 
   @BeforeEach
   void setup() throws IOException {
-    tempDirectory = Files.createTempDirectory(HttpReaderTest.class.getSimpleName());
     zipFile = copyFileToTempFolder("records.zip");
     extractedFile1 = copyFileToTempFolder(FILE1);
     extractedFile2 = copyFileToTempFolder(FILE2);
@@ -83,7 +79,7 @@ class HttpReaderTest {
 
 
   @Test
-  public void shouldSendSplitRequestAndWaitForResponseOnFirstPoll() {
+  void shouldSendSplitRequestAndWaitForResponseOnFirstPoll() {
     InputStatus result = reader.pollNext(output);
 
     verify(context).sendSplitRequest();
@@ -92,14 +88,14 @@ class HttpReaderTest {
   }
 
   @Test
-  public void shouldEmitRecordsDirectlyFromZip() {
+  void shouldEmitRecordsDirectlyFromZip() {
     reader.pollNext(output);
     reader.addSplits(
         List.of(
             HttpSourceSplit
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
-                .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(List.of(FILE1, FILE2))
+                .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(Lists.newArrayList(FILE1, FILE2))
                 .build())
     );
 
@@ -118,7 +114,7 @@ class HttpReaderTest {
   }
 
   @Test
-  public void shouldEmitExtractedRecordsFromDirectory() {
+  void shouldEmitExtractedRecordsFromDirectory() {
     reader.pollNext(output);
     reader.addSplits(
         List.of(
@@ -126,7 +122,7 @@ class HttpReaderTest {
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
                 .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
-                .fileNames(List.of(extractedFile1.toString(), extractedFile2.toString()))
+                .fileNames(Lists.newArrayList(extractedFile1.toString(), extractedFile2.toString()))
                 .build())
     );
 
@@ -145,14 +141,14 @@ class HttpReaderTest {
   }
 
   @Test
-  public void shouldEmitFailedRecordIfCouldNotGetContentOfTheFile() {
+  void shouldEmitFailedRecordIfCouldNotGetContentOfTheFile() {
     reader.pollNext(output);
     reader.addSplits(
         List.of(
             HttpSourceSplit
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
-                .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY).fileNames(List.of(badFilePath.toString()))
+                .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY).fileNames(Lists.newArrayList(badFilePath.toString()))
                 .build())
     );
 
@@ -165,18 +161,18 @@ class HttpReaderTest {
   }
 
   @Test
-  public void shouldReactOnNoMoreSplitSignal() {
+  void shouldReactOnNoMoreSplitSignal() {
     reader.pollNext(output);
     reader.notifyNoMoreSplits();
     assertEquals(InputStatus.END_OF_INPUT, reader.pollNext(output));
   }
 
   @Test
-  public void shouldProperlySnapshotStateWhenSplitAssigned() {
+  void shouldProperlySnapshotStateWhenSplitAssigned() {
     HttpSourceSplit split = HttpSourceSplit
         .builder()
         .downloadedArchiveFile(zipFile.toString())
-        .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(List.of(FILE1, FILE2))
+        .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(Lists.newArrayList(FILE1, FILE2))
         .build();
 
     reader.pollNext(output);
@@ -187,37 +183,33 @@ class HttpReaderTest {
   }
 
   @Test
-  public void shouldProperlySnapshotStateWhenSplitNotAssigned() {
+  void shouldProperlySnapshotStateWhenSplitNotAssigned() {
     List<HttpSourceSplit> snapshot = reader.snapshotState(0);
 
     assertTrue(snapshot.isEmpty());
   }
 
   @Test
-  public void shouldNotFailOnNotUsedNotifications() {
+  void shouldNotFailOnNotUsedNotifications() {
     reader.start();
+
     reader.notifyCheckpointComplete(0);
+
+    verifyNoInteractions(context, output);
   }
 
   @AfterEach
-  public void cleanup() throws Exception {
+  void cleanup() throws Exception {
     reader.close();
-    FileUtils.deleteDirectory(tempDirectory.toFile());
-  }
-
-  private Path copyFileToTempFolder(String name) throws IOException {
-    Path resultFile = tempDirectory.resolve(name);
-    IOUtils.copy(requireNonNull(HttpReaderTest.class.getResourceAsStream("/" + name)), new FileOutputStream(resultFile.toFile()));
-    return resultFile;
   }
 
   private ExecutionRecordResult createExecutionRecord(String recordId, Path extractedFilePath) throws IOException {
     ExecutionRecordKey key = ExecutionRecordKey.builder().datasetId(DATASET_ID).executionId(TASK_ID).recordId(recordId).build();
     String fileContent = Files.readString(extractedFilePath);
-    ExecutionRecord record = ExecutionRecord.builder()
-                                            .executionRecordKey(key).executionName(JobName.HTTP_HARVEST)
-                                            .recordData(fileContent).build();
-    return ExecutionRecordResult.builder().executionRecord(record).build();
+    ExecutionRecord theRecord = ExecutionRecord.builder()
+                                               .executionRecordKey(key).executionName(JobName.HTTP_HARVEST)
+                                               .recordData(fileContent).build();
+    return ExecutionRecordResult.builder().executionRecord(theRecord).build();
   }
 
 }

@@ -1,10 +1,13 @@
-package eu.europeana.processing.http.source.extractor;
+package eu.europeana.processing.http.reader.extractor;
+
+import static java.util.Collections.unmodifiableList;
 
 import eu.europeana.metis.harvesting.HarvesterException;
 import eu.europeana.metis.harvesting.ReportingIteration.IterationResult;
 import eu.europeana.metis.harvesting.http.PathIterator;
 import eu.europeana.metis.utils.CompressedFileExtension;
 import eu.europeana.metis.utils.CompressedFileHandler;
+import eu.europeana.processing.http.reader.exception.HttpSourceException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,9 +25,9 @@ import org.slf4j.LoggerFactory;
  * inside, only a zip file header containing names of compressed files is read. In other cases, the archive is extracted into a
  * folder and list of paths of the extracted files is returned. This extracted folder is then reused on further steps.
  */
-public class ArchiveHeaderExtractor {
+public class ArchiveFileNamesExtractor {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveHeaderExtractor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveFileNamesExtractor.class);
   public static final String EXTRACTED_SUB_DIR_NAME = "extracted";
 
   private final Path downloadedFile;
@@ -34,33 +37,38 @@ public class ArchiveHeaderExtractor {
 
 
   /**
-   * Creates ArchiveHeaderExtractor.
+   * Creates ArchiveFileNamesExtractor.
    *
    * @param downloadedFile - path to the downloaded archive file
    * @param extractionMode - mode of the extraction. Null value is allowed and passed on first execution.
    * Not null extraction mode could be passed during state restoring, so the extraction of the archive
    * to the folder used in mode: INITIAL_TO_DIRECTORY could be omitted.
    */
-  public ArchiveHeaderExtractor(Path downloadedFile, ExtractionMode extractionMode) {
+  public ArchiveFileNamesExtractor(Path downloadedFile, ExtractionMode extractionMode) {
     this.downloadedFile = downloadedFile;
     this.extractedDirectory = downloadedFile.toAbsolutePath().getParent().resolve(EXTRACTED_SUB_DIR_NAME);
     this.extractionMode = extractionMode;
   }
 
+  /**
+   * Extracts list of compressed files names and choses extraction mode.
+   *
+   * @return - extraction mode
+   */
   public ExtractionMode extract() {
     if (extractionMode == null) {
       try {
-        return extractionMode = extractZipFileHeader();
-      } catch (IOException | HarvesterException e) {
-        throw new RuntimeException(e);
+        extractionMode = extractFileNamesFromArchive();
+      } catch (IOException e) {
+        throw new HttpSourceException("Cound not extract compressed files names from the zip archive header of the file: " + downloadedFile, e);
       }
     } else {
-      LOGGER.info("Need not to extract. Extraction already performed. Extraction mode: {}", extractionMode);
-      return extractionMode;
+      LOGGER.debug("Need not to extract. Extraction already performed. Extraction mode: {}", extractionMode);
     }
+    return extractionMode;
   }
 
-  private ExtractionMode extractZipFileHeader() throws IOException, HarvesterException {
+  private ExtractionMode extractFileNamesFromArchive() throws IOException {
     CompressedFileExtension compressingExtension = CompressedFileExtension.forPath(downloadedFile);
     if (compressingExtension == CompressedFileExtension.ZIP) {
       if (zipContainsOnlyExtractedFiles()) {
@@ -83,19 +91,22 @@ public class ArchiveHeaderExtractor {
         case INITIAL_TO_DIRECTORY -> getExtractedFilePaths();
       };
     } catch (HarvesterException | IOException e) {
-      throw new RuntimeException(e);
+      throw new HttpSourceException("Could not gather file name list from archive file: " + downloadedFile, e);
     }
   }
 
   private List<String> getNamesFromZipHeader() throws IOException {
     //The result is stored in the field to not extract zip header twice.
     if (zippedFileNamesList == null) {
-      LOGGER.info("Zip archive file type. Reading header...");
+      LOGGER.debug("Zip archive file type. Reading header...");
       try (ZipFile zipFile = ZipFile.builder().setPath(downloadedFile).get()) {
-        zippedFileNamesList = Streams.stream(zipFile.getEntries().asIterator()).map(ZipArchiveEntry::getName).toList();
+        zippedFileNamesList = Streams.stream(zipFile.getEntries().asIterator())
+                                     .filter(entry -> !entry.isDirectory())
+                                     .map(ZipArchiveEntry::getName)
+                                     .toList();
       }
     }
-    return zippedFileNamesList;
+    return unmodifiableList(zippedFileNamesList);
   }
 
   private boolean zipContainsOnlyExtractedFiles() throws IOException {
@@ -103,9 +114,9 @@ public class ArchiveHeaderExtractor {
   }
 
   private void extractFilesToDirectory() throws IOException {
-    LOGGER.info("Creating extracted dir: {}", extractedDirectory);
+    LOGGER.debug("Creating extracted dir: {}", extractedDirectory);
     Files.createDirectory(extractedDirectory);
-    LOGGER.info("Extracting the archive: {}", downloadedFile);
+    LOGGER.debug("Extracting the archive: {}", downloadedFile);
     CompressedFileHandler.extractFile(downloadedFile, extractedDirectory);
     LOGGER.info("The archive file successfully extracted into the directory: {}", extractedDirectory);
   }
