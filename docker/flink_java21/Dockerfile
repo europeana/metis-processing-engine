@@ -46,7 +46,6 @@ RUN set -ex; \
 # Configure Flink version
 ENV FLINK_TGZ_URL=https://dlcdn.apache.org/flink/flink-1.20.0/flink-1.20.0-bin-scala_2.12.tgz \
     FLINK_ASC_URL=https://downloads.apache.org/flink/flink-1.20.0/flink-1.20.0-bin-scala_2.12.tgz.asc \
-    FLINK_S3_PRESTO_URL=https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-presto/1.20.0/flink-s3-fs-presto-1.20.0.jar \
     GPG_KEY=B2D64016B940A7E0B9B72E0D7D0528B28037D8BC \
     CHECK_GPG=true
 
@@ -88,9 +87,6 @@ RUN set -ex; \
   sed -i 's/taskmanager.bind-host: localhost/taskmanager.bind-host: 0.0.0.0/g' $FLINK_HOME/conf/config.yaml; \
   sed -i '/taskmanager.host: localhost/d' $FLINK_HOME/conf/config.yaml;
 
-RUN mkdir -p $FLINK_HOME/plugins/s3-fs-presto
-RUN wget $FLINK_S3_PRESTO_URL -O $FLINK_HOME/plugins/s3-fs-presto/flink-s3-fs-presto-1.20.0.jar
-RUN chown -R flink:flink $FLINK_HOME/plugins
 
 # Configure container
 COPY docker-entrypoint.sh /
