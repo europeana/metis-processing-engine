@@ -7,6 +7,7 @@ import java.util.*;
 import eu.europeana.cloud.flink.client.entities.JobConfigResponse.ExecutionConfig;
 import eu.europeana.cloud.flink.client.entities.JobConfigResponse.ExecutionConfig.UserConfig;
 import eu.europeana.cloud.flink.client.entities.JobOverviewResponse.Job;
+import eu.europeana.cloud.flink.client.exceptions.SubmitJobException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.AbstractEnvironment;
@@ -20,6 +21,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Class responsible for executing flink jobs via flink rest api
+ */
 public class JobExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobExecutor.class);
@@ -27,8 +31,10 @@ public class JobExecutor {
   private static final String STATE_CANCELED = "CANCELED";
   private static final String STATE_FAILED = "FAILED";
   private static final Set<String> END_STATES = Set.of(STATE_FINISHED, STATE_FAILED, STATE_CANCELED);
-  public static final int MAX_RETRIES = 30;
-  public static final long SLEEP_BETWEEN_RETRIES = 200L;
+  public static final int MAX_RETRIES_FOR_PROGRESS_REQUEST = 20;
+  public static final long SLEEP_BETWEEN_RETRIES_FOR_PROGRESS_REQUEST = 15000L;
+  public static final int MAX_RETRIES_FOR_SUBMIT_REQUEST = 30;
+  public static final long SLEEP_BETWEEN_RETRIES_FOR_SUBMIT_REQUEST = 200L;
   private static final int CONNECTION_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int READ_TIMEOUT_FOR_SUBMIT_REQUEST = 60_000;
   private static final int CONNECTION_TIMEOUT_FOR_PROGRESS_REQUEST = 10_000;
@@ -57,6 +63,12 @@ public class JobExecutor {
         serverConfiguration.getProperty("jar.id"));
   }
 
+  /**
+   * @param serverUrl Flink server url
+   * @param user Flink user
+   * @param password Flink password
+   * @param jarId Flink jar id
+   */
   public JobExecutor(String serverUrl, String user, String password, String jarId) {
     this.serverUrl = serverUrl;
     httpHeader = new HttpHeaders();
@@ -68,6 +80,15 @@ public class JobExecutor {
     this.jarId = jarId;
   }
 
+  /**
+   * @param request submit job request that contain program arguments and job configuration.
+   * @throws InterruptedException if thread is interrupted
+   * Executes the job on flink cluster and waits for it to finish.
+   * In case of error during submission will try to reconnect to task.
+   * When job is being executed it prints progress.
+   * In case of successful execution, job details are printed.
+   * Otherwise, exception is thrown.
+   */
   public void execute(SubmitJobRequest request) throws InterruptedException {
     String jobId = submitJob(request);
     JobDetails details;
@@ -86,6 +107,11 @@ public class JobExecutor {
     LOGGER.info("Job finished! Details: {}", details);
   }
 
+  /**
+   * @param jobId id of the job
+   * @return job details containing job state, name and its id
+   * @throws InterruptedException if thread is interrupted
+   */
   private JobDetails getProgressWithRetry(String jobId) throws InterruptedException {
     int i = 0;
     while (true) {
@@ -101,18 +127,44 @@ public class JobExecutor {
         }
       } catch (RestClientException e) {
         LOGGER.warn("Exception while getting the job progress! Waiting for retry", e);
-        Thread.sleep(SLEEP_BETWEEN_RETRIES);
-        if (++i > MAX_RETRIES) {
+        Thread.sleep(SLEEP_BETWEEN_RETRIES_FOR_PROGRESS_REQUEST);
+        if (++i > MAX_RETRIES_FOR_PROGRESS_REQUEST) {
           throw e;
         }
       }
     }
   }
 
+  /**
+   * @param jobId id of the job
+   * @return job details containing job state, name and its id
+   */
   public JobDetails getProgress(String jobId) {
     return progressRestTemplate.exchange(serverUrl+"/jobs/" + jobId, HttpMethod.GET, new HttpEntity(httpHeader), JobDetails.class).getBody();
   }
 
+
+  /**
+   * @param request submit job request that contain program arguments and job configuration.
+   * @return job id of the submitted job
+   * @throws InterruptedException if thread is interrupted
+   * Submits the job to flink cluster. In case of error during submission will try to reconnect to task.
+   * Algorithm of reconnection goes as follows:
+   * When job is submitted local job id is generated in form of UUID that is later on included in the request config part as local job id.
+   * When exception is thrown during process of task submission we don't know exact state of task since we don't parse exception message.
+   * There are two cases:
+   * 1. Task could be submitted, and we didn't receive response,
+   * 2. task could be submitted, and we received response with error.
+   * We need to assume that it is first case and try to reconnect to task.
+   * That is because if we retry task submission we can potentially clone task on flink cluster.
+   * Reconnection steps:
+   * 1. Filter recent jobs from job list (/jobs/overview) and get their external job ids.
+   * 2. Get each of recent jobs config (/jobs/<jobid>/config).
+   * 3. Check for match of local job id that was included in the request at beginning of the submission process and one included in task request config part local id.
+   * 4a. In case of match we assume that task was submitted, and we can reconnect to it by using external job id that we got in step 1.
+   * 4b. In case of no match we assume that task was not submitted, so we retry and repeat those steps.
+   * 5. In case of no match after retries we throw exception. After that user need to manually resubmit task.
+   */
   private String submitJob(SubmitJobRequest request) throws InterruptedException {
     UUID localJobId = request.getLocalJobId();
     try {
@@ -124,6 +176,7 @@ public class JobExecutor {
           request, response.getStatusCode(), responseBody);
       return Optional.ofNullable(responseBody).map(SubmitJobResponse::getJobid).orElseThrow();
     } catch(RestClientException e) {
+      LOGGER.warn("Exception occurred during task submission process.", e);
       return attemptTaskReconnectWithRetries(localJobId, e);
 
     }
@@ -132,38 +185,44 @@ public class JobExecutor {
   private String attemptTaskReconnectWithRetries(UUID localJobId, RestClientException e) throws InterruptedException {
     int i = 0;
     while (true) {
-      List<String> recentJobIds = getRecentTasksJobIds();
-      String externalJobId = checkRecentTasksLocalJobIds(localJobId, recentJobIds);
-      if (externalJobId == null){
-        if (++i > MAX_RETRIES) {
-            throw e;
+      Optional<String> externalJobId = findRecentlySubmittedJobByLocalId(localJobId);
+      if (externalJobId.isEmpty()){
+        if (++i > MAX_RETRIES_FOR_SUBMIT_REQUEST) {
+            throw new SubmitJobException("Job submission state is ambiguous and wasn't able to reconnect to task.", e);
           }
-        Thread.sleep(SLEEP_BETWEEN_RETRIES);
-        LOGGER.warn("Exception while submitting task! Waiting for retry", e);
+        Thread.sleep(SLEEP_BETWEEN_RETRIES_FOR_SUBMIT_REQUEST);
+        LOGGER.warn("Exception when reconnecting to potentially submitted task! Retrying");
         continue;
       }
-      return externalJobId;
+      return externalJobId.get();
     }
   }
 
-  private String checkRecentTasksLocalJobIds(UUID localJobId, List<String> recentJobIds) {
-    for (String jobId : recentJobIds) {
+  private Optional<String> findRecentlySubmittedJobByLocalId(UUID localJobId) {
+    for (String jobId : getRecentTasksJobIds()) {
       ResponseEntity<JobConfigResponse> configResponse = submitRestTemplate.exchange(
               serverUrl + "/jobs/" + jobId + "/config",
               HttpMethod.GET, new HttpEntity<>(httpHeader),
               JobConfigResponse.class);
-      //Checks if job local id is matching with response local id
-      boolean isMatchingJob = Optional.ofNullable(configResponse.getBody())
-              .map(JobConfigResponse::getExecutionConfig)
-              .map(ExecutionConfig::getUserConfig)
-              .map(UserConfig::getLocalJobId)
-              .map(responseLocalJobId -> responseLocalJobId.equals(localJobId))
-              .orElse(false);
-      if(isMatchingJob) {
-        return jobId;
+      if(isJobMatching(localJobId, configResponse)) {
+        return Optional.of(jobId);
       }
     }
-    return null;
+    return Optional.empty();
+  }
+
+  /**
+   * @param localJobId local job id
+   * @param configResponse config response
+   * @return if job config local id matches response local id
+   */
+  private static boolean isJobMatching(UUID localJobId, ResponseEntity<JobConfigResponse> configResponse) {
+    return Optional.ofNullable(configResponse.getBody())
+            .map(JobConfigResponse::getExecutionConfig)
+            .map(ExecutionConfig::getUserConfig)
+            .map(UserConfig::getLocalJobId)
+            .map(responseLocalJobId -> responseLocalJobId.equals(localJobId))
+            .orElse(false);
   }
 
   private List<String> getRecentTasksJobIds() {
@@ -177,19 +236,13 @@ public class JobExecutor {
     //Gets all recent tasks job ids
     return Optional.ofNullable(response.getBody())
             .map(JobOverviewResponse::getJobs)
-            .map(jobs -> filterRecentJobs(recentTimeThresholdTimestamp, jobs))
-            .map(JobExecutor::collectJobIds).orElse(Collections.emptyList());
+            .stream()
+            .flatMap(List::stream)
+            .filter(job -> job.getStartTime() > recentTimeThresholdTimestamp)
+            .map(Job::getJid)
+            .toList();
   }
 
-  private static List<String> collectJobIds(List<Job> jobs) {
-    return jobs.stream()
-            .map(Job::getJid).toList();
-  }
-
-  private static List<Job> filterRecentJobs(long recentTimeThresholdTimestamp, List<Job> jobs) {
-    return jobs.stream()
-            .filter(job -> job.getStartTime() > recentTimeThresholdTimestamp).toList();
-  }
 
   private RestTemplate createSubmitRestTemplate() {
     final RestTemplate restTemplate = new RestTemplate();
