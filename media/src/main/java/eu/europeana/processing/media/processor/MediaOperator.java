@@ -17,6 +17,7 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -62,7 +63,23 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) {
+        try {
+            mediaProcessRecord(sourceExecutionRecord, out);
+        } catch(RdfDeserializationException | RdfSerializationException e) {
+            LOGGER.warn("During media extraction of record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
+            out.collect(
+                    ExecutionRecordResult.from(
+                            sourceExecutionRecord,
+                            parameterTool.get(JobParamName.TASK_ID),
+                            JobName.MEDIA,
+                            ExecutionRecord.EMPTY,
+                            e.getMessage())
+            );
+        }
+    }
+
+    private void mediaProcessRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) throws RdfDeserializationException, RdfSerializationException {
         final byte[] rdfBytes = sourceExecutionRecord.getRecordData().getBytes(Charset.defaultCharset());
         final EnrichedRdf enrichedRdf;
         enrichedRdf = getEnrichedRdf(rdfBytes);

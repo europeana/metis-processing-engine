@@ -252,6 +252,7 @@ $RECYCLE.BIN/
 
 .vscode/settings.json
 
-/config/
-
 /client/src/test/resources/application.properties
+
+
+/config/

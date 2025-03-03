@@ -27,7 +27,7 @@ public class IdAssigningOperator extends ProcessFunction<ExecutionRecordResult, 
   public void processElement(ExecutionRecordResult tuple,
       ProcessFunction<ExecutionRecordResult, ExecutionRecordResult>.Context ctx,
       Collector<ExecutionRecordResult> out)
-      throws Exception {
+      throws EuropeanaIdException {
     ExecutionRecordResult result;
     if (tuple.getException() == null) {
       String europeanaId = assigneEuropeanaIdentifier(tuple);
@@ -49,7 +49,7 @@ public class IdAssigningOperator extends ProcessFunction<ExecutionRecordResult, 
     out.collect(result);
   }
 
-  private String assigneEuropeanaIdentifier(ExecutionRecordResult tuple) throws Exception {
+  private String assigneEuropeanaIdentifier(ExecutionRecordResult tuple) throws EuropeanaIdException {
     EuropeanaGeneratedIdsMap europeanaIdentifier = getEuropeanaIdentifier(tuple);
     String europeanaId = europeanaIdentifier.getEuropeanaGeneratedId();
     LOGGER.debug("Assigned Europeana id: {}, for external record: {}", europeanaId, tuple.getRecordId());

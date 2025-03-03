@@ -6,6 +6,7 @@ import static eu.europeana.processing.job.JobParamName.METADATA_PREFIX;
 import static eu.europeana.processing.job.JobParamName.OAI_REPOSITORY_URL;
 
 
+import eu.europeana.metis.harvesting.HarvesterException;
 import eu.europeana.metis.harvesting.HarvesterFactory;
 import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecord;
@@ -18,6 +19,7 @@ import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
 import java.io.Serial;
+
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -56,15 +58,15 @@ public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, E
       ProcessFunction<OaiRecordHeader, ExecutionRecordResult>.Context ctx, Collector<ExecutionRecordResult> out) {
     String externalRecordId = header.getOaiIdentifier();
     ExecutionRecordKey key = ExecutionRecordKey.builder().datasetId(parameterTool.get(DATASET_ID))
-                                               .executionId(parameterTool.get(JobParamName.TASK_ID))
-                                               .recordId(externalRecordId).build();
-
+            .executionId(parameterTool.get(JobParamName.TASK_ID))
+            .recordId(externalRecordId).build();
     ExecutionRecordBuilder executionRecordBuilder = ExecutionRecord.builder().executionRecordKey(key).executionName(OAI_HARVEST);
     ExecutionRecordResultBuilder executionRecordResultBuilder = ExecutionRecordResult.builder();
     try {
       OaiRecord oaiRecord = harvestRecordsContent(header);
       executionRecordBuilder.recordData(new String(oaiRecord.getContent().readAllBytes(), StandardCharsets.UTF_8));
-    } catch (Exception e) {
+    } catch (HarvesterException e) {
+      LOGGER.warn("During OAI harvesting of record with id: {}, Exception was caught", externalRecordId, e);
       executionRecordBuilder.recordData(ExecutionRecord.EMPTY);
       executionRecordResultBuilder.exception(ExceptionUtils.stringifyException(e));
     }
@@ -72,7 +74,7 @@ public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, E
     out.collect(executionRecordResultBuilder.build());
   }
 
-  private OaiRecord harvestRecordsContent(OaiRecordHeader header) throws Exception {
+  private OaiRecord harvestRecordsContent(OaiRecordHeader header) throws HarvesterException {
     Instant harvestingStartTime = Instant.now();
     String recordId = header.getOaiIdentifier();
     LOGGER.debug("Starting harvesting for: {}", recordId);

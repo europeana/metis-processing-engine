@@ -61,8 +61,21 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     public void processElement(
         ExecutionRecord sourceRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) {
+        try {
+            validateRecord(sourceRecord, out);
+        } catch (TransformationException e) {
+            LOGGER.warn("During process of validation of record with id: {}, Exception was caught", sourceRecord.getExecutionRecordKey().getRecordId(), e);
+            out.collect(ExecutionRecordResult.from(
+                    sourceRecord,
+                    parameterTool.get(JobParamName.TASK_ID),
+                    parameterTool.get(JobParamName.VALIDATION_TYPE),
+                    ExecutionRecord.EMPTY,
+                    e.getMessage()));
+        }
+    }
 
+    private void validateRecord(ExecutionRecord sourceRecord, Collector<ExecutionRecordResult> out) throws TransformationException {
         LOGGER.debug("Validating record with id {} on instance: {}", sourceRecord.getExecutionRecordKey().getRecordId(), this);
         ExecutionRecordResult resultRecord = prepareResultRecord(sourceRecord);
         String sortedDocument = reorderFileContent(resultRecord);

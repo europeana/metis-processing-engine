@@ -46,6 +46,10 @@ public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
 
     @Override
     public void invoke(ExecutionRecordResult executionRecordResult, Context context) throws Exception {
+        if(Thread.interrupted()){
+            LOGGER.warn("Thread interruption detected when processing element {}", executionRecordResult.getExecutionRecord().getExecutionRecordKey().getRecordId());
+            throw new InterruptedException();
+        }
         if (recordProcessedSuccessfully(executionRecordResult)) {
             storeProcessedRecord(executionRecordResult);
         } else {

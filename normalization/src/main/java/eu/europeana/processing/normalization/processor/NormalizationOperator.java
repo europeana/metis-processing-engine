@@ -3,11 +3,14 @@ package eu.europeana.processing.normalization.processor;
 import eu.europeana.normalization.Normalizer;
 import eu.europeana.normalization.NormalizerFactory;
 import eu.europeana.normalization.model.NormalizationResult;
+import eu.europeana.normalization.util.NormalizationConfigurationException;
+import eu.europeana.normalization.util.NormalizationException;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
+
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -41,10 +44,26 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws Exception {
+        Collector<ExecutionRecordResult> out) throws NormalizationConfigurationException {
 
         final Normalizer normalizer = normalizerFactory.getNormalizer();
 
+        try {
+            normalizeRecord(sourceExecutionRecord, out, normalizer);
+        } catch(NormalizationException e){
+            LOGGER.warn("During process of normalization of record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
+            out.collect(
+                    ExecutionRecordResult.from(
+                            sourceExecutionRecord,
+                            parameterTool.get(JobParamName.TASK_ID),
+                            JobName.NORMALIZATION,
+                            ExecutionRecord.EMPTY,
+                            e.getMessage())
+            );
+        }
+    }
+
+    private void normalizeRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out, Normalizer normalizer) throws NormalizationException {
         NormalizationResult normalizationResult = normalizer.normalize(sourceExecutionRecord.getRecordData());
         if (normalizationResult.getErrorMessage() == null) {
             out.collect(
@@ -61,7 +80,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
                             sourceExecutionRecord,
                             parameterTool.get(JobParamName.TASK_ID),
                             JobName.NORMALIZATION,
-                            "",
+                            ExecutionRecord.EMPTY,
                             normalizationResult.getErrorMessage())
             );
         }

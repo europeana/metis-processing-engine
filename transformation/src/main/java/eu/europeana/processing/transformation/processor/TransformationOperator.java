@@ -10,6 +10,7 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -40,33 +41,36 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
         Collector<ExecutionRecordResult> out) throws Exception {
-        ExecutionRecordResult result;
         try {
-            final XsltTransformer xsltTransformer = prepareXsltTransformer();
-
-            StringWriter writer =
-                    xsltTransformer.transform(
-                            sourceExecutionRecord.getRecordData().getBytes(StandardCharsets.UTF_8),
-                            prepareEuropeanaGeneratedIdsMap(sourceExecutionRecord));
-
-            result = ExecutionRecordResult.from(
+            out.collect(transformRecord(sourceExecutionRecord));
+        } catch (TransformationException | EuropeanaIdException e) {
+            LOGGER.warn("During transformation of record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
+            out.collect(ExecutionRecordResult.from(
                 sourceExecutionRecord,
                 parameterTool.get(JobParamName.TASK_ID),
                 JobName.TRANSFORMATION,
-                writer.toString(),
-                null);
-            LOGGER.debug("Transformed record, id: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
-        } catch (Exception e) {
-            LOGGER.warn("{} exception: {}", getClass().getName(), sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
-            result = ExecutionRecordResult.from(
-                sourceExecutionRecord,
-                parameterTool.get(JobParamName.TASK_ID),
-                JobName.TRANSFORMATION,
-                "",
-                e.getMessage());
+                ExecutionRecord.EMPTY,
+                e.getMessage()));
         }
+    }
 
-        out.collect(result);
+    private ExecutionRecordResult transformRecord(ExecutionRecord sourceExecutionRecord) throws TransformationException, EuropeanaIdException {
+        ExecutionRecordResult result;
+        final XsltTransformer xsltTransformer = prepareXsltTransformer();
+
+        StringWriter writer =
+                xsltTransformer.transform(
+                        sourceExecutionRecord.getRecordData().getBytes(StandardCharsets.UTF_8),
+                        prepareEuropeanaGeneratedIdsMap(sourceExecutionRecord));
+
+        result = ExecutionRecordResult.from(
+                sourceExecutionRecord,
+            parameterTool.get(JobParamName.TASK_ID),
+            JobName.TRANSFORMATION,
+            writer.toString(),
+            null);
+        LOGGER.debug("Transformed record, id: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
+        return result;
     }
 
     private XsltTransformer prepareXsltTransformer()
