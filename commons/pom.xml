@@ -63,7 +63,10 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.3</version>
+      <version>${postgres.version}</version>
+      <!--We should not import postgres, but instead it is embedded into node docker image
+      - in shared lib folder, cause of MET-6331-->
+      <scope>provided</scope>
     </dependency>
 
   </dependencies>

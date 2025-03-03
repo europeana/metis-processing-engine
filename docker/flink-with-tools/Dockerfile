@@ -1,6 +1,6 @@
-FROM flink:1.18.1-java21_poc
+FROM flink:1.20.0-java21_poc
 
-MAINTAINER PSNC
+LABEL maintainer="PSNC"
 
 RUN apt-get update && apt-get install -y \
     xz-utils \

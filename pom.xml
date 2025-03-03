@@ -17,12 +17,14 @@
     <flink-version>1.20.0</flink-version>
     <version.bytebuddy>1.14.19</version.bytebuddy>
     <metis.version>15-SNAPSHOT</metis.version>
-
     <jackson.version>2.16.1</jackson.version>
+    <postgres.version>42.7.3</postgres.version>
+    <netty.version>4.1.107.Final</netty.version>
     <jupiter.version>5.10.5</jupiter.version>
   </properties>
 
   <modules>
+    <module>docker/metis-processing-engine-flink/shared-libs</module>
     <module>commons</module>
     <module>harvesting-commons</module>
     <module>media</module>

@@ -13,6 +13,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>flink-node-shared-libs</artifactId>
+      <version>${parent.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-streaming-java</artifactId>
       <version>${flink-version}</version>
@@ -56,7 +62,6 @@
       <artifactId>metis-harvesting</artifactId>
       <version>${metis.version}</version>
     </dependency>
-
   </dependencies>
 
   <build>

@@ -13,6 +13,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>flink-node-shared-libs</artifactId>
+      <version>${parent.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.apache.flink</groupId>
       <artifactId>flink-streaming-java</artifactId>
       <version>${flink-version}</version>
@@ -46,9 +52,23 @@
           <artifactId>org.apache.logging.log4j</artifactId>
           <groupId>log4j-slf4j-impl</groupId>
         </exclusion>
+        <!--Netty used in the indexing job caused memory leaks - MET-6311 moved to shared lib-->
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <!--Mongo client used in the indexing job caused memory leaks - MET-6311,
+        so moved the whole morphia and flapdoodle to shared lib-->
+        <exclusion>
+          <groupId>de.flapdoodle.embed</groupId>
+          <artifactId>de.flapdoodle.embed.mongo</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>dev.morphia.morphia</groupId>
+          <artifactId>morphia-core</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
-
   </dependencies>
 
   <build>
