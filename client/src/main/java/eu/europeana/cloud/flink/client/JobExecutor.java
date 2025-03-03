@@ -140,7 +140,8 @@ public class JobExecutor {
    * @return job details containing job state, name and its id
    */
   public JobDetails getProgress(String jobId) {
-    return progressRestTemplate.exchange(serverUrl+"/jobs/" + jobId, HttpMethod.GET, new HttpEntity(httpHeader), JobDetails.class).getBody();
+    return progressRestTemplate.exchange(serverUrl+"/jobs/" + jobId,
+            HttpMethod.GET, new HttpEntity(httpHeader), JobDetails.class).getBody();
   }
 
 
@@ -150,8 +151,10 @@ public class JobExecutor {
    * @throws InterruptedException if thread is interrupted
    * Submits the job to flink cluster. In case of error during submission will try to reconnect to task.
    * Algorithm of reconnection goes as follows:
-   * When job is submitted local job id is generated in form of UUID that is later on included in the request config part as local job id.
-   * When exception is thrown during process of task submission we don't know exact state of task since we don't parse exception message.
+   * When job is submitted local job id is generated in form of UUID,
+   * that is later on included in the request config part as local job id.
+   * When exception is thrown during process of task submission,
+   * we don't know exact state of task since we don't parse exception message.
    * There are two cases:
    * 1. Task could be submitted, and we didn't receive response,
    * 2. task could be submitted, and we received response with error.
@@ -160,8 +163,10 @@ public class JobExecutor {
    * Reconnection steps:
    * 1. Filter recent jobs from job list (/jobs/overview) and get their external job ids.
    * 2. Get each of recent jobs config (/jobs/<jobid>/config).
-   * 3. Check for match of local job id that was included in the request at beginning of the submission process and one included in task request config part local id.
-   * 4a. In case of match we assume that task was submitted, and we can reconnect to it by using external job id that we got in step 1.
+   * 3. Check for match of local job id that was included in the request at beginning of the submission process
+   * and one included in task request config part local id.
+   * 4a. In case of match we assume that task was submitted,
+   * and we can reconnect to it by using external job id that we got in step 1.
    * 4b. In case of no match we assume that task was not submitted, so we retry and repeat those steps.
    * 5. In case of no match after retries we throw exception. After that user need to manually resubmit task.
    */
@@ -191,7 +196,7 @@ public class JobExecutor {
             throw new SubmitJobException("Job submission state is ambiguous and wasn't able to reconnect to task.", e);
           }
         Thread.sleep(SLEEP_BETWEEN_RETRIES_FOR_SUBMIT_REQUEST);
-        LOGGER.warn("Exception when reconnecting to potentially submitted task! Retrying");
+        LOGGER.warn("Exception occurred when reconnecting to potentially submitted task! Retrying");
         continue;
       }
       return externalJobId.get();
@@ -199,14 +204,18 @@ public class JobExecutor {
   }
 
   private Optional<String> findRecentlySubmittedJobByLocalId(UUID localJobId) {
-    for (String jobId : getRecentTasksJobIds()) {
-      ResponseEntity<JobConfigResponse> configResponse = submitRestTemplate.exchange(
-              serverUrl + "/jobs/" + jobId + "/config",
-              HttpMethod.GET, new HttpEntity<>(httpHeader),
-              JobConfigResponse.class);
-      if(isJobMatching(localJobId, configResponse)) {
-        return Optional.of(jobId);
+    try{
+      for (String jobId : getRecentTasksJobIds()) {
+        ResponseEntity<JobConfigResponse> configResponse = submitRestTemplate.exchange(
+                serverUrl + "/jobs/" + jobId + "/config",
+                HttpMethod.GET, new HttpEntity<>(httpHeader),
+                JobConfigResponse.class);
+        if(isJobMatching(localJobId, configResponse)) {
+          return Optional.of(jobId);
+        }
       }
+    } catch(RestClientException e){
+      LOGGER.warn("Exception occurred when trying to find recently submitted job", e);
     }
     return Optional.empty();
   }
