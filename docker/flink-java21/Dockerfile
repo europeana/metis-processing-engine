@@ -87,6 +87,7 @@ RUN set -ex; \
   sed -i 's/taskmanager.bind-host: localhost/taskmanager.bind-host: 0.0.0.0/g' $FLINK_HOME/conf/config.yaml; \
   sed -i '/taskmanager.host: localhost/d' $FLINK_HOME/conf/config.yaml;
 
+
 # Configure container
 COPY docker-entrypoint.sh /
 RUN chmod 755 /docker-entrypoint.sh

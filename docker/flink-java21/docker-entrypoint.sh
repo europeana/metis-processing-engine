@@ -113,7 +113,8 @@ maybe_enable_jemalloc
 
 copy_plugins_if_required
 
-prepare_configuration
+#We don't use the default configuration so we don't need to modify config based on ENV values
+#prepare_configuration
 
 args=("$@")
 if [ "$1" = "help" ]; then

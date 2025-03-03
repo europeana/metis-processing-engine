@@ -32,6 +32,7 @@
       <scope>provided</scope>
     </dependency>
 
+
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
