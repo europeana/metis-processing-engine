@@ -11,6 +11,6 @@ public class HttpFlinkPerformanceIT extends FlinkPerformanceIT {
   @Override
   @Test
   void step1_shouldExecuteOAIHarvestComplietellyWithoutErrors() throws Exception {
-    executeStep(1, jarIdsProperties.getHttp(), "eu.europeana.processing.http.HttpJob",
+    executeStep(1, jarIdsProperties.getHttp(), "eu.europeana.processing.http.HttpHarvestingJob",
         Map.of(HTTP_ARCHIVE_URL, sourceProperties.getUrl()));  }
 }
