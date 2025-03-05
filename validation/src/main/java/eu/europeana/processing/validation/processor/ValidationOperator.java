@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import static eu.europeana.processing.job.JobParamName.*;
+
 public class ValidationOperator extends ProcessFunction<ExecutionRecord, ExecutionRecordResult> {
 
     @Serial
@@ -42,14 +44,14 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
         Properties validationProperties = prepareProperties();
         switch (parameterTool.get(JobParamName.VALIDATION_TYPE)) {
             case JobParamValue.VALIDATION_INTERNAL -> {
-                schema = validationProperties.getProperty("predefinedSchemas.edm-internal.url");
-                rootFileLocation = validationProperties.getProperty("predefinedSchemas.edm-internal.rootLocation");
-                schematronFileLocation = validationProperties.getProperty("predefinedSchemas.edm-internal.schematronLocation");
+                schema = validationProperties.getProperty(VALIDATION_INTERNAL_SCHEMA_URL);
+                rootFileLocation = validationProperties.getProperty(VALIDATION_INTERNAL_ROOT_LOCATION);
+                schematronFileLocation = validationProperties.getProperty(VALIDATION_INTERNAL_SCHEMATRON_LOCATION);
             }
             case JobParamValue.VALIDATION_EXTERNAL -> {
-                schema = validationProperties.getProperty("predefinedSchemas.edm-external.url");
-                rootFileLocation = validationProperties.getProperty("predefinedSchemas.edm-external.rootLocation");
-                schematronFileLocation = validationProperties.getProperty("predefinedSchemas.edm-external.schematronLocation");
+                schema = validationProperties.getProperty(VALIDATION_EXTERNAL_SCHEMA_URL);
+                rootFileLocation = validationProperties.getProperty(VALIDATION_EXTERNAL_ROOT_LOCATION);
+                schematronFileLocation = validationProperties.getProperty(VALIDATION_EXTERNAL_SCHEMATRON_LOCATION);
             }
             default -> throw new IllegalStateException("Unexpected value: " + parameterTool.get(JobParamName.VALIDATION_TYPE));
         }
