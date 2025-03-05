@@ -31,21 +31,22 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     private static final long serialVersionUID = 1;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexingOperator.class);
-    private transient IndexingSettings indexingSettings;
     private Date recordDate;
     private boolean preserveTimestamps;
     private boolean performRedirect;
     private ParameterTool parameterTool;
+    private transient Indexer indexer;
     private long taskId;
 
     @Override
     public void open(Configuration parameters) throws Exception {
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
-        indexingSettings = prepareIndexingSetting(parameterTool);
+        IndexingSettings indexingSettings = prepareIndexingSetting(parameterTool);
         recordDate = new Date();
         preserveTimestamps = parameterTool.getBoolean(JobParamName.INDEXING_PRESERVETIMESTAMPS);
         performRedirect = parameterTool.getBoolean(JobParamName.INDEXING_PERFORMREDIRECTS);
+        indexer = new IndexerFactory(indexingSettings).getIndexer();
     }
 
     private IndexingSettings prepareIndexingSetting(ParameterTool parameterTool) throws IndexingException {
@@ -60,8 +61,8 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
 
         LOGGER.info("Indexing record: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());
 
-        try(Indexer indexer = new IndexerFactory(indexingSettings).getIndexer()) {
-            indexRecord(sourceExecutionRecord, out, indexer);
+        try {
+            indexRecord(sourceExecutionRecord, out);
         } catch (IndexingException e) {
             LOGGER.warn("During indexing record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(ExecutionRecordResult.from(
@@ -73,7 +74,13 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
             }
     }
 
-    private void indexRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out, Indexer indexer) throws IndexingException {
+    @Override
+    public void close() throws Exception {
+        LOGGER.info("Closing indexing operator");
+        indexer.close();
+    }
+
+    private void indexRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) throws IndexingException {
         final var properties = new eu.europeana.indexing.IndexingProperties(
                 recordDate, preserveTimestamps, Collections.emptyList(), performRedirect, true);
         LOGGER.info("Indexing: {}", sourceExecutionRecord.getExecutionRecordKey().getRecordId());

@@ -3,7 +3,6 @@ package eu.europeana.processing.normalization.processor;
 import eu.europeana.normalization.Normalizer;
 import eu.europeana.normalization.NormalizerFactory;
 import eu.europeana.normalization.model.NormalizationResult;
-import eu.europeana.normalization.util.NormalizationConfigurationException;
 import eu.europeana.normalization.util.NormalizationException;
 import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
@@ -29,13 +28,14 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NormalizationOperator.class);
 
-    private transient NormalizerFactory normalizerFactory;
+    private transient Normalizer normalizer;
     private ParameterTool parameterTool;
 
     @Override
     public void open(Configuration parameters) throws Exception {
-        normalizerFactory = new NormalizerFactory();
+        NormalizerFactory normalizerFactory = new NormalizerFactory();
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
+        normalizer = normalizerFactory.getNormalizer();
         LOGGER.info("Created normalization operator.");
     }
 
@@ -44,10 +44,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
     public void processElement(
         ExecutionRecord sourceExecutionRecord,
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
-        Collector<ExecutionRecordResult> out) throws NormalizationConfigurationException {
-
-        final Normalizer normalizer = normalizerFactory.getNormalizer();
-
+        Collector<ExecutionRecordResult> out) {
         try {
             normalizeRecord(sourceExecutionRecord, out, normalizer);
         } catch(NormalizationException e){

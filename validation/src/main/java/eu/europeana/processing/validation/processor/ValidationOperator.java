@@ -75,6 +75,13 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        LOGGER.info("Closing validation operator");
+        validationService.cleanup();
+        transformer.close();
+    }
+
     private void validateRecord(ExecutionRecord sourceRecord, Collector<ExecutionRecordResult> out) throws TransformationException {
         LOGGER.debug("Validating record with id {} on instance: {}", sourceRecord.getExecutionRecordKey().getRecordId(), this);
         ExecutionRecordResult resultRecord = prepareResultRecord(sourceRecord);
