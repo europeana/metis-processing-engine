@@ -57,16 +57,16 @@
           <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.springframework</artifactId>
-          <groupId>*</groupId>
+          <groupId>org.springframework</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.springframework.security</artifactId>
-          <groupId>*</groupId>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.apache.logging.log4j</artifactId>
-          <groupId>log4j-slf4j-impl</groupId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

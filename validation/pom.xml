@@ -11,6 +11,12 @@
 
   <artifactId>metis-processing-engine-validation</artifactId>
 
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
@@ -49,12 +55,36 @@
       <groupId>eu.europeana.metis</groupId>
       <artifactId>metis-transformation-service</artifactId>
       <version>${metis.version}</version>
+      <exclusions>
+      <exclusion>
+        <groupId>org.springframework</groupId>
+        <artifactId>*</artifactId>
+      </exclusion>
+      <exclusion>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>*</artifactId>
+      </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+    </exclusions>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.metis</groupId>
       <artifactId>metis-validation-service</artifactId>
       <version>${metis.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
   </dependencies>

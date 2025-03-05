@@ -11,6 +11,14 @@
 
   <artifactId>metis-processing-engine-indexing</artifactId>
 
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+
   <dependencies>
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
@@ -43,16 +51,16 @@
           <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.springframework</artifactId>
-          <groupId>*</groupId>
+          <groupId>org.springframework</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.springframework.security</artifactId>
-          <groupId>*</groupId>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
         <exclusion>
-          <artifactId>org.apache.logging.log4j</artifactId>
-          <groupId>log4j-slf4j-impl</groupId>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
         </exclusion>
         <!--Netty used in the indexing job caused memory leaks - MET-6311 moved to shared lib-->
         <exclusion>
