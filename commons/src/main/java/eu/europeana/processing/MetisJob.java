@@ -49,6 +49,7 @@ public abstract class MetisJob {
     protected MetisJob(String[] args, String jobName) {
         this.jobName = jobName;
         tool = ParameterTool.fromArgs(args);
+        validateJobParams();
         readerParallelism = tool.getInt(JobParamName.READER_PARALLELISM, JobParam.DEFAULT_READER_PARALLELISM);
         operatorParallelism = tool.getInt(JobParamName.OPERATOR_PARALLELISM, JobParam.DEFAULT_OPERATOR_PARALLELISM);
         sinkParallelism = tool.getInt(JobParamName.SINK_PARALLELISM, JobParam.DEFAULT_SINK_PARALLELISM);
@@ -111,7 +112,6 @@ public abstract class MetisJob {
      * @throws Exception in case of any failure during execution
      */
     public void execute() throws Exception {
-        validateJobParams();
         prepareJob();
         flinkEnvironment.execute(enrichedJobName());
     }
@@ -124,9 +124,7 @@ public abstract class MetisJob {
         return "dbSource (dataset: " + tool.get(JobParamName.DATASET_ID) + ", executionId: " + tool.get(JobParamName.EXECUTION_ID) + ")";
     }
 
-    public abstract ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator();
-
-//    public abstract Set<String> getJobRequiredParameters();
+    protected abstract ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator();
 
     public abstract JobParamValidator getParamValidator();
 

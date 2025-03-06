@@ -20,11 +20,13 @@
     <jackson.version>2.16.1</jackson.version>
     <postgres.version>42.7.3</postgres.version>
     <netty.version>4.1.107.Final</netty.version>
+    <jupiter.version>5.10.5</jupiter.version>
   </properties>
 
   <modules>
     <module>docker/metis-processing-engine-flink/shared-libs</module>
     <module>commons</module>
+    <module>harvesting-commons</module>
     <module>media</module>
     <module>client</module>
     <module>validation</module>
@@ -33,6 +35,7 @@
     <module>normalization</module>
     <module>enrichment</module>
     <module>indexing</module>
+    <module>http</module>
   </modules>
 
   <dependencyManagement>

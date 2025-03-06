@@ -52,6 +52,9 @@ public class JobParamName {
     public static final String METADATA_PREFIX = "metadataPrefix";
     public static final String OAI_REPOSITORY_URL = "oaiRepositoryUrl";
 
+    //HTTP
+    public static final String HTTP_ARCHIVE_URL = "httpArchiveUrl";
+
     private JobParamName() {
     }
 
