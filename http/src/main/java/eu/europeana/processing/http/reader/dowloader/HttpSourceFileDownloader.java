@@ -5,8 +5,10 @@ import eu.europeana.metis.harvesting.HarvesterFactory;
 import eu.europeana.metis.harvesting.http.HttpHarvester;
 import eu.europeana.processing.http.reader.exception.HttpSourceException;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.flink.runtime.execution.SuppressRestartsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,11 @@ public class HttpSourceFileDownloader {
       LOGGER.info("Downloaded file: {} from the url: {}", fileName, archiveUrl);
       return fileName;
     } catch (IOException | HarvesterException e) {
-      throw new HttpSourceException("Could not download archive file: " + archiveUrl, e);
+      HttpSourceException wrappedException = new HttpSourceException("Could not download archive file: " + archiveUrl, e);
+      if(e.getCause() instanceof UnknownHostException){
+        throw new SuppressRestartsException(wrappedException);
+      }
+      throw wrappedException;
     }
   }
 
