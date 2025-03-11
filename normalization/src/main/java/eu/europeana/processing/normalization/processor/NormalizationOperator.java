@@ -46,7 +46,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
         ProcessFunction<ExecutionRecord, ExecutionRecordResult>.Context ctx,
         Collector<ExecutionRecordResult> out) {
         try {
-            normalizeRecord(sourceExecutionRecord, out, normalizer);
+            normalizeRecord(sourceExecutionRecord, out);
         } catch(NormalizationException e){
             LOGGER.warn("During process of normalization of record with id: {}, Exception was caught", sourceExecutionRecord.getExecutionRecordKey().getRecordId(), e);
             out.collect(
@@ -60,7 +60,7 @@ public class NormalizationOperator extends ProcessFunction<ExecutionRecord, Exec
         }
     }
 
-    private void normalizeRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out, Normalizer normalizer) throws NormalizationException {
+    private void normalizeRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) throws NormalizationException {
         NormalizationResult normalizationResult = normalizer.normalize(sourceExecutionRecord.getRecordData());
         if (normalizationResult.getErrorMessage() == null) {
             out.collect(
