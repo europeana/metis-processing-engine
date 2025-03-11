@@ -30,10 +30,12 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
     private static final Logger LOGGER = LoggerFactory.getLogger(TransformationOperator.class);
 
     private ParameterTool parameterTool;
+    private transient XsltTransformer xsltTransformer;
 
     @Override
     public void open(Configuration parameters) throws Exception {
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
+        xsltTransformer = prepareXsltTransformer();
     }
 
     @Override
@@ -54,9 +56,14 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        LOGGER.info("Closing transformation operator");
+        xsltTransformer.close();
+    }
+
     private ExecutionRecordResult transformRecord(ExecutionRecord sourceExecutionRecord) throws TransformationException, EuropeanaIdException {
         ExecutionRecordResult result;
-        final XsltTransformer xsltTransformer = prepareXsltTransformer();
 
         StringWriter writer =
                 xsltTransformer.transform(

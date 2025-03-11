@@ -11,6 +11,12 @@ public class JobParamName {
     public static final String TASK_ID = "taskId";
     public static final String MAX_RECORD_PENDING = "maxRecordPending";
     public static final String VALIDATION_TYPE = "validationType";
+    public static final String VALIDATION_INTERNAL_SCHEMA_URL = "predefinedSchemas.edm-internal.url";
+    public static final String VALIDATION_EXTERNAL_SCHEMA_URL = "predefinedSchemas.edm-external.url";
+    public static final String VALIDATION_INTERNAL_ROOT_LOCATION = "predefinedSchemas.edm-internal.rootLocation";
+    public static final String VALIDATION_EXTERNAL_ROOT_LOCATION = "predefinedSchemas.edm-external.rootLocation";
+    public static final String VALIDATION_INTERNAL_SCHEMATRON_LOCATION = "predefinedSchemas.edm-internal.schematronLocation";
+    public static final String VALIDATION_EXTERNAL_SCHEMATRON_LOCATION = "predefinedSchemas.edm-external.schematronLocation";
     public static final String DATASET_ID = "datasetId";
     public static final String EXECUTION_ID = "executionId";
     public static final String METIS_DATASET_NAME = "metisDatasetName";
