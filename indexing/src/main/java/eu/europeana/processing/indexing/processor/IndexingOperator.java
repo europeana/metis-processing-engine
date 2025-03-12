@@ -77,7 +77,9 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     @Override
     public void close() throws Exception {
         LOGGER.info("Closing indexing operator");
-        indexer.close();
+        if (indexer != null){
+            indexer.close();
+        }
     }
 
     private void indexRecord(ExecutionRecord sourceExecutionRecord, Collector<ExecutionRecordResult> out) throws IndexingException {

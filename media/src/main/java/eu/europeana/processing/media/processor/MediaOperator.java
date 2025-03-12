@@ -168,6 +168,8 @@ public class MediaOperator extends ProcessFunction<ExecutionRecord, ExecutionRec
 
     @Override
     public void close() throws Exception {
-        mediaExtractor.close();
+        if (mediaExtractor != null) {
+            mediaExtractor.close();
+        }
     }
 }

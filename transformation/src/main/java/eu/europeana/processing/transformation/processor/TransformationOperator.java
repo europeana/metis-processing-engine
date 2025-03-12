@@ -57,9 +57,11 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         LOGGER.info("Closing transformation operator");
-        xsltTransformer.close();
+        if (xsltTransformer != null) {
+            xsltTransformer.close();
+        }
     }
 
     private ExecutionRecordResult transformRecord(ExecutionRecord sourceExecutionRecord) throws TransformationException, EuropeanaIdException {
