@@ -80,8 +80,12 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     @Override
     public void close() throws Exception {
         LOGGER.info("Closing validation operator");
-        validationService.cleanup();
-        transformer.close();
+        if (validationService != null){
+            validationService.cleanup();
+        }
+        if (transformer != null){
+            transformer.close();
+        }
     }
 
     private void validateRecord(ExecutionRecord sourceRecord, Collector<ExecutionRecordResult> out) throws TransformationException {
