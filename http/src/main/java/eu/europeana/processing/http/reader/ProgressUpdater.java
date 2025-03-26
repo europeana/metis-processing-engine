@@ -61,12 +61,8 @@ public class ProgressUpdater implements Closeable {
   }
 
   public void close() {
-    try {
       dbConnectionProvider.close();
       LOGGER.debug("Closed: {}", ProgressUpdater.class.getSimpleName());
-    } catch (Exception e) {
-      throw new HttpSourceException("Could not close db provider", e);
-    }
   }
 
 }

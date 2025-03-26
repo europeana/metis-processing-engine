@@ -4,9 +4,9 @@ import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.model.TaskInfo;
-import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.repository.TaskInfoRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
+import eu.europeana.processing.source.DbEnumeratorState.DbEnumeratorStateBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,30 +20,29 @@ import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.util.ParameterTool;
+import org.apache.flink.runtime.execution.SuppressRestartsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Flink enumerator that provides splits for Metis jobs
+ * Flink enumerator that provides splits for Metis jobs using as a source PostgresDB
  */
-public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumeratorState> {
+public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnumeratorStateBuilder<S,?>> implements SplitEnumerator<DataPartition, S> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DbEnumerator.class);
   private static final int DEFAULT_CHUNK_SIZE = 1000;
   public static final int NOT_EVALUATED = -1;
 
-  private final SplitEnumeratorContext<DataPartition> context;
-  private final ParameterTool parameterTool;
+  protected final SplitEnumeratorContext<DataPartition> context;
+  protected final ParameterTool parameterTool;
   private final int chunkSize;
   private final long taskId;
 
-  ExecutionRecordRepository executionRecordRepository;
   TaskInfoRepository taskInfoRepo;
-  private DbConnectionProvider dbConnectionProvider;
+  protected DbConnectionProvider dbConnectionProvider;
 
-  private long recordsToBeProcessed;
-  private long allPartitionCount;
-  private long startedPartitionCount;
+  protected long recordsToBeProcessed;
+  private long startedRecordsCount;
   private long finishedRecordCount;
   private final NavigableMap<Long, Long> checkpointIdToFinishedRecordCountMap = new TreeMap<>();
   private long commitCount;
@@ -69,7 +68,7 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
    * @param state enumerator state container
    * @param parameterTool parameter tool
    */
-  public DbEnumerator(SplitEnumeratorContext<DataPartition> context, DbEnumeratorState state,
+  public DbEnumerator(SplitEnumeratorContext<DataPartition> context, S state,
       ParameterTool parameterTool) {
     this.context = context;
     this.parameterTool = parameterTool;
@@ -84,8 +83,7 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
 
   private void initEnumerator() {
     recordsToBeProcessed = NOT_EVALUATED;
-    allPartitionCount = NOT_EVALUATED;
-    startedPartitionCount = 0;
+    startedRecordsCount = 0;
     finishedRecordCount = 0;
     commitCount = 0;
     returnedPartitions = new ArrayList<>();
@@ -94,50 +92,62 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
 
   private void restoreEnumeratorFromState(DbEnumeratorState state) {
     recordsToBeProcessed = state.getRecordsToBeProcessed();
-    allPartitionCount = state.getAllPartitionCount();
-    startedPartitionCount = state.getStartedPartitionCount();
+    startedRecordsCount = state.getStartedRecordsCount();
     finishedRecordCount = state.getFinishedRecordCount();
     commitCount = state.getCommitCount();
     returnedPartitions = state.getIncompletePartitions();
     LOGGER.info(
-        "Created DbEnumerator with finished: {} records, and: {} of: {} all partitions, {} started, from which: {} are incomplete: {}",
-        finishedRecordCount, getFinishedPartitionCount(), allPartitionCount, startedPartitionCount, returnedPartitions.size(),
-        returnedPartitions);
+        "Restored DbEnumerator with finished: {} of: {} started, of {} records to be processed. Returned: {} partitions: {}",
+        finishedRecordCount,startedRecordsCount, recordsToBeProcessed , returnedPartitions.size(),   returnedPartitions);
   }
 
   @Override
   public void start() {
     LOGGER.info("Starting DbEnumerator");
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
-    executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
+    createDbRepositories();
     taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     validateTaskExists();
-    if (allPartitionCount == NOT_EVALUATED) {
-      evaluateSplitCount();
+    if (recordsToBeProcessed == NOT_EVALUATED) {
+      evaluateRecordsCount();
     } else {
-      LOGGER.info("Splits are already initialized. Finished: {} of {} all partitions.",
-          getFinishedPartitionCount(), allPartitionCount);
+      LOGGER.info("Record count already evaluated. Finished: {} of {} all records.",
+          finishedRecordCount, recordsToBeProcessed);
     }
   }
+
+  protected abstract void createDbRepositories();
 
   @Override
   public void handleSplitRequest(int subtaskId, String requesterHostname) {
     DataPartition splitToBeServed;
     if (!returnedPartitions.isEmpty()) {
       splitToBeServed = returnedPartitions.removeFirst();
-    } else if (startedPartitionCount < allPartitionCount) {
-      splitToBeServed = new DataPartition(startedPartitionCount * chunkSize, chunkSize);
-      startedPartitionCount++;
+    } else if (startedRecordsCount < recordsToBeProcessed) {
+      splitToBeServed = createNextPartition();
     } else {
-      LOGGER.info("No more remaining splits, {} splits executing!", executingPartitions.size());
-      context.signalNoMoreSplits(subtaskId);
+      handleNoPartitionsAvailable(subtaskId);
       return;
     }
     executingPartitions.put(splitToBeServed, new SplitProgressInfo());
     context.assignSplit(splitToBeServed, subtaskId);
-    LOGGER.info("Assigned split: {} for subtaskId: {}, host: {}. Executing: {} of: {} started: splits, finished: {}",
-        splitToBeServed, subtaskId, requesterHostname, executingPartitions.size(), startedPartitionCount,
-        getFinishedPartitionCount());
+    LOGGER.info("Assigned split: {} for subtaskId: {}, host: {}. Executing: {} of: {} started records, finished: {}",
+        splitToBeServed, subtaskId, requesterHostname, executingPartitions.size(), startedRecordsCount,
+        finishedRecordCount);
+  }
+
+  protected void handleNoPartitionsAvailable(int subtaskId) {
+    LOGGER.info("No more remaining splits, currently executing {} splits!", executingPartitions.size());
+    context.signalNoMoreSplits(subtaskId);
+  }
+
+  private DataPartition createNextPartition() {
+    //TODO size of the split should be adjusted to parallelization level to work optimal
+    //Is good to do the adjustment in some place.
+    long partitionSize = Long.min(recordsToBeProcessed - startedRecordsCount, chunkSize);
+    DataPartition partition = new DataPartition(startedRecordsCount, partitionSize);
+    startedRecordsCount += partitionSize;
+    return partition;
   }
 
   @Override
@@ -183,8 +193,8 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
     DataPartition split = event.getSplit();
     SplitProgressInfo info = removeSplitFromExecutingMap(split);
     finishedRecordCount += info.update(event);
-    LOGGER.info("Split completed: {}. Now executing {} splits. Finished {} of: {} all splits.",
-        event, executingPartitions.size(), getFinishedPartitionCount(), allPartitionCount);
+    LOGGER.info("Split completed: {}. Now executing {} splits. Finished {} of: {} records.",
+        event, executingPartitions.size(), finishedRecordCount, recordsToBeProcessed);
   }
 
   @Override
@@ -193,19 +203,21 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
   }
 
   @Override
-  public DbEnumeratorState snapshotState(long checkpointId) {
-    DbEnumeratorState state = DbEnumeratorState.builder()
-                                               .recordsToBeProcessed(recordsToBeProcessed)
-                                               .allPartitionCount(allPartitionCount)
-                                               .startedPartitionCount(startedPartitionCount)
-                                               .finishedRecordCount(finishedRecordCount)
-                                               .commitCount(commitCount)
-                                               .incompletePartitions(getIncompletePartitionsSnapshot())
-                                               .build();
+  public S snapshotState(long checkpointId) {
+    S state = createSnapshotBuilder()
+        .recordsToBeProcessed(recordsToBeProcessed)
+        .startedRecordsCount(startedRecordsCount)
+        .finishedRecordCount(finishedRecordCount)
+        .commitCount(commitCount)
+        .incompletePartitions(getIncompletePartitionsSnapshot())
+        .build();
     checkpointIdToFinishedRecordCountMap.put(checkpointId, finishedRecordCount);
     LOGGER.info("Creating snapshot of state for the checkpoint: {}, state: {}", checkpointId, state);
     return state;
   }
+
+  protected abstract B createSnapshotBuilder();
+
 
   @Override
   public void notifyCheckpointComplete(long checkpointId) {
@@ -243,28 +255,22 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
 
   @Override
   public void close() throws IOException {
-    try {
+    if (dbConnectionProvider != null) {
       dbConnectionProvider.close();
-    } catch (Exception e) {
-      throw new IOException("Could not close dbProvider!", e);
     }
   }
 
-  private void evaluateSplitCount() {
+  private void evaluateRecordsCount() {
     LOGGER.info("Preparing split count...");
     try {
-      //TODO size of the split should be adjusted to parallelization level to work optimal
-      //Is good to do the adjustment in some place.
-      recordsToBeProcessed = executionRecordRepository.countByDatasetIdAndExecutionId(
-          parameterTool.getRequired(JobParamName.DATASET_ID),
-          parameterTool.getRequired(JobParamName.EXECUTION_ID));
-      allPartitionCount = (recordsToBeProcessed + chunkSize - 1) / chunkSize; //dividing with rounding up
-      LOGGER.info("Finished, there is: {} records to be processed divided into: {} splits.",
-          recordsToBeProcessed, allPartitionCount);
+      recordsToBeProcessed = countRecordsInDb();
+      LOGGER.info("Finished, there is: {} records to be processed!", recordsToBeProcessed);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
+
+  abstract protected long countRecordsInDb() throws IOException;
 
   private List<DataPartition> getIncompletePartitionsSnapshot() {
     List<DataPartition> incompletePartitions = new ArrayList<>();
@@ -280,8 +286,7 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
 
   private void validateTaskExists() {
     if (taskInfoRepo.findById(taskId).isEmpty()) {
-      LOGGER.error("Task not found in the database. It should never happen.");
-      System.exit(1);
+      throw new SuppressRestartsException(new Exception("Task not found in the database. It should never happen."));
     }
   }
 
@@ -302,10 +307,6 @@ public class DbEnumerator implements SplitEnumerator<DataPartition, DbEnumerator
       throw new SourceConsistencyException("Could not find split: " + split + " in the executed splits!");
     }
     return info;
-  }
-
-  private long getFinishedPartitionCount() {
-    return startedPartitionCount - returnedPartitions.size() - executingPartitions.size();
   }
 
   /**

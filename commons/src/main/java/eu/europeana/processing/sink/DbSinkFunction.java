@@ -41,8 +41,10 @@ public class DbSinkFunction extends RichSinkFunction<ExecutionRecordResult> {
     }
 
     @Override
-    public void close() throws Exception {
-        dbConnectionProvider.close();
+    public void close() {
+        if (dbConnectionProvider != null) {
+            dbConnectionProvider.close();
+        }
     }
 
     @Override

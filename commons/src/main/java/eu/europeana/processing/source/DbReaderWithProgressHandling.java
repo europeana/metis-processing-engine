@@ -4,10 +4,8 @@ import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
-import eu.europeana.processing.model.ExecutionRecord;
-import eu.europeana.processing.repository.ExecutionRecordRepository;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,12 +23,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecord, DataPartition> {
+public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R, DataPartition> {
 
     private static final long INITIAL_CHECKPOINT_ID = -1;
     private final SourceReaderContext context;
-    private final ParameterTool parameterTool;
-    private ExecutionRecordRepository executionRecordRepository;
+    protected final ParameterTool parameterTool;
+
     private CompletableFuture<Void> readerAvailable = new CompletableFuture<>();
     private final int maxRecordPending;
     private int currentRecordPendingCount;
@@ -41,13 +39,13 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
     private boolean noMoreSplits = false;
     private long currentCheckpointId = INITIAL_CHECKPOINT_ID;
 
-    private List<ExecutionRecord> polledRecords = null;
+    private List<R> polledRecords = null;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbReaderWithProgressHandling.class);
 
     private List<DataPartition> currentSplits = new ArrayList<>();
-    private DbConnectionProvider dbConnectionProvider;
-    private DataPartition currentSplit;
+    protected DbConnectionProvider dbConnectionProvider;
+    protected DataPartition currentSplit;
     private int currentSplitEmittedRecordCount;
 
     public DbReaderWithProgressHandling(
@@ -63,19 +61,15 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
 
     @Override
     public void start() {
-        LOGGER.info("Starting source reader");
+        LOGGER.info("Starting: {}", getClass().getSimpleName());
         dbConnectionProvider = new DbConnectionProvider(parameterTool);
-
-        //TODO Using retry proxy is maybe not optimal strategy in this case. This source implements asynchronous interface, so
-        // we could do this retries in poolNext() method by returning InputStatus.NOTHING_AVAILABLE, wait a bit and notify
-        // completable future to poll source again. Or simple wait a bit in pollNext() but only once per one retry.
-        // In such cases we would less block checkpointing mechanism, which should work smoothly in case of infrastructure problems
-        // and potential job restarts. And when we do not block we could do more retries or longer pauses.
-        executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
+        createRepositories();
     }
 
+    protected abstract void createRepositories() ;
+
     @Override
-    public InputStatus pollNext(ReaderOutput<ExecutionRecord> output) throws Exception {
+    public InputStatus pollNext(ReaderOutput<R> output) throws Exception {
         LOGGER.debug("Pooling next record");
         if (noMoreSplits) {
             LOGGER.info("There are no more splits");
@@ -91,7 +85,7 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
             fetchRecordsIfNeeded();
 
             if (!polledRecords.isEmpty()) {
-                ExecutionRecord executionRecord = polledRecords.removeFirst();
+                R executionRecord = polledRecords.removeFirst();
                 emitRecord(output, executionRecord);
                 if (isPendingLimitReached()) {
                     LOGGER.debug("Blocking reader due to hitting pending records limit");
@@ -115,7 +109,7 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
         return InputStatus.NOTHING_AVAILABLE;
     }
 
-    private void emitRecord(ReaderOutput<ExecutionRecord> output, ExecutionRecord executionRecord) {
+    private void emitRecord(ReaderOutput<R> output, R executionRecord) {
         currentRecordPendingCount++;
         int currentlyPendingForThisCheckpoint = 1;
         if (recordPendingCountPerCheckpoint.containsKey(currentCheckpointId)) {
@@ -124,8 +118,9 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
         } else {
             recordPendingCountPerCheckpoint.put(currentCheckpointId, currentlyPendingForThisCheckpoint);
         }
-        LOGGER.debug("Emitting record {} - currently pending {} records", executionRecord.getExecutionRecordKey().getRecordId(), currentRecordPendingCount);
-        LOGGER.debug("There are {} records pending for checkpoint {}", currentlyPendingForThisCheckpoint, currentCheckpointId);
+        LOGGER.trace("Emitting record: {}", executionRecord);
+        LOGGER.debug("There are {} records pending and {} pending for current checkpoint with id: {}",
+            currentRecordPendingCount ,currentlyPendingForThisCheckpoint, currentCheckpointId);
         output.collect(executionRecord);
         currentSplitEmittedRecordCount++;
     }
@@ -134,10 +129,7 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
         currentSplit = currentSplits.getFirst();
         if (polledRecords == null) {
             LOGGER.debug("Fetching records from database");
-            polledRecords = executionRecordRepository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(
-                    parameterTool.getRequired(JobParamName.DATASET_ID),
-                    parameterTool.getRequired(JobParamName.EXECUTION_ID),
-                    currentSplit.offset(), currentSplit.limit());
+            polledRecords = new LinkedList<>(fetchRecords());
 
             currentSplitCommitedRecordCount = 0;
             currentSplitEmittedRecordCount = 0;
@@ -145,6 +137,8 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
             LOGGER.debug("Already fetched records exist");
         }
     }
+
+    protected abstract List<R> fetchRecords() throws IOException;
 
     private boolean isPendingLimitReached() {
         if(currentRecordPendingCount >= maxRecordPending){
@@ -195,7 +189,7 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
     @Override
     public void addSplits(List<DataPartition> splits) {
         LOGGER.debug("Adding splits: {}", splits);
-        currentSplits = splits;
+        currentSplits = new LinkedList<>(splits);
         readerAvailable.complete(null);
     }
 
@@ -207,7 +201,7 @@ public class DbReaderWithProgressHandling implements SourceReader<ExecutionRecor
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (dbConnectionProvider != null) {
             dbConnectionProvider.close();
         }

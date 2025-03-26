@@ -34,7 +34,7 @@ public class DbConnectionProvider implements Serializable, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         dataSource.close();
     }
 }
