@@ -1,6 +1,8 @@
 package eu.europeana.processing.oai.reader;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
+import eu.europeana.processing.model.DataPartition;
+import eu.europeana.processing.source.ObjectStreamVersionedSerializer;
 import java.io.Serial;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.Boundedness;
@@ -15,7 +17,7 @@ import org.apache.flink.core.io.SimpleVersionedSerializer;
 
 import java.io.IOException;
 
-public class OAIHeadersSource implements Source<OaiRecordHeader, OAISplit, OAIEnumeratorState>,
+public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, OAIEnumeratorState>,
     ResultTypeQueryable<OaiRecordHeader> {
 
   @Serial
@@ -29,54 +31,34 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, OAISplit, OAIEn
 
   @Override
   public Boundedness getBoundedness() {
-    //TODO Check if it is proper value
     return Boundedness.BOUNDED;
   }
 
+    @Override
+    public SplitEnumerator<DataPartition, OAIEnumeratorState> createEnumerator(SplitEnumeratorContext<DataPartition> enumContext) {
+      return new OAIHeadersSplitEnumerator(enumContext, parameterTool);
+    }
+
   @Override
-  public SplitEnumerator<OAISplit, OAIEnumeratorState> createEnumerator(
-      SplitEnumeratorContext<OAISplit> enumContext) throws Exception {
-    return new OAIHeadersSplitEnumerator(enumContext, null);
+  public SplitEnumerator<DataPartition, OAIEnumeratorState> restoreEnumerator(SplitEnumeratorContext<DataPartition> enumContext,
+      OAIEnumeratorState state) {
+    return new OAIHeadersSplitEnumerator(enumContext, state, parameterTool);
   }
 
   @Override
-  public SourceReader<OaiRecordHeader, OAISplit> createReader(SourceReaderContext readerContext) throws Exception {
+  public SourceReader<OaiRecordHeader, DataPartition> createReader(SourceReaderContext readerContext) {
     return new OAIHeadersReader(readerContext, parameterTool);
   }
 
   @Override
-  public SplitEnumerator<OAISplit, OAIEnumeratorState> restoreEnumerator(SplitEnumeratorContext<OAISplit> enumContext,
-      OAIEnumeratorState checkpoint)
-      throws Exception {
-    return new OAIHeadersSplitEnumerator(enumContext, checkpoint);
-  }
-
-  @Override
-  public SimpleVersionedSerializer<OAISplit> getSplitSerializer() {
-
-    return new SimpleVersionedSerializer<>() {
-      @Override
-      public int getVersion() {
-        return 0;
-      }
-
-      @Override
-      public byte[] serialize(OAISplit obj) throws IOException {
-        return new byte[0];
-      }
-
-      @Override
-      public OAISplit deserialize(int version, byte[] serialized) throws IOException {
-        return new OAISplit();
-      }
-    };
+  public SimpleVersionedSerializer<DataPartition> getSplitSerializer() {
+    return new ObjectStreamVersionedSerializer<>();
   }
 
   @Override
   public SimpleVersionedSerializer<OAIEnumeratorState> getEnumeratorCheckpointSerializer() {
-    return new OAIEnumeratorStateSerializer();
+    return new ObjectStreamVersionedSerializer<>();
   }
-
 
   @Override
   public TypeInformation<OaiRecordHeader> getProducedType() {

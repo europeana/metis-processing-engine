@@ -1,21 +1,23 @@
 package eu.europeana.processing.oai.reader;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import eu.europeana.processing.source.DbEnumeratorState;
+import java.io.Serial;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-@Data
-@AllArgsConstructor
-@Builder
-public class OAIEnumeratorState {
+/**
+ * State of the OAIHeadersSplitEnumerator
+ */
+@SuperBuilder
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class OAIEnumeratorState extends DbEnumeratorState {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OAIEnumeratorState.class);
+  @Serial
+  private static final long serialVersionUID = 1;
 
-  public OAIEnumeratorState() {
-    LOGGER.info("Initializing OAIEnumeratorState");
-  }
-
-  private boolean splitAssigned;
+  private boolean headersHarvested;
 }

@@ -1,13 +1,11 @@
 package eu.europeana.processing.oai.reader;
 
-import eu.europeana.metis.harvesting.HarvesterFactory;
-import eu.europeana.metis.harvesting.HarvestingIterator;
-import eu.europeana.metis.harvesting.ReportingIteration.IterationResult;
-import eu.europeana.metis.harvesting.oaipmh.OaiHarvest;
-import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
-import org.apache.flink.api.connector.source.ReaderOutput;
-import org.apache.flink.api.connector.source.SourceReader;
+import eu.europeana.processing.job.JobParamName;
+import eu.europeana.processing.oai.repository.OAIHeadersRepository;
+import eu.europeana.processing.retryable.RetryableMethodExecutor;
+import eu.europeana.processing.source.DbReaderWithProgressHandling;
+import java.io.IOException;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.util.ParameterTool;
 import org.apache.flink.core.io.InputStatus;
@@ -15,99 +13,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-import static eu.europeana.processing.job.JobParamName.METADATA_PREFIX;
-import static eu.europeana.processing.job.JobParamName.OAI_REPOSITORY_URL;
-import static eu.europeana.processing.job.JobParamName.SET_SPEC;
-
-public class OAIHeadersReader implements SourceReader<OaiRecordHeader, OAISplit> {
+/**
+ * SourceReader implementation for OAI source. It read headers from the DB and emits them.
+ */
+public class OAIHeadersReader extends DbReaderWithProgressHandling<OaiRecordHeader> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersReader.class);
 
-  private static final int DEFAULT_RETRIES = 3;
-  private static final int SLEEP_TIME = 5000;
-  private final SourceReaderContext context;
-  private final ParameterTool parameterTool;
-  private boolean active;
+  private OAIHeadersRepository repository;
 
-  private CompletableFuture<Void> available = new CompletableFuture<>();
-  private boolean completed;
-  private OaiHarvester harvester;
-  private OaiHarvest oaiHarvest;
-
+  /**
+   * Creates OAIHeadersReader
+   * @param context - Flink context
+   * @param parameterTool - job parameters
+   */
   public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool) {
-    this.context = context;
-    this.parameterTool = parameterTool;
-    LOGGER.info("Created oai reader.");
+    super(context,parameterTool);
+    LOGGER.info("Created OAIHeadersReader");
   }
 
-  @Override
-  public void start() {
-    LOGGER.info("Started oai reader.");
-    harvester = HarvesterFactory.createOaiHarvester(null, DEFAULT_RETRIES, SLEEP_TIME);
-    oaiHarvest = new OaiHarvest(
-        parameterTool.getRequired(OAI_REPOSITORY_URL),
-        parameterTool.getRequired(METADATA_PREFIX),
-        parameterTool.getRequired(SET_SPEC));
+  protected void createRepositories() {
+    repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(dbConnectionProvider));
   }
 
-  @Override
-  public InputStatus pollNext(ReaderOutput<OaiRecordHeader> output) throws Exception {
-    if (completed) {
-      LOGGER.info("Poll on completed OAI source.");
-      return InputStatus.END_OF_INPUT;
-    }
-    LOGGER.info("Executed poll: active: {}", active);
-    if (!active) {
-      available = new CompletableFuture<>();
-      context.sendSplitRequest();
-      return InputStatus.NOTHING_AVAILABLE;
-    }
-
-    HarvestingIterator<OaiRecordHeader, OaiRecordHeader> headerIterator = harvester.harvestRecordHeaders(
-        oaiHarvest);
-    headerIterator.forEach(oaiHeader -> {
-      output.collect(oaiHeader);
-      return IterationResult.CONTINUE;
-    });
-    headerIterator.close();
-    active = false;
-    available = CompletableFuture.completedFuture(null);
-    completed=true;
-
-    LOGGER.info("Completed OAI source.");
-    return InputStatus.END_OF_INPUT;
+  protected List<OaiRecordHeader> fetchRecords() throws IOException {
+    return repository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(
+        parameterTool.getRequired(JobParamName.DATASET_ID),
+        parameterTool.getRequired(JobParamName.TASK_ID),
+        currentSplit.offset(),
+        currentSplit.limit());
   }
 
-  @Override
-  public List<OAISplit> snapshotState(long checkpointId) {
-    LOGGER.info("Snapshotted state: {}", checkpointId);
-    return null;
-  }
-
-  @Override
-  public CompletableFuture<Void> isAvailable() {
-    return available;
-  }
-
-  @Override
-  public void addSplits(List<OAISplit> splits) {
-    LOGGER.info("Adding split");
-    active = true;
-    available.complete(null);
-    LOGGER.info("Added split");
-  }
-
-
-  @Override
-  public void notifyNoMoreSplits() {
-    LOGGER.info("Notified: no more splits");
-  }
-
-  @Override
-  public void close() throws Exception {
-    LOGGER.info("OAI - close");
-    //No needed for now
-  }
 }
