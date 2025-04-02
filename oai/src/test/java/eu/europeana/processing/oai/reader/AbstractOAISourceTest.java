@@ -21,18 +21,14 @@ public abstract class AbstractOAISourceTest {
 
   protected static final Instant DATESTAMP_A =Instant.parse("2024-12-10T00:00:00Z");
   protected static final Instant DATESTAMP_B =Instant.parse("2024-12-01T00:00:00Z");
-  protected static final OaiRecordHeader HEADER_1=new OaiRecordHeader(
-      "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_664______2WGTWS8_sr",
-      false, DATESTAMP_A);
-  protected static final OaiRecordHeader HEADER_2=new OaiRecordHeader(
-      "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_643______06VMZI9_sr",
-      false, DATESTAMP_A);
-  protected static final OaiRecordHeader HEADER_3=new OaiRecordHeader(
-      "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_486______3OL0PS4_sr",
-      false, DATESTAMP_B);
-  protected static final OaiRecordHeader HEADER_4=new OaiRecordHeader(
-      "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_388______0Y4FH46_sr",
-      false, DATESTAMP_B);
+  static final String RECORD_ID_1 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_664______2WGTWS8_sr";
+  static final OaiRecordHeader HEADER_1 = new OaiRecordHeader(RECORD_ID_1, false, DATESTAMP_A);
+  static final String RECORD_ID_2 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_643______06VMZI9_sr";
+  static final OaiRecordHeader HEADER_2 = new OaiRecordHeader(RECORD_ID_2, false, DATESTAMP_A);
+  static final String RECORD_ID_3 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_486______3OL0PS4_sr";
+  static final OaiRecordHeader HEADER_3 = new OaiRecordHeader(RECORD_ID_3, false, DATESTAMP_B);
+  static final String RECORD_ID_4 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_388______0Y4FH46_sr";
+  static final OaiRecordHeader HEADER_4 = new OaiRecordHeader(RECORD_ID_4, false, DATESTAMP_B);
 
   protected MockedConstruction<DbConnectionProvider> dbProviderConstruction;
   protected MockedConstruction<OAIHeadersRepository> repositoryConstruction;

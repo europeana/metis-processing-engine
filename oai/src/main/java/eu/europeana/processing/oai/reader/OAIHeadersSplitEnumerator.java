@@ -30,7 +30,7 @@ public class OAIHeadersSplitEnumerator extends
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersSplitEnumerator.class);
   private OAIHeadersRepository repository;
   private final OAIBackgroundHeaderHarvester backgroundHeaderHarvester;
-  private final Queue<Integer> waitingReaders = new LinkedList<>();
+  private Queue<Integer> waitingReaders = new LinkedList<>();
   private boolean headersHarvested;
 
   /**
@@ -113,7 +113,7 @@ public class OAIHeadersSplitEnumerator extends
   public void notifyNewHeaderSavedInDB(int allRecordInDb) {
     context.runInCoordinatorThread(() -> {
       recordsToBeProcessed = allRecordInDb;
-      tryAssignWaitingReader();
+      tryAssignWaitingReaders();
     });
   }
 
@@ -123,9 +123,7 @@ public class OAIHeadersSplitEnumerator extends
   public void notifyHeaderHarvestingFinished() {
     context.runInCoordinatorThread(() -> {
       headersHarvested = true;
-      for (int reader : waitingReaders) {
-        handleSplitRequest(reader, "");
-      }
+      tryAssignWaitingReaders();
     });
   }
 
@@ -140,9 +138,10 @@ public class OAIHeadersSplitEnumerator extends
     });
   }
 
-  private void tryAssignWaitingReader() {
-    Integer reader = waitingReaders.poll();
-    if (reader != null) {
+  private void tryAssignWaitingReaders() {
+    Queue<Integer> readyReaders = waitingReaders;
+    waitingReaders = new LinkedList<>();
+    for (int reader : readyReaders) {
       handleSplitRequest(reader, "");
     }
   }

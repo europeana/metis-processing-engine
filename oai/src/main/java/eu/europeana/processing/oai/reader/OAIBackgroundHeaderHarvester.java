@@ -13,6 +13,7 @@ import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.job.JobParamName;
+import eu.europeana.processing.oai.repository.BatchHeaderSaver;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.io.IOException;
@@ -40,15 +41,14 @@ public class OAIBackgroundHeaderHarvester {
   private final String execution;
   private final ParameterTool parameterTool;
   private final OAIHeadersSplitEnumerator enumerator;
-  private int allRecordsInDb;
   private ExecutorService backgroudExecutor;
   private Future<?> future;
   private int harvestedHeaders;
-  private int newHeaders;
   private StopWatch progressWatch;
   private OaiHarvest oaiHarvest;
   private DbConnectionProvider dbConnectionProvider;
   private OAIHeadersRepository repository;
+  private BatchHeaderSaver batchSaver;
 
   /**
    * Creates OAIBackgroundHeaderHarvester.
@@ -98,8 +98,8 @@ public class OAIBackgroundHeaderHarvester {
   private void execute() {
     try{
       progressWatch = StopWatch.createStarted();
-      countHeadersAlreadySavedInDB();
-      harvestHeaders();
+      int headersFromPreviousExecutionsCount= countHeadersFromPreviousExecutions();
+      harvestHeaders(headersFromPreviousExecutionsCount);
       if(Thread.currentThread().isInterrupted()){
         return;
       }
@@ -112,16 +112,17 @@ public class OAIBackgroundHeaderHarvester {
     }
   }
 
-  private void countHeadersAlreadySavedInDB() throws IOException {
-    allRecordsInDb = (int) repository.countByDatasetIdAndExecutionId(dataset, execution);
-    LOGGER.info("Counted: {} OAI headers already in DB.", allRecordsInDb);
-    if(allRecordsInDb > 0) {
+  private int countHeadersFromPreviousExecutions() throws IOException {
+    int headersCount = (int) repository.countByDatasetIdAndExecutionId(dataset, execution);
+    LOGGER.info("Counted: {} OAI headers already in DB.", headersCount);
+    if(headersCount > 0) {
       //It happens when task is restarted (for example from a checkpoint) and there are records already in DB.
-      enumerator.notifyNewHeaderSavedInDB(allRecordsInDb);
+      enumerator.notifyNewHeaderSavedInDB(headersCount);
     }
+    return headersCount;
   }
 
-  private void harvestHeaders()
+  private void harvestHeaders(int headersFromPreviousExecutionsCount)
       throws IOException, HarvesterException {
     oaiHarvest = new OaiHarvest(
         parameterTool.getRequired(OAI_REPOSITORY_URL),
@@ -129,8 +130,8 @@ public class OAIBackgroundHeaderHarvester {
         parameterTool.getRequired(SET_SPEC));
 
     LOGGER.info("Starting harvesting of: {}", oaiHarvest);
+    batchSaver = new BatchHeaderSaver(repository, dataset, execution, headersFromPreviousExecutionsCount);
     OaiHarvester harvester = HarvesterFactory.createOaiHarvester(null, DEFAULT_RETRIES, SLEEP_TIME);
-
     try (HarvestingIterator<OaiRecordHeader, OaiRecordHeader> headerIterator = harvester.harvestRecordHeaders(oaiHarvest)) {
       headerIterator.forEach(oaiHeader -> {
         if (Thread.currentThread().isInterrupted()) {
@@ -140,21 +141,19 @@ public class OAIBackgroundHeaderHarvester {
         return IterationResult.CONTINUE;
       });
     }
+    if(batchSaver.flush()) {
+      enumerator.notifyNewHeaderSavedInDB(batchSaver.getAllRecordsInDb());
+    }
   }
 
   private void saveHeaderInDb(OaiRecordHeader oaiHeader) throws IOException {
-    //TODO this method could return false even if record was saved but the method ended with exception because of
-    //other reasons, for example the result could not be read cause of network issues.
-    //We should add some mitigation for example doing get after retry to double check.
-    if (repository.save(dataset, execution, oaiHeader, allRecordsInDb)) {
-      newHeaders++;
-      allRecordsInDb++;
-      enumerator.notifyNewHeaderSavedInDB(allRecordsInDb);
+    if(batchSaver.save(oaiHeader)) {
+      enumerator.notifyNewHeaderSavedInDB(batchSaver.getAllRecordsInDb());
     }
     harvestedHeaders++;
     logProgressNotMoreOftenThanEvery10Seconds();
   }
-  
+
   private void logProgressNotMoreOftenThanEvery10Seconds() {
     if (progressWatch.getTime(TimeUnit.SECONDS) >= PROGRESS_INTERVAL) {
       logProgress();
@@ -164,7 +163,7 @@ public class OAIBackgroundHeaderHarvester {
   }
 
   private void logProgress() {
-    LOGGER.info("Harvested {} headers, saved: {} new headers, all records in DB: {} for: {}",
-        harvestedHeaders, newHeaders, allRecordsInDb, oaiHarvest);
+    LOGGER.info("Harvested {} headers, saved: {} new headers, all headers in DB: {} for: {}",
+        harvestedHeaders, batchSaver.getNewHeaders(), batchSaver.getAllRecordsInDb(), oaiHarvest);
   }
 }
