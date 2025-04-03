@@ -2,7 +2,7 @@ package eu.europeana.processing.enrichment.validation;
 
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.validation.AbstractInternalSourceJobValidator;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 
 /**
  * Validates parameters provided for {@link eu.europeana.processing.enrichment.EnrichmentJob} during task startup.

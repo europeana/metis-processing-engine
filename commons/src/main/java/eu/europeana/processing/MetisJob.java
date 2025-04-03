@@ -12,7 +12,7 @@ import eu.europeana.processing.source.DbSourceWithProgressHandling;
 import eu.europeana.processing.validation.JobParamValidator;
 import java.time.Duration;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

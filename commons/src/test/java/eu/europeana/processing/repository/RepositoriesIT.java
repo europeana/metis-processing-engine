@@ -7,7 +7,7 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -19,7 +19,7 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;

@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import eu.europeana.processing.job.JobParamName;
 import java.io.Serial;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 
 import java.io.Serializable;
 import java.sql.Connection;

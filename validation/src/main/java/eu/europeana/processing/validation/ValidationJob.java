@@ -6,7 +6,7 @@ import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.validation.processor.ValidationOperator;
 import eu.europeana.processing.validation.validation.ValidationJobParamValidator;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

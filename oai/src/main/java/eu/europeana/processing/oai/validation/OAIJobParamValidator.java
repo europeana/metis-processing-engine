@@ -2,7 +2,7 @@ package eu.europeana.processing.oai.validation;
 
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.validation.AbstractExternalSourceJobValidator;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 
 public class OAIJobParamValidator extends AbstractExternalSourceJobValidator {
 

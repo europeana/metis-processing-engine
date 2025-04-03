@@ -1,6 +1,6 @@
 package eu.europeana.processing.validation;
 
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 
 /**
  * Validates parameters provided for job with the external data source (currently just OAI-PMH job).

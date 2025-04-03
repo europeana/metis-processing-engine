@@ -7,7 +7,7 @@ import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.io.Serial;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.slf4j.Logger;

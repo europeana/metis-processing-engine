@@ -2,7 +2,7 @@ package eu.europeana.processing.transformation.validation;
 
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.validation.AbstractInternalSourceJobValidator;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 
 /**
  * Validates parameters provided for {@link eu.europeana.processing.transformation.TransformationJob} during task startup.
