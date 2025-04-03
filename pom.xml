@@ -15,6 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <flink-version>2.0.0</flink-version>
+    <flink-shaded-guava.version>33.4.0-jre-20.0</flink-shaded-guava.version>
     <version.bytebuddy>1.14.19</version.bytebuddy>
     <metis.version>15-SNAPSHOT</metis.version>
     <jackson.version>2.16.1</jackson.version>
