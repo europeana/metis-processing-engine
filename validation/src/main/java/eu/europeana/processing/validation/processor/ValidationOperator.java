@@ -109,13 +109,20 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     }
 
     private void validateFile(ExecutionRecordResult executionRecordResult, String sortedDocument) {
-        ValidationResult result =
-            validationService.singleValidation(
-                schema,
-                rootFileLocation,
-                schematronFileLocation,
-                sortedDocument
-            );
+        ValidationResult result;
+        ClassLoader original = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(ValidationExecutionService.class.getClassLoader());
+            result =
+                    validationService.singleValidation(
+                            schema,
+                            rootFileLocation,
+                            schematronFileLocation,
+                            sortedDocument
+                    );
+        } finally {
+            Thread.currentThread().setContextClassLoader(original);
+        }
         if (result.isSuccess()) {
             LOGGER.debug("Validation Success for datasetId {}, recordId {}", executionRecordResult.getExecutionRecord().getExecutionRecordKey().getDatasetId(),
                     executionRecordResult.getRecordId());
