@@ -24,8 +24,11 @@ import org.apache.flink.runtime.execution.SuppressRestartsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * Flink enumerator that provides splits for Metis jobs using as a source PostgresDB
+ * @param <S> state used by an implementation of enumerator which is saved in snapshot
+ * @param <B> state builder for enumerator.
  */
 public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnumeratorStateBuilder<S,?>> implements SplitEnumerator<DataPartition, S> {
 
@@ -56,7 +59,7 @@ public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnume
    * @param context context for enumerator
    * @param parameterTool parameter tool
    */
-  public DbEnumerator(SplitEnumeratorContext<DataPartition> context,
+  protected DbEnumerator(SplitEnumeratorContext<DataPartition> context,
       ParameterTool parameterTool) {
     this(context, null, parameterTool);
   }
@@ -68,7 +71,7 @@ public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnume
    * @param state enumerator state container
    * @param parameterTool parameter tool
    */
-  public DbEnumerator(SplitEnumeratorContext<DataPartition> context, S state,
+  protected DbEnumerator(SplitEnumeratorContext<DataPartition> context, S state,
       ParameterTool parameterTool) {
     this.context = context;
     this.parameterTool = parameterTool;
@@ -270,7 +273,7 @@ public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnume
     }
   }
 
-  abstract protected long countRecordsInDb() throws IOException;
+  protected abstract long countRecordsInDb() throws IOException;
 
   private List<DataPartition> getIncompletePartitionsSnapshot() {
     List<DataPartition> incompletePartitions = new ArrayList<>();

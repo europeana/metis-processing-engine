@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * <p>Job can be executed by starting main method with all needed arguments</p>
  * <p>The following args are required:</p>
  *
- *<ul>
+ * <ul>
  *  <li>datasetId</li>
  *  <li>executionId</li>
  *  <li>datasource.url</li>
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *  <li>setSpec</li>
  *  <li>metadataPrefix</li>
  *  <li>oaiRepositoryUrl</li>
- *</ul>
+ * </ul>
  *
  * <p>The following args are optional:</p>
  * <ul>
@@ -65,58 +65,47 @@ import org.slf4j.LoggerFactory;
  * </blockquote>
  */
 public class OAIJob extends MetisJob {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OAIJob.class);
 
-    protected OAIJob(String[] args) {
-        super(args, JobName.OAI_HARVEST);
-    }
+  private static final Logger LOGGER = LoggerFactory.getLogger(OAIJob.class);
 
-    protected StreamExecutionEnvironment prepareEnvironment() {
-        final StreamExecutionEnvironment env =
-                StreamExecutionEnvironment.getExecutionEnvironment();
+  protected OAIJob(String[] args) {
+    super(args, JobName.OAI_HARVEST);
+  }
 
-        env.setParallelism(1);
-        generateTaskIdIfNeeded();
-        env.getConfig().setGlobalJobParameters(tool);
-        env.getCheckpointConfig().disableCheckpointing();
-        return env;
-    }
-
-
-    @Override
-    protected void prepareJob() {
-        flinkEnvironment.fromSource(
-            new OAIHeadersSource(tool), WatermarkStrategy.noWatermarks(), createSourceName()).setParallelism(1)
-
+  @Override
+  protected void prepareJob() {
+    flinkEnvironment
+        .fromSource(
+            new OAIHeadersSource(tool), WatermarkStrategy.noWatermarks(), createSourceName()).setParallelism(readerParallelism)
         .filter(new DeletedRecordFilter()).setParallelism(operatorParallelism)
         .process(new RecordHarvestingOperator(tool)).setParallelism(operatorParallelism)
         .process(new IdAssigningOperator()).setParallelism(operatorParallelism)
-                        .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
-    }
+        .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
+  }
 
-    /**
-     * Entry point for job
-     *
-     * @param args list of all required and optional arguments for job
-     * @throws Exception in case of any Exception
-     */
-    public static void main(String[] args) throws Exception {
-        LOGGER.info("Starting {}...", OAIJob.class.getSimpleName());
-        new OAIJob(args).execute();
-    }
+  /**
+   * Entry point for job
+   *
+   * @param args list of all required and optional arguments for job
+   * @throws Exception in case of any Exception
+   */
+  public static void main(String[] args) throws Exception {
+    LOGGER.info("Starting {}...", OAIJob.class.getSimpleName());
+    new OAIJob(args).execute();
+  }
 
-    private String createSourceName() {
-        return "OAI (url: " + tool.get(JobParamName.OAI_REPOSITORY_URL)
-            + ", set: " + tool.get(JobParamName.SET_SPEC) +
-            ", format: " + tool.get(JobParamName.METADATA_PREFIX) + ")";
-    }
+  private String createSourceName() {
+    return "OAI (url: " + tool.get(JobParamName.OAI_REPOSITORY_URL)
+        + ", set: " + tool.get(JobParamName.SET_SPEC) +
+        ", format: " + tool.get(JobParamName.METADATA_PREFIX) + ")";
+  }
 
-    public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator(){
-        throw new UnsupportedOperationException();
-    }
+  public ProcessFunction<ExecutionRecord, ExecutionRecordResult> getMainOperator() {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public JobParamValidator getParamValidator() {
-        return new OAIJobParamValidator();
-    }
+  @Override
+  public JobParamValidator getParamValidator() {
+    return new OAIJobParamValidator();
+  }
 }

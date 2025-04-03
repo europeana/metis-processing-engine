@@ -8,7 +8,6 @@ import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.DbEnumerator;
 import java.util.LinkedList;
 import java.util.Queue;
-import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.slf4j.Logger;
@@ -24,8 +23,7 @@ import java.io.IOException;
  * could be potentially changed in the future. We could make more granular fail-over using resumption token storing.
  */
 public class OAIHeadersSplitEnumerator extends
-    DbEnumerator<OAIEnumeratorState, OAIEnumeratorStateBuilder<OAIEnumeratorState, ?>> implements
-    SplitEnumerator<DataPartition, OAIEnumeratorState> {
+    DbEnumerator<OAIEnumeratorState, OAIEnumeratorStateBuilder<OAIEnumeratorState, ?>> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersSplitEnumerator.class);
   private OAIHeadersRepository repository;
@@ -112,6 +110,8 @@ public class OAIHeadersSplitEnumerator extends
    */
   public void notifyNewHeaderSavedInDB(int allRecordInDb) {
     context.runInCoordinatorThread(() -> {
+      LOGGER.debug("Notified about new headers saved to database total count: {}, previously: {}, waiting readers: {}",
+          allRecordInDb, recordsToBeProcessed, waitingReaders);
       recordsToBeProcessed = allRecordInDb;
       tryAssignWaitingReaders();
     });

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import lombok.Getter;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -77,9 +78,10 @@ public class BatchHeaderSaver {
 
     if (savedHeadersInPreviousJobExecutions) {
       //We need only check it if the job was restarted because of fail-over and there are already saved headers in DB
-      List<String> indentifiers = headersToSave.stream().map(OaiRecordHeader::getOaiIdentifier).toList();
-      Set<String> existing = repository.getExistingIdentifiers(datasetId, executionId, indentifiers);
-      headersToSave = headersToSave.stream().filter(header -> !existing.contains(header.getOaiIdentifier())).toList();
+      List<String> identifiers = headersToSave.stream().map(OaiRecordHeader::getOaiIdentifier).toList();
+      Set<String> existing = repository.getExistingIdentifiers(datasetId, executionId, identifiers);
+      headersToSave = headersToSave.stream().filter(header -> !existing.contains(header.getOaiIdentifier()))
+          .collect(Collectors.toCollection(ArrayList::new)); //ArrayList is needed here because it is later modified
     }
 
     if (headersToSave.isEmpty()) {

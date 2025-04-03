@@ -2,7 +2,6 @@ package eu.europeana.processing.oai.reader;
 
 import static eu.europeana.processing.job.JobParamName.DATASET_ID;
 import static eu.europeana.processing.job.JobParamName.TASK_ID;
-import static java.lang.String.valueOf;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.DbConnectionProvider;
@@ -36,7 +35,7 @@ public abstract class AbstractOAISourceTest {
 
   @BeforeEach
   final void setupCommon() {
-    parameterTool = ParameterTool.fromMap(Map.of(DATASET_ID, DATASET, TASK_ID, valueOf(TASK)));
+    parameterTool = ParameterTool.fromMap(Map.of(DATASET_ID, DATASET, TASK_ID, TASK));
     dbProviderConstruction= Mockito.mockConstruction(DbConnectionProvider.class);
   }
 

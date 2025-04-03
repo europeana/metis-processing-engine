@@ -15,8 +15,6 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.util.ParameterTool;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
 
-import java.io.IOException;
-
 public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, OAIEnumeratorState>,
     ResultTypeQueryable<OaiRecordHeader> {
 
