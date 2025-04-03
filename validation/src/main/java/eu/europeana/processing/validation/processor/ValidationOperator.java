@@ -9,8 +9,9 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.validation.model.ValidationResult;
 import eu.europeana.validation.service.ValidationExecutionService;
 import java.io.Serial;
+
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.util.ParameterTool;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class ValidationOperator extends ProcessFunction<ExecutionRecord, Executi
     private String schematronFileLocation;
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(OpenContext openContext) throws Exception {
         LOGGER.info("Opening validation operator");
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);

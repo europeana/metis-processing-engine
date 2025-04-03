@@ -12,8 +12,8 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import java.io.Serial;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.util.ParameterTool;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class TransformationOperator extends ProcessFunction<ExecutionRecord, Exe
     private transient XsltTransformer xsltTransformer;
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(OpenContext openContext) throws Exception {
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         xsltTransformer = prepareXsltTransformer();
     }

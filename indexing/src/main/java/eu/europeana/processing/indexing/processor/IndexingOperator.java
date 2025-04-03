@@ -9,8 +9,8 @@ import eu.europeana.processing.job.JobName;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.util.ParameterTool;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
     private long taskId;
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(OpenContext openContext) throws Exception {
         parameterTool = ParameterTool.fromMap(getRuntimeContext().getGlobalJobParameters());
         taskId = parameterTool.getLong(JobParamName.TASK_ID);
         IndexingSettings indexingSettings = prepareIndexingSetting(parameterTool);

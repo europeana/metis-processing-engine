@@ -20,8 +20,8 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
 import java.io.Serial;
 
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.util.ParameterTool;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.ExceptionUtils;
@@ -93,7 +93,7 @@ public class RecordHarvestingOperator extends ProcessFunction<OaiRecordHeader, E
   }
 
   @Override
-  public void open(Configuration parameters) {
+  public void open(OpenContext openContext) {
     harvester = HarvesterFactory.createOaiHarvester(null, DEFAULT_RETRIES, SLEEP_TIME);
   }
 
