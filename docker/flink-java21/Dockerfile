@@ -42,11 +42,11 @@ RUN set -ex; \
   rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
   chmod +x /usr/local/bin/gosu; \
   gosu nobody true
-
+ENV FLINK_VERSION=2.0.0
 # Configure Flink version
-ENV FLINK_TGZ_URL=https://dlcdn.apache.org/flink/flink-1.20.0/flink-1.20.0-bin-scala_2.12.tgz \
-    FLINK_ASC_URL=https://downloads.apache.org/flink/flink-1.20.0/flink-1.20.0-bin-scala_2.12.tgz.asc \
-    GPG_KEY=B2D64016B940A7E0B9B72E0D7D0528B28037D8BC \
+ENV FLINK_TGZ_URL=https://dlcdn.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-scala_2.12.tgz \
+    FLINK_ASC_URL=https://downloads.apache.org/flink/flink-$FLINK_VERSION/flink-$FLINK_VERSION-bin-scala_2.12.tgz.asc \
+    GPG_KEY=F8E419AA0B60C28879E876859DFF40967ABFC5A4 \
     CHECK_GPG=true
 
 # Prepare environment

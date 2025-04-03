@@ -1,9 +1,9 @@
-FROM flink:1.20.0-java21_poc
+FROM flink:2.0.0-java21_poc
 
 LABEL maintainer="PSNC"
 
 ENV FLINK_HOME=/opt/flink \
-    FLINK_VERSION=1.20.0
+    FLINK_VERSION=2.0.0
 ENV FLINK_S3_PRESTO_URL=https://repo1.maven.org/maven2/org/apache/flink/flink-s3-fs-presto/$FLINK_VERSION/flink-s3-fs-presto-$FLINK_VERSION.jar
 
 RUN mkdir -p $FLINK_HOME/plugins/s3-fs-presto
