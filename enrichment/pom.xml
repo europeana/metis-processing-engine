@@ -46,6 +46,11 @@
       <artifactId>metis-enrichment-client</artifactId>
       <version>${metis.version}</version>
       <exclusions>
+        <!-- This artifact clashes with jackson used by flink-->
+        <exclusion>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
         <exclusion>
           <groupId>org.apache.maven.surefire</groupId>
           <artifactId>*</artifactId>
