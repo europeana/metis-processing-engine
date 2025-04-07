@@ -1,6 +1,8 @@
 package eu.europeana.cloud.flink.client.entities;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,7 +22,7 @@ public class SubmitJobRequest {
 
   String entryClass;
   String parallelism;
-  String programArgs;
+  ArrayList<String> programArgsList;
   String savepointPath;
   boolean allowNonRestoredState;
   @JsonIgnore
@@ -30,10 +32,14 @@ public class SubmitJobRequest {
 
     public SubmitJobRequestBuilder programArgs(Map<String, Object> argsMap) {
       this.localJobId = UUID.randomUUID();
-      this.programArgs = argsMap.entrySet().stream()
-                                .map(entry -> "--" + entry.getKey() + " " + entry.getValue())
-                                .collect(Collectors.joining(" "))
-              .concat(" --"+LOCAL_JOB_ID+" "+ localJobId);
+      this.programArgsList = new ArrayList<>();
+      argsMap.forEach((key, value) -> {
+        programArgsList.add("--" + key);
+        programArgsList.add(String.valueOf(value));
+      });
+
+      programArgsList.add("--" + LOCAL_JOB_ID);
+      programArgsList.add(String.valueOf(localJobId));
       return this;
     }
   }
