@@ -39,15 +39,17 @@ public class EnrichmentOperator extends ProcessFunction<ExecutionRecord, Executi
 
         String dereferenceURL = parameterTool.getRequired(JobParamName.DEREFERENCE_SERVICE_URL);
         String enrichmentEntityManagementUrl = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_MANAGEMENT_URL);
-        String enrichmentEntityApiKey = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_KEY);
         String enrichmentEntityApiUrl = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_URL);
+        String enrichmentEntityApiTokenEndpoint = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_TOKEN_ENDPOINT);
+        String enrichmentEntityApiGrantParam = parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_GRANT_PARAMS);
 
         final EnricherProvider enricherProvider = new EnricherProvider();
-        enricherProvider.setEnrichmentPropertiesValues(enrichmentEntityManagementUrl, enrichmentEntityApiUrl, enrichmentEntityApiKey);
+        enricherProvider.setEnrichmentPropertiesValues(enrichmentEntityManagementUrl,
+                enrichmentEntityApiUrl, enrichmentEntityApiTokenEndpoint, enrichmentEntityApiGrantParam);
         final DereferencerProvider dereferencerProvider = new DereferencerProvider();
         dereferencerProvider.setDereferenceUrl(dereferenceURL);
         dereferencerProvider.setEnrichmentPropertiesValues(enrichmentEntityManagementUrl, enrichmentEntityApiUrl,
-                enrichmentEntityApiKey);
+                enrichmentEntityApiTokenEndpoint, enrichmentEntityApiGrantParam);
 
         enrichmentWorker = new EnrichmentWorkerImpl(dereferencerProvider.create(), enricherProvider.create());
         LOGGER.debug("Created enrichment operator.");
