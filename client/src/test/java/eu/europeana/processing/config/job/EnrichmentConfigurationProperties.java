@@ -13,5 +13,6 @@ public class EnrichmentConfigurationProperties {
   private String dereferenceUrl;
   private String entityManagementUrl;
   private String entityApiUrl;
-  private String entityApiKey;
+  private String entityApiTokenEndpoint;
+  private String entityApiGrantParams;
 }

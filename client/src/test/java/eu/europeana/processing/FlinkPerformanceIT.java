@@ -1,47 +1,5 @@
 package eu.europeana.processing;
 
-import static eu.europeana.processing.job.JobParamName.CHUNK_SIZE;
-import static eu.europeana.processing.job.JobParamName.DATASET_ID;
-import static eu.europeana.processing.job.JobParamName.DATASOURCE_PASSWORD;
-import static eu.europeana.processing.job.JobParamName.DATASOURCE_URL;
-import static eu.europeana.processing.job.JobParamName.DATASOURCE_USERNAME;
-import static eu.europeana.processing.job.JobParamName.DEREFERENCE_SERVICE_URL;
-import static eu.europeana.processing.job.JobParamName.ENRICHMENT_ENTITY_API_KEY;
-import static eu.europeana.processing.job.JobParamName.ENRICHMENT_ENTITY_API_URL;
-import static eu.europeana.processing.job.JobParamName.ENRICHMENT_ENTITY_MANAGEMENT_URL;
-import static eu.europeana.processing.job.JobParamName.EXECUTION_ID;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOAPPLICATIONNAME;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOAUTHDB;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGODBNAME;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOINSTANCES;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOPASSWORD;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOPOOLSIZE;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOPORTNUMBER;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOREADPREFERENCE;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOREDIRECTDBNAME;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOUSERNAME;
-import static eu.europeana.processing.job.JobParamName.INDEXING_MONGOUSESSL;
-import static eu.europeana.processing.job.JobParamName.INDEXING_PERFORMREDIRECTS;
-import static eu.europeana.processing.job.JobParamName.INDEXING_PRESERVETIMESTAMPS;
-import static eu.europeana.processing.job.JobParamName.INDEXING_SOLRINSTANCES;
-import static eu.europeana.processing.job.JobParamName.INDEXING_ZOOKEEPERCHROOT;
-import static eu.europeana.processing.job.JobParamName.INDEXING_ZOOKEEPERDEFAULTCOLLECTION;
-import static eu.europeana.processing.job.JobParamName.INDEXING_ZOOKEEPERINSTANCES;
-import static eu.europeana.processing.job.JobParamName.INDEXING_ZOOKEEPERPORTNUMBER;
-import static eu.europeana.processing.job.JobParamName.MAX_RECORD_PENDING;
-import static eu.europeana.processing.job.JobParamName.METADATA_PREFIX;
-import static eu.europeana.processing.job.JobParamName.METIS_DATASET_COUNTRY;
-import static eu.europeana.processing.job.JobParamName.METIS_DATASET_LANGUAGE;
-import static eu.europeana.processing.job.JobParamName.METIS_DATASET_NAME;
-import static eu.europeana.processing.job.JobParamName.METIS_XSLT_URL;
-import static eu.europeana.processing.job.JobParamName.OAI_REPOSITORY_URL;
-import static eu.europeana.processing.job.JobParamName.OPERATOR_PARALLELISM;
-import static eu.europeana.processing.job.JobParamName.READER_PARALLELISM;
-import static eu.europeana.processing.job.JobParamName.SET_SPEC;
-import static eu.europeana.processing.job.JobParamName.SINK_PARALLELISM;
-import static eu.europeana.processing.job.JobParamName.TASK_ID;
-import static eu.europeana.processing.job.JobParamName.VALIDATION_TYPE;
-
 import eu.europeana.cloud.flink.client.JobExecutor;
 import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
 import eu.europeana.processing.config.FlinkConfigurationProperties;
@@ -59,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static eu.europeana.processing.job.JobParamName.*;
+
 
 public class FlinkPerformanceIT extends AbstractPerformanceIT {
 
@@ -74,7 +34,7 @@ public class FlinkPerformanceIT extends AbstractPerformanceIT {
   protected JarIdsProperties jarIdsProperties;
 
   @Test
-  void step1_shouldExecuteOAIHarvestComplietellyWithoutErrors() throws Exception {
+  void step1_shouldExecuteWAIHarvestCompletelyWithoutErrors() throws Exception {
 
     executeStep(1, jarIdsProperties.getOai(), "eu.europeana.processing.oai.OAIJob",
         Map.of(OAI_REPOSITORY_URL, sourceProperties.getUrl(), SET_SPEC, sourceProperties.getSetSpec(), METADATA_PREFIX,
@@ -96,7 +56,7 @@ public class FlinkPerformanceIT extends AbstractPerformanceIT {
   }
 
   @Test
-  void step4_shouldExecuteIternalValidationWithoutErrors() throws Exception {
+  void step4_shouldExecuteInternalValidationWithoutErrors() throws Exception {
     executeStep(4, jarIdsProperties.getValidation(), "eu.europeana.processing.validation.ValidationJob",
         Map.of(VALIDATION_TYPE, JobParamValue.VALIDATION_INTERNAL));
   }
@@ -112,8 +72,9 @@ public class FlinkPerformanceIT extends AbstractPerformanceIT {
     executeStep(6, jarIdsProperties.getEnrichment(), "eu.europeana.processing.enrichment.EnrichmentJob",
         Map.of(DEREFERENCE_SERVICE_URL, jobsConfigurationProperties.getEnrichment().getDereferenceUrl(),
             ENRICHMENT_ENTITY_MANAGEMENT_URL, jobsConfigurationProperties.getEnrichment().getEntityManagementUrl(),
-            ENRICHMENT_ENTITY_API_URL, jobsConfigurationProperties.getEnrichment().getEntityApiUrl(), ENRICHMENT_ENTITY_API_KEY,
-            jobsConfigurationProperties.getEnrichment().getEntityApiKey()));
+            ENRICHMENT_ENTITY_API_URL, jobsConfigurationProperties.getEnrichment().getEntityApiUrl(),
+            ENRICHMENT_ENTITY_API_TOKEN_ENDPOINT, jobsConfigurationProperties.getEnrichment().getEntityApiTokenEndpoint(),
+            ENRICHMENT_ENTITY_API_GRANT_PARAMS,jobsConfigurationProperties.getEnrichment().getEntityApiGrantParams()));
 
   }
 

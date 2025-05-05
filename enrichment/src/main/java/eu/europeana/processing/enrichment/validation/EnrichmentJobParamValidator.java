@@ -13,7 +13,8 @@ public class EnrichmentJobParamValidator extends AbstractInternalSourceJobValida
   public void validateJobSpecificParameters(ParameterTool parameterTool) {
     parameterTool.getRequired(JobParamName.DEREFERENCE_SERVICE_URL);
     parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_MANAGEMENT_URL);
-    parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_KEY);
+    parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_TOKEN_ENDPOINT);
+    parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_GRANT_PARAMS);
     parameterTool.getRequired(JobParamName.ENRICHMENT_ENTITY_API_URL);
   }
 }

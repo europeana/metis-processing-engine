@@ -27,7 +27,8 @@ public class JobParamName {
     public static final String DEREFERENCE_SERVICE_URL = "DEREFERENCE_SERVICE_URL";
     public static final String ENRICHMENT_ENTITY_MANAGEMENT_URL = "ENRICHMENT_ENTITY_MANAGEMENT_URL";
     public static final String ENRICHMENT_ENTITY_API_URL = "ENRICHMENT_ENTITY_API_URL";
-    public static final String ENRICHMENT_ENTITY_API_KEY = "ENRICHMENT_ENTITY_API_KEY";
+    public static final String ENRICHMENT_ENTITY_API_TOKEN_ENDPOINT = "ENTITY_API_TOKEN_ENDPOINT";
+    public static final String ENRICHMENT_ENTITY_API_GRANT_PARAMS = "ENTITY_API_GRANT_PARAMS";
 
     public static final String DATASOURCE_URL = "datasource.url";
     public static final String DATASOURCE_USERNAME = "datasource.username";
