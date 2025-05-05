@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
@@ -22,7 +21,7 @@ public class SubmitJobRequest {
 
   String entryClass;
   String parallelism;
-  ArrayList<String> programArgsList;
+  List<String> programArgsList;
   String savepointPath;
   boolean allowNonRestoredState;
   @JsonIgnore
