@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static eu.europeana.processing.job.JobParamName.*;
 
 
-public class FlinkPerformanceIT extends AbstractPerformanceIT {
+class OaiFlinkPerformanceIT extends AbstractPerformanceIT {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -34,7 +34,7 @@ public class FlinkPerformanceIT extends AbstractPerformanceIT {
   protected JarIdsProperties jarIdsProperties;
 
   @Test
-  void step1_shouldExecuteWAIHarvestCompletelyWithoutErrors() throws Exception {
+  void step1_shouldExecuteHarvestCompletelyWithoutErrors() throws Exception {
 
     executeStep(1, jarIdsProperties.getOai(), "eu.europeana.processing.oai.OAIJob",
         Map.of(OAI_REPOSITORY_URL, sourceProperties.getUrl(), SET_SPEC, sourceProperties.getSetSpec(), METADATA_PREFIX,
