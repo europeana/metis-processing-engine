@@ -7,7 +7,8 @@ import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.DbEnumeratorState.DbEnumeratorStateBuilder;
 import java.io.IOException;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
+
 
 /**
  * Enumerator implementation for regular - all but not harvesting jobs.

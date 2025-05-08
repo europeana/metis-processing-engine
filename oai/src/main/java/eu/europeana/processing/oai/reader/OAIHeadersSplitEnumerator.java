@@ -9,7 +9,7 @@ import eu.europeana.processing.source.DbEnumerator;
 import java.util.LinkedList;
 import java.util.Queue;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;

@@ -8,7 +8,7 @@ import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import java.time.Instant;
 import java.util.Map;
-import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.ParameterTool;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockedConstruction;
