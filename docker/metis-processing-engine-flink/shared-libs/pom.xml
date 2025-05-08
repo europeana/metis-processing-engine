@@ -84,6 +84,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>metis-processing-engine-blocking</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

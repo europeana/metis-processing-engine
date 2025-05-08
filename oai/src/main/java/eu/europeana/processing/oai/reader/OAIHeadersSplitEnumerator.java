@@ -38,9 +38,9 @@ public class OAIHeadersSplitEnumerator extends
    * @param parameterTool parameter tool
    */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context,
-      ParameterTool parameterTool) {
+      ParameterTool parameterTool, String jobUuid) {
     super(context, parameterTool);
-    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool);
+    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
   }
 
   /**
@@ -51,10 +51,10 @@ public class OAIHeadersSplitEnumerator extends
    * @param parameterTool parameter tool
    */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, OAIEnumeratorState state,
-      ParameterTool parameterTool) {
+      ParameterTool parameterTool, String jobUuid) {
     super(context, state, parameterTool);
     headersHarvested = state.isHeadersHarvested();
-    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool);
+    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
   }
 
   @Override

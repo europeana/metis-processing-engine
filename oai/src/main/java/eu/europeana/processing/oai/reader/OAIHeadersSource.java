@@ -4,6 +4,7 @@ import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.source.ObjectStreamVersionedSerializer;
 import java.io.Serial;
+import java.util.UUID;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.connector.source.Source;
@@ -23,6 +24,8 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, 
 
   private final ParameterTool parameterTool;
 
+  private final String jobUuid = UUID.randomUUID().toString();
+
   public OAIHeadersSource(ParameterTool parameterTool) {
     this.parameterTool = parameterTool;
   }
@@ -32,15 +35,15 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, 
     return Boundedness.BOUNDED;
   }
 
-    @Override
-    public SplitEnumerator<DataPartition, OAIEnumeratorState> createEnumerator(SplitEnumeratorContext<DataPartition> enumContext) {
-      return new OAIHeadersSplitEnumerator(enumContext, parameterTool);
-    }
+  @Override
+  public SplitEnumerator<DataPartition, OAIEnumeratorState> createEnumerator(SplitEnumeratorContext<DataPartition> enumContext) {
+    return new OAIHeadersSplitEnumerator(enumContext, parameterTool, jobUuid);
+  }
 
   @Override
   public SplitEnumerator<DataPartition, OAIEnumeratorState> restoreEnumerator(SplitEnumeratorContext<DataPartition> enumContext,
       OAIEnumeratorState state) {
-    return new OAIHeadersSplitEnumerator(enumContext, state, parameterTool);
+    return new OAIHeadersSplitEnumerator(enumContext, state, parameterTool, jobUuid);
   }
 
   @Override

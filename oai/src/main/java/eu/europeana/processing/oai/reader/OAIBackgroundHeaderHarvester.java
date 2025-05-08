@@ -12,6 +12,7 @@ import eu.europeana.metis.harvesting.oaipmh.OaiHarvest;
 import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.blocking.BlockingService;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.oai.repository.BatchHeaderSaver;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
@@ -41,6 +42,7 @@ public class OAIBackgroundHeaderHarvester {
   private final String execution;
   private final ParameterTool parameterTool;
   private final OAIHeadersSplitEnumerator enumerator;
+  private final String jobUuid;
   private ExecutorService backgroudExecutor;
   private Future<?> future;
   private int harvestedHeaders;
@@ -56,11 +58,12 @@ public class OAIBackgroundHeaderHarvester {
    * @param enumerator - enumerator instance which is notified about harvesting progress, completion and failure.
    * @param parameterTool - job parameters
    */
-  public OAIBackgroundHeaderHarvester(OAIHeadersSplitEnumerator enumerator, ParameterTool parameterTool) {
+  public OAIBackgroundHeaderHarvester(OAIHeadersSplitEnumerator enumerator, ParameterTool parameterTool, String jobUuid) {
     this.enumerator = enumerator;
     this.parameterTool = parameterTool;
     this.dataset = parameterTool.getRequired(JobParamName.DATASET_ID);
     this.execution = parameterTool.getRequired(JobParamName.TASK_ID);
+    this.jobUuid = jobUuid;
   }
 
   /**
@@ -97,6 +100,7 @@ public class OAIBackgroundHeaderHarvester {
 
   private void execute() {
     try{
+      BlockingService.aquireLock(jobUuid);
       progressWatch = StopWatch.createStarted();
       int headersFromPreviousExecutionsCount= countHeadersFromPreviousExecutions();
       harvestHeaders(headersFromPreviousExecutionsCount);
@@ -109,6 +113,8 @@ public class OAIBackgroundHeaderHarvester {
     } catch (@SuppressWarnings("java:S1181") Throwable e) { //We catch errors because we want to instantly notify enumerator
       LOGGER.warn("Error during harvesting background headers", e);
       enumerator.notifyHeadersHarvestingFailed(e);
+    } finally {
+      BlockingService.releaseLock(jobUuid);
     }
   }
 
