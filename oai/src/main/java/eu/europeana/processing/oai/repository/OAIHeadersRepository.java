@@ -75,11 +75,11 @@ public class OAIHeadersRepository implements DbRepository {
       throws IOException {
 
     String inPlaceholder = identifiers.stream().map(i -> "?").collect(joining(",", "(", ")"));
+    String queryString = "select record_id from \"batch-framework\".execution_record_external_identifier "
+        + "where dataset_id=? and execution_id=? and record_id in " + inPlaceholder;
     try (Connection con = dbConnectionProvider.getConnection();
-
-        PreparedStatement preparedStatement = con.prepareStatement(
-            "select record_id from \"batch-framework\".execution_record_external_identifier "
-                + "where dataset_id=? and execution_id=? and record_id in " + inPlaceholder)) {
+        PreparedStatement preparedStatement = con.prepareStatement(queryString)
+    ) {
       preparedStatement.setString(1, datasetId);
       preparedStatement.setString(2, executionId);
       int i = 3;
@@ -87,6 +87,7 @@ public class OAIHeadersRepository implements DbRepository {
         preparedStatement.setString(i, identifier);
         i++;
       }
+      LOGGER.info("Checking existing OAI headers in DB, executing: {} identifiers query : {}", identifiers.size(), queryString);
 
       ResultSet resultSet = preparedStatement.executeQuery();
       Set<String> result = new HashSet<>();
@@ -95,7 +96,7 @@ public class OAIHeadersRepository implements DbRepository {
       }
       return result;
     } catch (SQLException e) {
-      throw new IOException(e);
+      throw new IOException("Failed to execute query: " + queryString, e);
     }
   }
 
@@ -106,11 +107,11 @@ public class OAIHeadersRepository implements DbRepository {
    * @param datasetId dataset identifier
    * @param executionId execution identifier
    * @param headers list of headers to be saved in the database
-   * @param index index of saved header record
+   * @param firstIndex index of first saved header record, further records from the list would get next indexes
    * @throws IOException in case of any DB exception
    */
-  public void save(String datasetId, String executionId, List<OaiRecordHeader> headers, int index) throws IOException {
-
+  public void save(String datasetId, String executionId, List<OaiRecordHeader> headers, int firstIndex) throws IOException {
+    int index = firstIndex;
     try (Connection con = dbConnectionProvider.getConnection();
         PreparedStatement preparedStatement = con.prepareStatement(
             "INSERT INTO \"batch-framework\".execution_record_external_identifier (DATASET_ID,EXECUTION_ID,RECORD_ID,is_deleted,datestamp,record_index)"
@@ -120,6 +121,7 @@ public class OAIHeadersRepository implements DbRepository {
         addToBatch(datasetId, executionId, header, index, preparedStatement);
         index++;
       }
+      LOGGER.info("Saving OAI headers, executing batch of {} records starting from index: {}", headers.size(), firstIndex);
       preparedStatement.executeBatch();
     } catch (SQLException e) {
       throw new IOException(e);

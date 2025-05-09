@@ -62,6 +62,9 @@ public class OAIHeadersSplitEnumerator extends
     super.start();
     if (!headersHarvested) {
       backgroundHeaderHarvester.start();
+    }else{
+      LOGGER.info("Headers already harvested and saved in the DB. Finished: {} of {} all records.",
+          finishedRecordCount, recordsToBeProcessed);
     }
   }
 

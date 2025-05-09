@@ -46,7 +46,7 @@ public abstract class DbEnumerator<S extends DbEnumeratorState,B extends DbEnume
 
   protected long recordsToBeProcessed;
   private long startedRecordsCount;
-  private long finishedRecordCount;
+  protected long finishedRecordCount;
   private final NavigableMap<Long, Long> checkpointIdToFinishedRecordCountMap = new TreeMap<>();
   private long commitCount;
   private List<DataPartition> returnedPartitions;
