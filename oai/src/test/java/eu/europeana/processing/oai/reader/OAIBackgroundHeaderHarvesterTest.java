@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.flink.util.ParameterTool;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
 
+  private String jobUuid=UUID.randomUUID().toString();
   @Mock
   private OAIHeadersSplitEnumerator enumerator;
   @Captor
@@ -54,6 +56,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
 
   private OAIBackgroundHeaderHarvester harvester;
 
+
   @Test
   void shouldHarvestAndSaveHeadersInDbWithAndNotifyEnumerator() throws IOException {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
@@ -62,7 +65,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         OAI_REPOSITORY_URL, "https://metis-repository-rest.test.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
         SET_SPEC, "ecloud_e2e_tests_without_4_records"));
-    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool);
+    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
 
     harvester.start();
     await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(200))
@@ -87,7 +90,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         OAI_REPOSITORY_URL, "https://metis-repository-rest.test.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
         SET_SPEC, "ecloud_e2e_tests_without_4_records"));
-    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool);
+    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
 
     harvester.start();
     await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(200))
@@ -111,7 +114,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         OAI_REPOSITORY_URL, "https://unknown-dns-adres14395.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
         SET_SPEC, "ecloud_e2e_tests_without_4_records"));
-    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool);
+    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
 
     harvester.start();
     await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(200))
@@ -128,7 +131,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         OAI_REPOSITORY_URL, "https://metis-repository-rest.test.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
         SET_SPEC, "ecloud_e2e_tests_without_4_records"));
-    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool);
+    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
 
     harvester.start();
     OAIHeadersRepository repository = repositoryConstruction.constructed().getFirst();
@@ -145,7 +148,7 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         OAI_REPOSITORY_URL, "https://metis-repository-rest.test.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
         SET_SPEC, "Heide1000records"));
-    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool);
+    harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
 
     harvester.start();
     await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(200))

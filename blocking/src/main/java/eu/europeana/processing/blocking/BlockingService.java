@@ -5,8 +5,9 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
-import org.apache.flink.shaded.guava31.com.google.common.cache.Cache;
-import org.apache.flink.shaded.guava31.com.google.common.cache.CacheBuilder;
+
+import org.apache.flink.shaded.guava32.com.google.common.cache.Cache;
+import org.apache.flink.shaded.guava32.com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public final class BlockingService {
       LOGGER.error("FATAL could not obtain the job (uuid: {}) lock in the expected time. Killing job manager!", jobUuid);
       System.exit(1);
     }
-    LOGGER.warn("Acquired lock for the the job (uuid: {}) ...", jobUuid);
+    LOGGER.info("Acquired lock for the the job (uuid: {}) ...", jobUuid);
   }
 
   /**

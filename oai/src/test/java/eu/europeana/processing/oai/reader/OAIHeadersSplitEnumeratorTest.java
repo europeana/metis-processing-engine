@@ -17,6 +17,7 @@ import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import eu.europeana.processing.repository.TaskInfoRepository;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
 
   private static final int SUBTASK_ID = 7;
+  private String jobUuid= UUID.randomUUID().toString();
   @Mock
   private SplitEnumeratorContext<DataPartition> context;
   @Mock
@@ -49,7 +51,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
   void shouldStartBackgroundHeadersHarvestingIfNotHarvestedYet() throws IOException {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
 
       enumerator.start();
 
@@ -66,7 +68,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
                                                  .headersHarvested(true)
                                                  .incompletePartitions(emptyList())
                                                  .build();
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, state, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, state, parameterTool, jobUuid)) {
 
       enumerator.start();
 
@@ -80,7 +82,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
 
       enumerator.handleSplitRequest(SUBTASK_ID, "");
@@ -97,7 +99,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
 
       enumerator.notifyNewHeaderSavedInDB(5);
@@ -112,7 +114,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
       enumerator.notifyHeaderHarvestingFinished();
 
@@ -127,7 +129,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
 
       enumerator.notifyHeaderHarvestingFinished();
@@ -142,7 +144,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK_ID, "");
 
@@ -158,7 +160,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
     mockRunInCoordinatorThreadMethod();
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
       enumerator.start();
 
       assertThrows(RuntimeException.class,
