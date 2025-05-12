@@ -132,9 +132,10 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
         METADATA_PREFIX, "edm",
         SET_SPEC, "ecloud_e2e_tests_without_4_records"));
     harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
-
     harvester.start();
     OAIHeadersRepository repository = repositoryConstruction.constructed().getFirst();
+    //We sleep to ensure that background executor had time to start.
+    Thread.sleep(500);
     harvester.close();
     verify(repository, never()).save(any(), any(), any(), anyInt());
     verifyNoInteractions(enumerator);
