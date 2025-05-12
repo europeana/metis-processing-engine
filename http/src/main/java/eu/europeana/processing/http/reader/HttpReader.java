@@ -11,6 +11,8 @@ import eu.europeana.processing.model.ExecutionRecord.ExecutionRecordBuilder;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.ExecutionRecordResult.ExecutionRecordResultBuilder;
+import eu.europeana.processing.source.ProgressSnapshotEvent;
+import eu.europeana.processing.source.SplitCompletedEvent;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -81,6 +83,10 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   private void emitRecord(ReaderOutput<ExecutionRecordResult> output, String fileName) {
     ExecutionRecordResult theRecord = prepareRecord(fileName);
     output.collect(theRecord);
+    assignedSplit = assignedSplit.withProgress(assignedSplit.getProgress() + 1);
+    context.sendSourceEventToCoordinator(
+        new ProgressSnapshotEvent(-1, assignedSplit.splitId(), assignedSplit.getProgress()));
+
     if(!fileNameIterator.hasNext()){
       wholeSplitEmitted();
     }
@@ -104,7 +110,8 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
   }
 
   private void wholeSplitEmitted() {
-    context.sendSourceEventToCoordinator(new SplitEmittedEvent(assignedSplit.splitId(), assignedSplit.getFileNames().size()));
+    context.sendSourceEventToCoordinator(
+        new SplitCompletedEvent(assignedSplit.splitId(), assignedSplit.getProgress()));
     assignedSplit = null;
   }
 

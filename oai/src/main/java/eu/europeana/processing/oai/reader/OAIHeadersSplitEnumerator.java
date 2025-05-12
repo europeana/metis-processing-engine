@@ -2,10 +2,9 @@ package eu.europeana.processing.oai.reader;
 
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
-import eu.europeana.processing.oai.reader.OAIEnumeratorState.OAIEnumeratorStateBuilder;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
-import eu.europeana.processing.source.DbEnumerator;
+import eu.europeana.processing.source.AbstractDbEnumerator;
 import java.util.LinkedList;
 import java.util.Queue;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
@@ -15,15 +14,14 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * SplitEnumerator implementation for OAI. It is based on DbEnumerator and uses similar Db like regularDbSource, with additional
+ * SplitEnumerator implementation for OAI. It is based on AbstractDbEnumerator and uses similar Db like regularDbSource, with additional
  * index column. This enumerator, generally reads and emits records from DB, but also fills this DB in background thread
  * harvesting OAI headers from OAI source using OAIBackgroundHeaderHarvester class. State of main thread emitting headers from DB
  * is often stored in checkpoint, the same as in the RegularDBEnumerator The background header harvesting state could not be
  * stored cause of limitations of current metis-harvesting implementation. So the operation is repeated whole during failover. It
  * could be potentially changed in the future. We could make more granular fail-over using resumption token storing.
  */
-public class OAIHeadersSplitEnumerator extends
-    DbEnumerator<OAIEnumeratorState, OAIEnumeratorStateBuilder<OAIEnumeratorState, ?>> {
+public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumeratorState> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersSplitEnumerator.class);
   private OAIHeadersRepository repository;
@@ -31,30 +29,27 @@ public class OAIHeadersSplitEnumerator extends
   private Queue<Integer> waitingReaders = new LinkedList<>();
   private boolean headersHarvested;
 
-  /**
-   * Constructor used when state restoration is not needed;
-   *
-   * @param context context for enumerator
-   * @param parameterTool parameter tool
-   */
-  public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context,
-      ParameterTool parameterTool, String jobUuid) {
-    super(context, parameterTool);
-    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
-  }
 
+  public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool, String jobUuid) {
+    this(context,parameterTool,null,jobUuid);
+  }
   /**
    * Constructor used when state restoration is needed;
    *
    * @param context context for enumerator
-   * @param state enumerator state container
    * @param parameterTool parameter tool
+   * @param state enumerator state container
    */
-  public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, OAIEnumeratorState state,
-      ParameterTool parameterTool, String jobUuid) {
-    super(context, state, parameterTool);
-    headersHarvested = state.isHeadersHarvested();
+  public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool,
+      OAIEnumeratorState state, String jobUuid) {
+    super(context, parameterTool, state);
     backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
+  }
+
+  @Override
+  protected void restoreEnumeratorFromState(OAIEnumeratorState state) {
+    super.restoreEnumeratorFromState(state);
+    headersHarvested = state.isHeadersHarvested();
   }
 
   @Override
@@ -64,7 +59,7 @@ public class OAIHeadersSplitEnumerator extends
       backgroundHeaderHarvester.start();
     }else{
       LOGGER.info("Headers already harvested and saved in the DB. Finished: {} of {} all records.",
-          finishedRecordCount, recordsToBeProcessed);
+          emittedRecordCount, recordsToBeProcessed);
     }
   }
 
@@ -74,8 +69,10 @@ public class OAIHeadersSplitEnumerator extends
   }
 
   @Override
-  protected OAIEnumeratorStateBuilder createSnapshotBuilder() {
-    return OAIEnumeratorState.builder().headersHarvested(headersHarvested);
+  protected OAIEnumeratorState createState() {
+    OAIEnumeratorState state = new OAIEnumeratorState();
+    state.setHeadersHarvested(headersHarvested);
+    return state;
   }
 
   @Override

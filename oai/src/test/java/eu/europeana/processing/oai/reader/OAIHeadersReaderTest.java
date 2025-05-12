@@ -36,7 +36,7 @@ class OAIHeadersReaderTest extends AbstractOAISourceTest {
         .thenReturn(List.of(HEADER_1, HEADER_2)));
     try (OAIHeadersReader reader = new OAIHeadersReader(context, parameterTool)) {
       reader.start();
-      reader.addSplits(List.of(new DataPartition(OFFSET, LIMIT)));
+      reader.addSplits(List.of(new DataPartition(OFFSET, LIMIT, 0)));
 
       //TODO the implementation return bad status. It looks that is does not matter much for Flink,
       //because it executes reader.isAvailable() which return unmodified already completed feature

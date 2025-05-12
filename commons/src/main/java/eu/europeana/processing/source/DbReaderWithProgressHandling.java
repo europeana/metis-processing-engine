@@ -46,7 +46,6 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
     private List<DataPartition> currentSplits = new ArrayList<>();
     protected DbConnectionProvider dbConnectionProvider;
     protected DataPartition currentSplit;
-    private int currentSplitEmittedRecordCount;
 
     protected DbReaderWithProgressHandling(
             SourceReaderContext context,
@@ -99,8 +98,10 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
                 currentSplits.removeFirst();
                 splitFetched = false;
                 polledRecords = null;
+                //This is somehow reduntat to progress event, but shoudl correct situtation when
+                //there were fetched less records than planned
                 context.sendSourceEventToCoordinator(
-                    new SplitCompletedEvent(currentCheckpointId, currentSplit, currentSplitEmittedRecordCount)
+                    new SplitCompletedEvent(currentSplit.splitId(), currentSplit.getLimit())
                 );
                 currentSplit = null;
                 return InputStatus.MORE_AVAILABLE;
@@ -122,7 +123,18 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
         LOGGER.debug("There are {} records pending and {} pending for current checkpoint with id: {}",
             currentRecordPendingCount ,currentlyPendingForThisCheckpoint, currentCheckpointId);
         output.collect(executionRecord);
-        currentSplitEmittedRecordCount++;
+        currentSplit = currentSplit.withProgress(currentSplit.getProgress() + 1);
+        emitProgressEvent();
+    }
+
+    private void emitProgressEvent() {
+        if (currentSplit != null) {
+            //TODO we could consider if we need to sent the event every time although it does not look as a big overhead.
+            //Cause it is not every record but only every snapshot.
+            context.sendSourceEventToCoordinator(
+                new ProgressSnapshotEvent(currentCheckpointId, currentSplit.splitId(), currentSplit.getProgress()));
+        }
+
     }
 
     private void fetchRecordsIfNeeded() throws IOException {
@@ -132,7 +144,6 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
             polledRecords = new LinkedList<>(fetchRecords());
 
             currentSplitCommittedRecordCount = 0;
-            currentSplitEmittedRecordCount = 0;
         } else {
             LOGGER.debug("Already fetched records exist");
         }
@@ -160,22 +171,9 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
 
     @Override
     public List<DataPartition> snapshotState(long checkpointId) {
-        LOGGER.info("Storing snapshot for checkpoint with id: {}", checkpointId);
+        LOGGER.info("Storing snapshot for checkpoint with id: {}, snapshot: {}", checkpointId, currentSplit);
         this.currentCheckpointId = checkpointId;
-
-        if (currentSplit != null) {
-            //TODO we could consider if we need to sent the event every time although it does not look as a big overhead.
-            //Cause it is not every record but only every snapshot.
-            context.sendSourceEventToCoordinator(
-                new ProgressSnapshotEvent(currentCheckpointId, currentSplit, currentSplitEmittedRecordCount));
-        }
-
-        //TODO Validate if this method returns valid content. It could return partition with somehow stored progress for
-        // current split. It could be used in case of failure when this split goes back to the enumerator and could be used
-        // for more current and actual progress state storing in case of failure. Cause the progress send in event coudl be
-        // somehow delayed in this case it is stored in the state so could be on time,
-        // but it would go to th enumerator only in case of failure. So would be interpreted only after failure.
-        return List.of();
+        return List.of(currentSplit);
     }
 
     @Override

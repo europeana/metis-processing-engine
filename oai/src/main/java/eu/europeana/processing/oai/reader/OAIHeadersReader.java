@@ -40,8 +40,8 @@ public class OAIHeadersReader extends DbReaderWithProgressHandling<OaiRecordHead
     return repository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(
         parameterTool.getRequired(JobParamName.DATASET_ID),
         parameterTool.getRequired(JobParamName.TASK_ID),
-        currentSplit.offset(),
-        currentSplit.limit());
+        currentSplit.getOffset(),
+        currentSplit.getLimit());
   }
 
 }

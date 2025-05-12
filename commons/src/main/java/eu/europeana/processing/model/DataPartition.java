@@ -1,20 +1,28 @@
 package eu.europeana.processing.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Value;
+import lombok.With;
 import org.apache.flink.api.connector.source.SourceSplit;
 
 import java.io.Serializable;
 
 /**
- * Record describing actual partition of data that is delivered to reader
+ * Class describing actual partition of data that is delivered to reader
  *
- * @param offset database offset used by read to query the data
- * @param limit database limit used by reader to query the data
  */
-public record DataPartition(long offset, long limit) implements SourceSplit, Serializable {
+@Value
+@AllArgsConstructor
+public class DataPartition implements AbstractPartition {
 
-    //TODO Check if is it proper implementation.
+    long offset;
+    long limit;
+    @With
+    long progress;
+
     @Override
     public String splitId() {
-        return "customSplitId";
+        return offset+"_"+limit;
     }
+
 }

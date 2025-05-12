@@ -51,7 +51,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
   void shouldStartBackgroundHeadersHarvestingIfNotHarvestedYet() throws IOException {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, null, jobUuid)) {
 
       enumerator.start();
 
@@ -68,7 +68,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
                                                  .headersHarvested(true)
                                                  .incompletePartitions(emptyList())
                                                  .build();
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, state, parameterTool, jobUuid)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, state, jobUuid)) {
 
       enumerator.start();
 
@@ -90,7 +90,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
       verify(context, never()).assignSplit(any(), anyInt());
       enumerator.notifyNewHeaderSavedInDB(5);
 
-      verify(context).assignSplit(new DataPartition(0, 5), SUBTASK_ID);
+      verify(context).assignSplit(new DataPartition(0, 5, 0), SUBTASK_ID);
     }
   }
 
@@ -105,7 +105,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
       enumerator.notifyNewHeaderSavedInDB(5);
       enumerator.handleSplitRequest(SUBTASK_ID, "");
 
-      verify(context).assignSplit(new DataPartition(0, 5), SUBTASK_ID);
+      verify(context).assignSplit(new DataPartition(0, 5, 0), SUBTASK_ID);
     }
   }
 
@@ -118,7 +118,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
       enumerator.start();
       enumerator.notifyHeaderHarvestingFinished();
 
-      OAIEnumeratorState snapshot = enumerator.createSnapshotBuilder().build();
+      OAIEnumeratorState snapshot = enumerator.snapshotState(0);
 
       assertTrue(snapshot.isHeadersHarvested());
     }

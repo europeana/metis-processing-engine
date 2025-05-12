@@ -41,7 +41,7 @@ public class RegularDbReader extends DbReaderWithProgressHandling<ExecutionRecor
     return executionRecordRepository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(
         parameterTool.getRequired(JobParamName.DATASET_ID),
         parameterTool.getRequired(JobParamName.EXECUTION_ID),
-        currentSplit.offset(), currentSplit.limit());
+        currentSplit.getOffset(), currentSplit.getLimit());
   }
 
 }

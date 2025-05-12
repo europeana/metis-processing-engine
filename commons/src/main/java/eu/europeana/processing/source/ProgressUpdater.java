@@ -1,4 +1,4 @@
-package eu.europeana.processing.http.reader;
+package eu.europeana.processing.source;
 
 import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.job.JobParamName;
@@ -19,8 +19,8 @@ public class ProgressUpdater implements Closeable {
   private final long taskId;
   private final DbConnectionProvider dbConnectionProvider;
   private final TaskInfoRepository taskInfoRepo;
-  private int lastStoredFilesCount;
-  private int snapshottedEmittedFilesCount = -1;
+  private long lastStoredFilesCount;
+  private long snapshottedEmittedFilesCount = -1;
 
   /**
    * Creates ProgressUpdater
@@ -28,7 +28,7 @@ public class ProgressUpdater implements Closeable {
    * @param completedFilesCount - number of files already completed. It is greater than 0 only if the
    * source is restored from a checkpoint.
    */
-  public ProgressUpdater(ParameterTool parameterTool, int completedFilesCount) {
+  public ProgressUpdater(ParameterTool parameterTool, long completedFilesCount) {
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     lastStoredFilesCount = completedFilesCount;
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
@@ -42,7 +42,7 @@ public class ProgressUpdater implements Closeable {
    * This count that is later saved as progress into DB after the checkpoint is completed.
    * @param shapshotedEmittedFilesCount - number of emitted files.
    */
-  public void snapshotEmittedFilesCount(int shapshotedEmittedFilesCount) {
+  public void snapshotEmittedFilesCount(long shapshotedEmittedFilesCount) {
     this.snapshottedEmittedFilesCount = shapshotedEmittedFilesCount;
 
   }
@@ -54,8 +54,15 @@ public class ProgressUpdater implements Closeable {
   public void saveProgressInDB() {
     if (snapshottedEmittedFilesCount != lastStoredFilesCount) {
       TaskInfo taskInfo = new TaskInfo(taskId, 0, snapshottedEmittedFilesCount);
+      //TODO The repository uses retries in case of failure, but because updating progress is not a key feature,
+      // without it the task should finish its work properly. Beside that we could omit some updates of progress
+      // as long as we store last progress, when the task is whole complete.
+      // So we could consider more sophisticated failover mechanism with lesser impact on the execution.
       taskInfoRepo.update(taskInfo);
       lastStoredFilesCount = snapshottedEmittedFilesCount;
+      LOGGER.info("Updated task progress in DB: {}", taskInfo);
+    }else{
+      LOGGER.info("Need not update progress for: {}", taskId);
     }
   }
 

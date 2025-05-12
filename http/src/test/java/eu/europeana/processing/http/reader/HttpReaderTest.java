@@ -12,6 +12,7 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
+import eu.europeana.processing.source.SplitCompletedEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -107,7 +108,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedRecordFromZip2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
-    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 2));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -134,7 +135,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedExtractedRecord2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
-    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 2));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -157,7 +158,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(State.SUCCESS, reader.isAvailable().state());
     assertEquals(badFilePath.toString(), emitCaptor.getValue().getRecordId());
     assertNotNull(emitCaptor.getValue().getException());
-    verify(context).sendSourceEventToCoordinator(new SplitEmittedEvent("0", 1));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 1));
   }
 
   @Test

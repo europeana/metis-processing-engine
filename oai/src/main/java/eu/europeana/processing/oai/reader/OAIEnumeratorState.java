@@ -4,16 +4,20 @@ import eu.europeana.processing.source.DbEnumeratorState;
 import java.io.Serial;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 /**
  * State of the OAIHeadersSplitEnumerator
  */
-@SuperBuilder
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@Setter
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 public class OAIEnumeratorState extends DbEnumeratorState {
 
   @Serial

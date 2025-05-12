@@ -37,13 +37,13 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, 
 
   @Override
   public SplitEnumerator<DataPartition, OAIEnumeratorState> createEnumerator(SplitEnumeratorContext<DataPartition> enumContext) {
-    return new OAIHeadersSplitEnumerator(enumContext, parameterTool, jobUuid);
+    return new OAIHeadersSplitEnumerator(enumContext, parameterTool, null, jobUuid);
   }
 
   @Override
   public SplitEnumerator<DataPartition, OAIEnumeratorState> restoreEnumerator(SplitEnumeratorContext<DataPartition> enumContext,
       OAIEnumeratorState state) {
-    return new OAIHeadersSplitEnumerator(enumContext, state, parameterTool, jobUuid);
+    return new OAIHeadersSplitEnumerator(enumContext, parameterTool, state, jobUuid);
   }
 
   @Override
