@@ -74,7 +74,7 @@ class OaiFlinkPerformanceIT extends AbstractPerformanceIT {
             ENRICHMENT_ENTITY_MANAGEMENT_URL, jobsConfigurationProperties.getEnrichment().getEntityManagementUrl(),
             ENRICHMENT_ENTITY_API_URL, jobsConfigurationProperties.getEnrichment().getEntityApiUrl(),
             ENRICHMENT_ENTITY_API_TOKEN_ENDPOINT, jobsConfigurationProperties.getEnrichment().getEntityApiTokenEndpoint(),
-            ENRICHMENT_ENTITY_API_GRANT_PARAMS,jobsConfigurationProperties.getEnrichment().getEntityApiGrantParams()));
+            ENRICHMENT_ENTITY_API_GRANT_PARAMS, jobsConfigurationProperties.getEnrichment().getEntityApiGrantParams()));
 
   }
 

@@ -9,7 +9,7 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 
-import eu.europeana.processing.sink.DbSinkFunction;
+import eu.europeana.processing.sink.DbSink;
 import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *   <li>source responsible for downloading archive file from http url and providing content of the files contained in it.
  *   Defined in {@link HttpSource}</li>
  *   <li>operator responsible for assigning identifiers to the records {@link IdAssigningOperator}</li>
- *   <li>sink defined in {@link eu.europeana.processing.sink.DbSinkFunction}</li>
+ *   <li>sink defined in {@link eu.europeana.processing.sink.DbSink}</li>
  * </ul>
  *
  * <p><b>How to run the job</b></p>
@@ -70,7 +70,7 @@ public class HttpHarvestingJob extends MetisJob {
         flinkEnvironment.fromSource(
             new HttpSource(tool), WatermarkStrategy.noWatermarks(), createHttpSourceName()).setParallelism(readerParallelism)
                         .process(new IdAssigningOperator()).setParallelism(operatorParallelism)
-                        .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
+                        .sinkTo(new DbSink(tool));
     }
 
     /**

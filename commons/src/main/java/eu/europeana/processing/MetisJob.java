@@ -7,7 +7,7 @@ import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.repository.TaskInfoRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
-import eu.europeana.processing.sink.DbSinkFunction;
+import eu.europeana.processing.sink.DbSink;
 import eu.europeana.processing.source.DbSourceWithProgressHandling;
 import eu.europeana.processing.validation.JobParamValidator;
 import java.time.Duration;
@@ -103,7 +103,7 @@ public abstract class MetisJob {
             .fromSource(new DbSourceWithProgressHandling(tool), WatermarkStrategy.noWatermarks(), createSourceName())
             .setParallelism(readerParallelism)
             .process(getMainOperator()).setParallelism(operatorParallelism)
-            .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
+            .sinkTo(new DbSink(tool));
     }
 
     /**

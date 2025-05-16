@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>source defined in {@link eu.europeana.processing.source.DbSourceWithProgressHandling}</li>
  *   <li>operator responsible for transforming the {@link ExecutionRecord} instances defined in {@link eu.europeana.processing.transformation.processor.TransformationOperator}</li>
- *   <li>sink defined in {@link eu.europeana.processing.sink.DbSinkFunction}</li>
+ *   <li>sink defined in {@link eu.europeana.processing.sink.DbSink}</li>
  * </ul>
  *
  * <p><b>How to run the job</b></p>
