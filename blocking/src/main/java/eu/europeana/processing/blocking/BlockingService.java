@@ -45,7 +45,7 @@ public final class BlockingService {
    * @throws ExecutionException - if the new Semaphore could not be created, what should never happen in practice
    */
   @SuppressWarnings("java:S1147")
-  public static void aquireLock(String jobUuid) throws InterruptedException, ExecutionException {
+  public static void acquireLock(String jobUuid) throws InterruptedException, ExecutionException {
     Semaphore semaphore = semaphores.get(jobUuid, () -> new Semaphore(1));
     if (semaphore.availablePermits() == 0) {
       LOGGER.warn("Waiting for lock for the job (uuid: {}) ...", jobUuid);

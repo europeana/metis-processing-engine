@@ -43,7 +43,7 @@ public class OAIBackgroundHeaderHarvester {
   private final ParameterTool parameterTool;
   private final OAIHeadersSplitEnumerator enumerator;
   private final String jobUuid;
-  private ExecutorService backgroudExecutor;
+  private ExecutorService backgroundExecutor;
   private Future<?> future;
   private int harvestedHeaders;
   private StopWatch progressWatch;
@@ -74,8 +74,8 @@ public class OAIBackgroundHeaderHarvester {
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
     repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(dbConnectionProvider));
     LOGGER.info("OAIBackgroundHeaderHarvester - starting background thread");
-    backgroudExecutor = Executors.newFixedThreadPool(1, r -> new Thread(r, "OAI-harvesting-" + dataset));
-    future = backgroudExecutor.submit(this::execute);
+    backgroundExecutor = Executors.newFixedThreadPool(1, r -> new Thread(r, "OAI-harvesting-" + dataset));
+    future = backgroundExecutor.submit(this::execute);
   }
 
   /**
@@ -85,7 +85,7 @@ public class OAIBackgroundHeaderHarvester {
   public void close() throws InterruptedException {
     try {
       LOGGER.info("Closing OAIBackgroundHeaderHarvester...");
-      backgroudExecutor.shutdownNow();
+      backgroundExecutor.shutdownNow();
       //We could block on get without timeout, cause Flink will kill process if it would take too long.
       future.get();
       if (dbConnectionProvider != null) {
@@ -100,7 +100,7 @@ public class OAIBackgroundHeaderHarvester {
 
   private void execute() {
     try{
-      BlockingService.aquireLock(jobUuid);
+      BlockingService.acquireLock(jobUuid);
       progressWatch = StopWatch.createStarted();
       int headersFromPreviousExecutionsCount= countHeadersFromPreviousExecutions();
       harvestHeaders(headersFromPreviousExecutionsCount);

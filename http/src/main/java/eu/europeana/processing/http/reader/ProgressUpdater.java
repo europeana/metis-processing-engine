@@ -1,7 +1,6 @@
 package eu.europeana.processing.http.reader;
 
 import eu.europeana.processing.DbConnectionProvider;
-import eu.europeana.processing.http.reader.exception.HttpSourceException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.repository.TaskInfoRepository;
@@ -21,7 +20,7 @@ public class ProgressUpdater implements Closeable {
   private final DbConnectionProvider dbConnectionProvider;
   private final TaskInfoRepository taskInfoRepo;
   private int lastStoredFilesCount;
-  private int shapshotedEmittedFilesCount = -1;
+  private int snapshottedEmittedFilesCount = -1;
 
   /**
    * Creates ProgressUpdater
@@ -44,7 +43,7 @@ public class ProgressUpdater implements Closeable {
    * @param shapshotedEmittedFilesCount - number of emitted files.
    */
   public void snapshotEmittedFilesCount(int shapshotedEmittedFilesCount) {
-    this.shapshotedEmittedFilesCount = shapshotedEmittedFilesCount;
+    this.snapshottedEmittedFilesCount = shapshotedEmittedFilesCount;
 
   }
 
@@ -53,10 +52,10 @@ public class ProgressUpdater implements Closeable {
    * what means that the emitted files are already stored in the DB.
    */
   public void saveProgressInDB() {
-    if (shapshotedEmittedFilesCount != lastStoredFilesCount) {
-      TaskInfo taskInfo = new TaskInfo(taskId, 0, shapshotedEmittedFilesCount);
+    if (snapshottedEmittedFilesCount != lastStoredFilesCount) {
+      TaskInfo taskInfo = new TaskInfo(taskId, 0, snapshottedEmittedFilesCount);
       taskInfoRepo.update(taskInfo);
-      lastStoredFilesCount = shapshotedEmittedFilesCount;
+      lastStoredFilesCount = snapshottedEmittedFilesCount;
     }
   }
 

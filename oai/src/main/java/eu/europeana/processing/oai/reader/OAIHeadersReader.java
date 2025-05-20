@@ -8,7 +8,6 @@ import eu.europeana.processing.source.DbReaderWithProgressHandling;
 import java.io.IOException;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.util.ParameterTool;
-import org.apache.flink.core.io.InputStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

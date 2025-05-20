@@ -32,8 +32,8 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
     private CompletableFuture<Void> readerAvailable = new CompletableFuture<>();
     private final int maxRecordPending;
     private int currentRecordPendingCount;
-    private int allCommitedRecordCount;
-    private int currentSplitCommitedRecordCount;
+    private int allCommittedRecordCount;
+    private int currentSplitCommittedRecordCount;
     private final TreeMap<Long, Integer> recordPendingCountPerCheckpoint = new TreeMap<>();
     private boolean splitFetched = false;
     private boolean noMoreSplits = false;
@@ -48,7 +48,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
     protected DataPartition currentSplit;
     private int currentSplitEmittedRecordCount;
 
-    public DbReaderWithProgressHandling(
+    protected DbReaderWithProgressHandling(
             SourceReaderContext context,
             ParameterTool parameterTool) {
         this.context = context;
@@ -95,7 +95,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
             }else {
                 LOGGER.debug("Removing split: {} due to exhaustion of polled record set"
                         + ", after commit: {} records of: {} all commited, ",
-                   currentSplit , currentSplitCommitedRecordCount, allCommitedRecordCount);
+                   currentSplit , currentSplitCommittedRecordCount, allCommittedRecordCount);
                 currentSplits.removeFirst();
                 splitFetched = false;
                 polledRecords = null;
@@ -131,7 +131,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
             LOGGER.debug("Fetching records from database");
             polledRecords = new LinkedList<>(fetchRecords());
 
-            currentSplitCommitedRecordCount = 0;
+            currentSplitCommittedRecordCount = 0;
             currentSplitEmittedRecordCount = 0;
         } else {
             LOGGER.debug("Already fetched records exist");
@@ -217,12 +217,12 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
                 .stream().map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
         if (committedRecordPendingCount > 0) {
-            allCommitedRecordCount += committedRecordPendingCount;
-            currentSplitCommitedRecordCount += committedRecordPendingCount;
+            allCommittedRecordCount += committedRecordPendingCount;
+            currentSplitCommittedRecordCount += committedRecordPendingCount;
             currentRecordPendingCount -= committedRecordPendingCount;
             LOGGER.debug("Pending records state updated successfully! Increased commited records by: {}"
                     + ", commited in current split: {}, all commited: {}"
-                , committedRecordPendingCount, currentSplitCommitedRecordCount, allCommitedRecordCount);
+                , committedRecordPendingCount, currentSplitCommittedRecordCount, allCommittedRecordCount);
         } else {
             LOGGER.debug("Pending records state did not changed for checkpoint with id: {} or less", completedCheckpointId);
         }

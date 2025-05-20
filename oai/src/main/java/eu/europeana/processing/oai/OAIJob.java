@@ -13,7 +13,6 @@ import eu.europeana.processing.sink.DbSinkFunction;
 import eu.europeana.processing.oai.reader.OAIHeadersSource;
 import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
