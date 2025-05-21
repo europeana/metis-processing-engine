@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     net-tools \
     dnsutils \
     vim \
+    s3fs \
+    fuse \
     && rm -rf /var/lib/apt/lists/*
 
 COPY install.sh /
