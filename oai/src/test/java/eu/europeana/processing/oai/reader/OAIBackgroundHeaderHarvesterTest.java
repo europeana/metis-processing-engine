@@ -12,6 +12,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.flink.util.ParameterTool;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +45,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
-
   private String jobUuid=UUID.randomUUID().toString();
   @Mock
   private OAIHeadersSplitEnumerator enumerator;
@@ -110,6 +112,8 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
   void shouldNotifyEnumeratorAboutFailure() {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.getExistingIdentifiers(any(), any(), any())).thenReturn(Collections.emptySet()));
+
+
     ParameterTool parameterTool = ParameterTool.fromMap(Map.of(DATASET_ID, DATASET, TASK_ID, TASK,
         OAI_REPOSITORY_URL, "https://unknown-dns-adres14395.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
@@ -126,17 +130,24 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
   @Test
   void shouldStopProcessingWhenCloseInvoked() throws IOException, InterruptedException {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
-        -> when(repository.getExistingIdentifiers(any(), any(), any())).thenReturn(Collections.emptySet()));
+        ->  when(repository.getExistingIdentifiers(any(), any(), any())).thenReturn(Collections.emptySet()));
+    doAnswer(invocation->sleepStubbornly(500L))
+        .when(enumerator).notifyNewHeaderSavedInDB(anyInt());
     ParameterTool parameterTool = ParameterTool.fromMap(Map.of(DATASET_ID, DATASET, TASK_ID, TASK,
         OAI_REPOSITORY_URL, "https://metis-repository-rest.test.eanadev.org/repository/oai",
         METADATA_PREFIX, "edm",
-        SET_SPEC, "ecloud_e2e_tests_without_4_records"));
+        SET_SPEC, "Heide2000elements"));
     harvester = new OAIBackgroundHeaderHarvester(enumerator, parameterTool, jobUuid);
     harvester.start();
     OAIHeadersRepository repository = repositoryConstruction.constructed().getFirst();
-    //We sleep to ensure that background executor had time to start.
-    Thread.sleep(500);
+    //We wait for first save to be done.
+    await().atMost(Duration.ofSeconds(30)).pollInterval(Duration.ofMillis(100))
+           .untilAsserted(() -> verify(enumerator).notifyNewHeaderSavedInDB(anyInt()));
+    clearInvocations(enumerator, repository);
+
     harvester.close();
+
+    Thread.sleep(2000);
     verify(repository, never()).save(any(), any(), any(), anyInt());
     verifyNoInteractions(enumerator);
   }
@@ -163,6 +174,26 @@ class OAIBackgroundHeaderHarvesterTest extends AbstractOAISourceTest {
     //Index of first element in last batch could not be smaller than: 1000 - batch size
     assertThat(savedCountCaptor.getValue()).isGreaterThanOrEqualTo(1000 - BatchHeaderSaver.MAX_BATCH_SIZE);
     assertEquals(1000, notifiedCountCaptor.getValue());
+  }
+
+  private Void sleepStubbornly(long millis) {
+    StopWatch watch = StopWatch.createStarted();
+    boolean interrupted = false;
+    while (true) {
+      try {
+        long sleepTime = millis - watch.getTime();
+        if (sleepTime <= 0) {
+          if (interrupted) {
+            Thread.currentThread().interrupt();
+          }
+          return null;
+        }
+        Thread.sleep(sleepTime);
+      } catch (InterruptedException ignored) {
+        interrupted = true;
+      }
+    }
+
   }
 
 }
