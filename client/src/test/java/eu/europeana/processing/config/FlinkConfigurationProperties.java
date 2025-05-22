@@ -9,6 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @ConfigurationProperties(prefix = "flink")
 public class FlinkConfigurationProperties {
+  ClusterMode clusterMode;
+  String configTemplateDir;
+  String openshiftProject;
   String jobManagerUrl;
   String jobManagerUser;
   String jobManagerPassword;

@@ -84,7 +84,6 @@
       <version>${flink-shaded-guava.version}</version>
       <scope>test</scope><!-- Adjust the version as needed -->
     </dependency>
-
   </dependencies>
 
   <build>

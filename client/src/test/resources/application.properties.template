@@ -47,6 +47,9 @@ test.dataset-id=12
 
 
 #Flink related
+flink.clusterMode=SESSION
+flink.configTemplateDir=
+flink.openshiftProject=
 flink.jobManagerUrl=
 flink.jar.id.oai=3c2af5ad-3005-4f5c-bb38-8eea9482171c_metis-processing-engine-oai-1.0-SNAPSHOT.jar
 flink.jar.id.validation=58b42250-5795-4835-8b6a-651d0fed5ca8_metis-processing-engine-validation-1.0-SNAPSHOT.jar
