@@ -103,7 +103,7 @@ public abstract class MetisJob {
             .fromSource(new DbSourceWithProgressHandling(tool), WatermarkStrategy.noWatermarks(), createSourceName())
             .setParallelism(readerParallelism)
             .process(getMainOperator()).setParallelism(operatorParallelism)
-            .sinkTo(new DbSink(tool));
+            .sinkTo(new DbSink(tool)).setParallelism(sinkParallelism);
     }
 
     /**

@@ -70,7 +70,7 @@ public class HttpHarvestingJob extends MetisJob {
         flinkEnvironment.fromSource(
             new HttpSource(tool), WatermarkStrategy.noWatermarks(), createHttpSourceName()).setParallelism(readerParallelism)
                         .process(new IdAssigningOperator()).setParallelism(operatorParallelism)
-                        .sinkTo(new DbSink(tool));
+                        .sinkTo(new DbSink(tool)).setParallelism(sinkParallelism);
     }
 
     /**
