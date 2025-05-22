@@ -4,11 +4,9 @@ import eu.europeana.processing.MetisJob;
 import eu.europeana.processing.indexing.processor.IndexingOperator;
 import eu.europeana.processing.indexing.validation.IndexingJobParamValidator;
 import eu.europeana.processing.job.JobName;
-import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.validation.JobParamValidator;
-import java.util.Set;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>source defined in {@link eu.europeana.processing.source.DbSourceWithProgressHandling}</li>
  *   <li>operator responsible for indexing the {@link ExecutionRecord} instances defined in {@link IndexingOperator}</li>
- *   <li>sink defined in {@link eu.europeana.processing.sink.DbSinkFunction}</li>
+ *   <li>sink defined in {@link eu.europeana.processing.sink.DbSink}</li>
  * </ul>
  *
  * <p><b>How to run the job</b></p>

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>source defined in {@link eu.europeana.processing.source.DbSourceWithProgressHandling}</li>
  *   <li>operator responsible for media processing in the {@link ExecutionRecord} instances defined in {@link MediaOperator}</li>
- *   <li>sink defined in {@link eu.europeana.processing.sink.DbSinkFunction}</li>
+ *   <li>sink defined in {@link eu.europeana.processing.sink.DbSink}</li>
  * </ul>
  *
  * <p><b>How to run the job</b></p>

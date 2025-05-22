@@ -9,7 +9,7 @@ import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.oai.validation.OAIJobParamValidator;
-import eu.europeana.processing.sink.DbSinkFunction;
+import eu.europeana.processing.sink.DbSink;
 import eu.europeana.processing.oai.reader.OAIHeadersSource;
 import eu.europeana.processing.validation.JobParamValidator;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *   <li>source defined in {@link OAIHeadersSource}</li>
  *   <li>operator responsible for downloading records from OAI source {@link RecordHarvestingOperator}</li>
  *   <li>operator responsible for assigning identifiers to the records {@link IdAssigningOperator}</li>
- *   <li>sink defined in {@link eu.europeana.processing.sink.DbSinkFunction}</li>
+ *   <li>sink defined in {@link eu.europeana.processing.sink.DbSink}</li>
  * </ul>
  *
  * <p><b>How to run the job</b></p>
@@ -79,7 +79,7 @@ public class OAIJob extends MetisJob {
         .filter(new DeletedRecordFilter()).setParallelism(operatorParallelism)
         .process(new RecordHarvestingOperator(tool)).setParallelism(operatorParallelism)
         .process(new IdAssigningOperator()).setParallelism(operatorParallelism)
-        .addSink(new DbSinkFunction()).setParallelism(sinkParallelism);
+                .sinkTo(new DbSink(tool)).setParallelism(sinkParallelism);
   }
 
   /**
