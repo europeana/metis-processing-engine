@@ -8,8 +8,10 @@ import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
@@ -44,6 +46,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   protected final Map<String, P> returnedPartitions = new LinkedHashMap<>();
   protected final Map<String, P> executingPartitions = new LinkedHashMap<>();
   protected long recordsToBeProcessed = NOT_EVALUATED;
+  protected Queue<Integer> waitingReaders = new LinkedList<>();
   /**
    * Constructor used when state restoration is needed;
    *
@@ -109,6 +112,16 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   }
 
   protected void handleNoPartitionsAvailable(int subtaskId) {
+    if (isFinished()) {
+      notifyNoMoreSplits(subtaskId);
+    } else {
+      waitingReaders.add(subtaskId);
+      LOGGER.info("No more splits currently available for subtask: {}, waiting readers: {}!", subtaskId, waitingReaders);
+    }
+  }
+
+
+  protected void notifyNoMoreSplits(int subtaskId) {
     LOGGER.info("No more remaining splits, currently executing {} splits!", executingPartitions.size());
     context.signalNoMoreSplits(subtaskId);
   }
@@ -165,6 +178,9 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
     executingPartitions.remove(event.getSplitId());
     LOGGER.info("Split completed: {}. Now executing {} splits. Finished {} of: {} records.",
         event, executingPartitions.size(), emittedRecordCount, recordsToBeProcessed);
+    if (isFinished()) {
+      tryAssignWaitingReaders();
+    }
   }
 
   @Override
@@ -216,6 +232,18 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   private void validateTaskExists() {
     if (taskInfoRepo.findById(taskId).isEmpty()) {
       throw new SuppressRestartsException(new Exception("Task not found in the database. It should never happen."));
+    }
+  }
+
+  protected boolean isFinished() {
+    return executingPartitions.isEmpty() && returnedPartitions.isEmpty();
+  }
+
+  protected void tryAssignWaitingReaders() {
+    Queue<Integer> readyReaders = waitingReaders;
+    waitingReaders = new LinkedList<>();
+    for (int reader : readyReaders) {
+      handleSplitRequest(reader, "");
     }
   }
 

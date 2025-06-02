@@ -26,9 +26,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersSplitEnumerator.class);
   private OAIHeadersRepository repository;
   private final OAIBackgroundHeaderHarvester backgroundHeaderHarvester;
-  private Queue<Integer> waitingReaders = new LinkedList<>();
   private boolean headersHarvested;
-
 
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool, String jobUuid) {
     this(context,parameterTool,null,jobUuid);
@@ -93,16 +91,6 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
         parameterTool.getRequired(JobParamName.TASK_ID));
   }
 
-  @Override
-  protected void handleNoPartitionsAvailable(int subtaskId) {
-    if (headersHarvested) {
-      super.handleNoPartitionsAvailable(subtaskId);
-    } else {
-      waitingReaders.add(subtaskId);
-      LOGGER.info("No more splits currently available for subtask: {}, waiting readers: {}!", subtaskId, waitingReaders);
-    }
-  }
-
   /**
    * Inform the enumerator that new headers were harvested and saved in DB by background thread.
    *
@@ -138,12 +126,9 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
     });
   }
 
-  private void tryAssignWaitingReaders() {
-    Queue<Integer> readyReaders = waitingReaders;
-    waitingReaders = new LinkedList<>();
-    for (int reader : readyReaders) {
-      handleSplitRequest(reader, "");
-    }
+  @Override
+  protected boolean isFinished() {
+    return super.isFinished() && headersHarvested;
   }
 
 }

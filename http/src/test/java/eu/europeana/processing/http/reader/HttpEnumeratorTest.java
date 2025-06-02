@@ -152,13 +152,15 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   }
 
   @Test
-  void shouldProperlyDetectWhenAllSplitStarted()  throws IOException {
+  void shouldProperlyDetectWhenAllSplitsAreFinished()  throws IOException {
     try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent(expectedSplit1.splitId(), expectedSplit1.getLimit()));
+      enumerator.handleSourceEvent(SUBTASK1_ID, new SplitCompletedEvent(expectedSplit2.splitId(), expectedSplit2.getLimit()));
     }
 
     InOrder inOrder = inOrder(context);

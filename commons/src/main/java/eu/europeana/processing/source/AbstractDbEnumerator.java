@@ -73,4 +73,5 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
     state.setRecordsToBeProcessed(recordsToBeProcessed);
     return state;
   }
+
 }
