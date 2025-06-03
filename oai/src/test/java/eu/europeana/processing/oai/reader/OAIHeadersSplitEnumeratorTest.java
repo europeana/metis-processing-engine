@@ -33,6 +33,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
 
   private static final int SUBTASK_ID = 7;
   private String jobUuid= UUID.randomUUID().toString();
+
   @Mock
   private SplitEnumeratorContext<DataPartition> context;
   @Mock
@@ -90,7 +91,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
       verify(context, never()).assignSplit(any(), anyInt());
       enumerator.notifyNewHeaderSavedInDB(5);
 
-      verify(context).assignSplit(new DataPartition(0, 5, 0), SUBTASK_ID);
+      verify(context).assignSplit(new DataPartition(0, 5, 0, enumerator.getEnumeratorId()), SUBTASK_ID);
     }
   }
 
@@ -105,7 +106,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
       enumerator.notifyNewHeaderSavedInDB(5);
       enumerator.handleSplitRequest(SUBTASK_ID, "");
 
-      verify(context).assignSplit(new DataPartition(0, 5, 0), SUBTASK_ID);
+      verify(context).assignSplit(new DataPartition(0, 5, 0, enumerator.getEnumeratorId()), SUBTASK_ID);
     }
   }
 

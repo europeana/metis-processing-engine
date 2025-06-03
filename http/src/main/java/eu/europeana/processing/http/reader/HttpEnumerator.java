@@ -54,7 +54,6 @@ public class HttpEnumerator extends AbstractEnumerator<HttpSourceSplit, HttpEnum
     LOGGER.info("Created enumerator for the http task id: {}. Previous state: {}", taskId, state);
   }
 
-
   @Override
   public void start() {
     LOGGER.debug("Starting HttpEnumerator for task id: {}, downloaded file: {}, extractionMode: {},"
@@ -109,6 +108,7 @@ public class HttpEnumerator extends AbstractEnumerator<HttpSourceSplit, HttpEnum
                                              .downloadedArchiveFile(downloadedFile.toString())
                                              .fileNames(fileNames)
                                              .firstFileIndex(startedRecordsCount)
+                                             .enumeratorId(enumeratorId)
                                              .build();
 
       startedRecordsCount += fileNames.size();

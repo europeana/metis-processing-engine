@@ -85,7 +85,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
     output.collect(theRecord);
     assignedSplit = assignedSplit.withProgress(assignedSplit.getProgress() + 1);
     context.sendSourceEventToCoordinator(
-        new ProgressSnapshotEvent(-1, assignedSplit.splitId(), assignedSplit.getProgress()));
+        new ProgressSnapshotEvent(-1, assignedSplit.splitId(), assignedSplit.getProgress(), assignedSplit.getEnumeratorId()));
 
     if(!fileNameIterator.hasNext()){
       wholeSplitEmitted();
@@ -111,7 +111,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   private void wholeSplitEmitted() {
     context.sendSourceEventToCoordinator(
-        new SplitCompletedEvent(assignedSplit.splitId(), assignedSplit.getProgress()));
+        new SplitCompletedEvent(assignedSplit.splitId(), assignedSplit.getProgress(), assignedSplit.getEnumeratorId()));
     assignedSplit = null;
   }
 

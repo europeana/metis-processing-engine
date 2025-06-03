@@ -1,7 +1,7 @@
 package eu.europeana.processing.source;
 
-import eu.europeana.processing.model.AbstractPartition;
 import java.io.Serial;
+import java.util.UUID;
 import lombok.Value;
 import org.apache.flink.api.connector.source.SourceEvent;
 
@@ -17,4 +17,5 @@ public class SplitCompletedEvent implements SourceEvent {
   String splitId;
 
   long completedCount;
+  UUID enumeratorId;
 }

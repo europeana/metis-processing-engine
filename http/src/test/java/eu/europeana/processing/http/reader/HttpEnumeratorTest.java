@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.shaded.guava33.com.google.common.collect.Lists;
@@ -40,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -95,24 +98,20 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
                                     .fileNames(Lists.newArrayList(FILE1, FILE2, FILE3))
                                     .firstFileIndex(0)
+                                    .enumeratorId(enumeratorUuid)
                                     .build();
     expectedSplit2 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
                                     .fileNames(Lists.newArrayList(FILE4))
                                     .firstFileIndex(3)
-                                    .build();
-    expectedSplit2 = HttpSourceSplit.builder()
-                                    .downloadedArchiveFile(downLoadedFile)
-                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(Lists.newArrayList(FILE4))
-                                    .firstFileIndex(3)
+                                    .enumeratorId(enumeratorUuid)
                                     .build();
   }
 
   @Test
   void shouldAssignSplitsForRegularZip() throws IOException{
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(null)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -131,7 +130,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
         JobParamName.TASK_ID, "1"
     ));
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(null)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -146,6 +145,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ)
                                    .toString()))
                        .firstFileIndex(0)
+                       .enumeratorId(enumeratorUuid)
                        .build();
     verify(context).assignSplit(expectedTarSplit, SUBTASK0_ID);
     verify(context, never()).assignSplit(any(), eq(SUBTASK1_ID));
@@ -153,14 +153,14 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
 
   @Test
   void shouldProperlyDetectWhenAllSplitsAreFinished()  throws IOException {
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, null, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(null)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
-      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent(expectedSplit1.splitId(), expectedSplit1.getLimit()));
-      enumerator.handleSourceEvent(SUBTASK1_ID, new SplitCompletedEvent(expectedSplit2.splitId(), expectedSplit2.getLimit()));
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent(expectedSplit1.splitId(), expectedSplit1.getLimit(), enumeratorUuid));
+      enumerator.handleSourceEvent(SUBTASK1_ID, new SplitCompletedEvent(expectedSplit2.splitId(), expectedSplit2.getLimit(), enumeratorUuid));
     }
 
     InOrder inOrder = inOrder(context);
@@ -175,7 +175,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
     createIncompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().incompletePartitions(new LinkedList<>()).build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -185,14 +185,13 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
     verify(context).assignSplit(expectedSplit2, SUBTASK1_ID);
   }
 
-
   @Test
   void shouldAssignSplitsWhenFileIsAlreadyDownloadedCompletely() throws IOException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .incompletePartitions(new LinkedList<>()).build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -210,7 +209,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                                    .startedRecordsCount(3)
                                                    .incompletePartitions(new LinkedList<>()).build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -230,7 +229,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
         .startedRecordsCount(4)
         .incompletePartitions(List.of(expectedSplit2.withProgress(0))).build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       enumerator.addSplitsBack(List.of(expectedSplit2), SUBTASK1_ID);
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
@@ -250,7 +249,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                                           .incompletePartitions(List.of(expectedSplit1)).build();
 
     HttpEnumeratorState snapshot;
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, initialState, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(initialState)) {
       enumerator.start();
       snapshot = enumerator.snapshotState(1);
     }
@@ -269,18 +268,18 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                                            HttpSourceSplit.builder().firstFileIndex(10).progress(0).build()))
                                                    .build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       ProgressUpdater progressUpdater = progressUpdaterConstruction.constructed().getFirst();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
-      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent("0", 10));
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent("0", 10, enumeratorUuid));
       enumerator.snapshotState(0);
       enumerator.notifyCheckpointComplete(0);
       verify(progressUpdater).snapshotEmittedFilesCount(30);
       verify(progressUpdater).saveProgressInDB();
 
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
-      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent("10", 7));
+      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent("10", 7, enumeratorUuid));
       enumerator.snapshotState(0);
       enumerator.notifyCheckpointComplete(0);
       verify(progressUpdater).snapshotEmittedFilesCount(37);
@@ -296,7 +295,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                                                    .incompletePartitions(emptyList())
                                                    .build();
 
-    try (HttpEnumerator enumerator = new HttpEnumerator(context, state, parameterTool, jobDirectory)) {
+    try (HttpEnumerator enumerator = createEnumerator(state)) {
       enumerator.start();
       enumerator.addReader(SUBTASK0_ID);
       enumerator.notifyCheckpointAborted(0);
@@ -317,6 +316,13 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
     Files.createDirectory(Path.of(jobDirectory));
     IOUtils.copy(requireNonNull(HttpEnumeratorTest.class.getResourceAsStream(name))
         , new FileOutputStream(downLoadedFile));
+  }
+
+  private HttpEnumerator createEnumerator(HttpEnumeratorState state) {
+    try (MockedStatic<UUID> mock = mockStatic(UUID.class)) {
+      mock.when(UUID::randomUUID).thenReturn(enumeratorUuid);
+      return new HttpEnumerator(context, state, parameterTool, jobDirectory);
+    }
   }
 
   @AfterEach

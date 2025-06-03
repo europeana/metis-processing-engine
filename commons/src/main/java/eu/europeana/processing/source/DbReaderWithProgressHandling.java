@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.flink.api.connector.source.ReaderOutput;
@@ -101,7 +102,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
                 //This is somehow reduntat to progress event, but shoudl correct situtation when
                 //there were fetched less records than planned
                 context.sendSourceEventToCoordinator(
-                    new SplitCompletedEvent(currentSplit.splitId(), currentSplit.getLimit())
+                    new SplitCompletedEvent(currentSplit.splitId(), currentSplit.getLimit(), currentSplit.getEnumeratorId())
                 );
                 currentSplit = null;
                 return InputStatus.MORE_AVAILABLE;
@@ -131,8 +132,8 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
         if (currentSplit != null) {
             //TODO we could consider if we need to sent the event every time although it does not look as a big overhead.
             //Cause it is not every record but only every snapshot.
-            context.sendSourceEventToCoordinator(
-                new ProgressSnapshotEvent(currentCheckpointId, currentSplit.splitId(), currentSplit.getProgress()));
+            context.sendSourceEventToCoordinator(new ProgressSnapshotEvent(currentCheckpointId,
+                currentSplit.splitId(), currentSplit.getProgress(), currentSplit.getEnumeratorId()));
         }
 
     }
@@ -173,7 +174,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
     public List<DataPartition> snapshotState(long checkpointId) {
         LOGGER.info("Storing snapshot for checkpoint with id: {}, snapshot: {}", checkpointId, currentSplit);
         this.currentCheckpointId = checkpointId;
-        return List.of(currentSplit);
+        return Optional.ofNullable(currentSplit).stream().toList();
     }
 
     @Override

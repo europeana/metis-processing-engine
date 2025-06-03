@@ -56,7 +56,7 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
     //TODO size of the split should be adjusted to parallelization level to work optimal
     //Is good to do the adjustment in some place.
     long partitionSize = Long.min(recordsToBeProcessed - startedRecordsCount, chunkSize);
-    DataPartition partition = new DataPartition(startedRecordsCount, partitionSize, 0);
+    DataPartition partition = new DataPartition(startedRecordsCount, partitionSize, 0, enumeratorId);
     startedRecordsCount += partitionSize;
     if (partitionSize > 0) {
       return partition;

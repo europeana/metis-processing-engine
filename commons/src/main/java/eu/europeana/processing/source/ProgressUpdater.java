@@ -28,10 +28,10 @@ public class ProgressUpdater implements Closeable {
    * @param completedFilesCount - number of files already completed. It is greater than 0 only if the
    * source is restored from a checkpoint.
    */
-  public ProgressUpdater(ParameterTool parameterTool, long completedFilesCount) {
+  public ProgressUpdater(DbConnectionProvider dbConnectionProvider, ParameterTool parameterTool, long completedFilesCount) {
+    this.dbConnectionProvider = dbConnectionProvider;
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     lastStoredFilesCount = completedFilesCount;
-    dbConnectionProvider = new DbConnectionProvider(parameterTool);
     taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     LOGGER.debug("Created ProgressUpdater");
   }

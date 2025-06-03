@@ -17,7 +17,6 @@ import org.mockito.Mockito;
 public abstract class AbstractOAISourceTest {
   protected static final String DATASET = "dataset";
   protected static final String TASK = String.valueOf(11);
-
   protected static final Instant DATESTAMP_A =Instant.parse("2024-12-10T00:00:00Z");
   protected static final Instant DATESTAMP_B =Instant.parse("2024-12-01T00:00:00Z");
   static final String RECORD_ID_1 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_664______2WGTWS8_sr";

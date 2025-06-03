@@ -5,8 +5,8 @@ import static java.lang.String.valueOf;
 import eu.europeana.processing.http.reader.extractor.ExtractionMode;
 import eu.europeana.processing.model.AbstractPartition;
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
@@ -26,7 +26,8 @@ public class HttpSourceSplit implements AbstractPartition {
   String downloadedArchiveFile;
   long firstFileIndex;
   ArrayList<String> fileNames;
-
+  @With
+  UUID enumeratorId;
   @With
   long progress;
 

@@ -8,6 +8,7 @@ import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import java.util.List;
+import java.util.UUID;
 import org.apache.flink.api.connector.source.ReaderOutput;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.core.io.InputStatus;
@@ -22,7 +23,7 @@ class OAIHeadersReaderTest extends AbstractOAISourceTest {
 
   private static final long OFFSET = 10;
   private static final long LIMIT = 2;
-
+  protected UUID enumeratorUuid = UUID.randomUUID();
   @Mock
   private SourceReaderContext context;
   @Mock
@@ -36,7 +37,7 @@ class OAIHeadersReaderTest extends AbstractOAISourceTest {
         .thenReturn(List.of(HEADER_1, HEADER_2)));
     try (OAIHeadersReader reader = new OAIHeadersReader(context, parameterTool)) {
       reader.start();
-      reader.addSplits(List.of(new DataPartition(OFFSET, LIMIT, 0)));
+      reader.addSplits(List.of(new DataPartition(OFFSET, LIMIT, 0, enumeratorUuid)));
 
       //TODO the implementation return bad status. It looks that is does not matter much for Flink,
       //because it executes reader.isAvailable() which return unmodified already completed feature

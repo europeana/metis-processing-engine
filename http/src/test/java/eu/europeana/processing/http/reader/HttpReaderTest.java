@@ -97,6 +97,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
                 .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(Lists.newArrayList(FILE1, FILE2))
+                .enumeratorId(enumeratorUuid)
                 .build())
     );
 
@@ -108,7 +109,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedRecordFromZip2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
-    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2, enumeratorUuid));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -124,6 +125,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
                 .downloadedArchiveFile(zipFile.toString())
                 .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
                 .fileNames(Lists.newArrayList(extractedFile1.toString(), extractedFile2.toString()))
+                .enumeratorId(enumeratorUuid)
                 .build())
     );
 
@@ -135,7 +137,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(InputStatus.MORE_AVAILABLE, reader.pollNext(output));
     verify(output).collect(expectedEmittedExtractedRecord2);
     assertEquals(State.SUCCESS, reader.isAvailable().state());
-    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 2, enumeratorUuid));
     //NO MORE RECORDS:
     assertEquals(InputStatus.NOTHING_AVAILABLE, reader.pollNext(output));
     assertEquals(State.RUNNING, reader.isAvailable().state());
@@ -150,6 +152,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
                 .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY).fileNames(Lists.newArrayList(badFilePath.toString()))
+                .enumeratorId(enumeratorUuid)
                 .build())
     );
 
@@ -158,7 +161,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     assertEquals(State.SUCCESS, reader.isAvailable().state());
     assertEquals(badFilePath.toString(), emitCaptor.getValue().getRecordId());
     assertNotNull(emitCaptor.getValue().getException());
-    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 1));
+    verify(context).sendSourceEventToCoordinator(new SplitCompletedEvent("0", 1, enumeratorUuid));
   }
 
   @Test

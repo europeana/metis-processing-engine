@@ -1,5 +1,6 @@
 package eu.europeana.processing.model;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.With;
@@ -19,6 +20,8 @@ public class DataPartition implements AbstractPartition {
     long limit;
     @With
     long progress;
+    @With
+    UUID enumeratorId;
 
     @Override
     public String splitId() {

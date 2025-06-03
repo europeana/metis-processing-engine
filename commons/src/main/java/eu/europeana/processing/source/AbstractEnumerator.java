@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.UUID;
+import lombok.Getter;
 import org.apache.flink.api.connector.source.SourceEvent;
 import org.apache.flink.api.connector.source.SplitEnumerator;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
@@ -36,6 +38,10 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   protected final ParameterTool parameterTool;
   protected final int chunkSize;
   protected final long taskId;
+
+  @Getter
+  protected final UUID enumeratorId = UUID.randomUUID();
+
 
   TaskInfoRepository taskInfoRepo;
   protected DbConnectionProvider dbConnectionProvider;
@@ -76,18 +82,15 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
     startedRecordsCount = state.getStartedRecordsCount();
     emittedRecordCount = state.getFinishedRecordCount();
     for (P split : state.getIncompletePartitions()) {
-      returnedPartitions.put(split.splitId(), split);
+      returnedPartitions.put(split.splitId(), (P) split.withEnumeratorId(enumeratorId));
     }
-    LOGGER.info(
-        "Restored enumerator with finished: {} of: {} started, of {} records to be processed. Returned: {} partitions: {}",
-        emittedRecordCount, startedRecordsCount, recordsToBeProcessed, returnedPartitions.size(), returnedPartitions);
   }
 
   @Override
   public void start() {
     LOGGER.info("Starting enumerator");
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
-    progressUpdater = new ProgressUpdater(parameterTool, emittedRecordCount);
+    progressUpdater = new ProgressUpdater(dbConnectionProvider, parameterTool, emittedRecordCount);
     createDbRepositories();
     taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     validateTaskExists();
@@ -168,11 +171,22 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   }
 
   private void handleProgressSnapshotEvent(ProgressSnapshotEvent event) {
-    executingPartitions.put(event.getSplitId(), updateProgress(executingPartitions.get(event.getSplitId()), event.getProgress()));
+    if (!event.getEnumeratorId().equals(enumeratorId)) {
+      LOGGER.info("Enumerator: {}, received an event from reader from different attempt: {}", enumeratorId, event);
+      return;
+    }
+
+    executingPartitions.put(event.getSplitId(),
+        updateProgress(executingPartitions.get(event.getSplitId()), event.getProgress()));
     LOGGER.debug("Received progress information: {}", event);
   }
 
   private void handleSplitCompletedEvent(SplitCompletedEvent event) {
+    if (!event.getEnumeratorId().equals(enumeratorId)) {
+      LOGGER.info("Enumerator: {}, received an event from reader from different attempt: {}", enumeratorId, event);
+      return;
+    }
+
     updateProgressOfExecutingSplit(event.getSplitId(), event.getCompletedCount());
     //We always remove it even, if not all records were performed because of some bugs.
     executingPartitions.remove(event.getSplitId());
