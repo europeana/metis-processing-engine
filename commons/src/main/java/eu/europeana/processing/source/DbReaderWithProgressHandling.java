@@ -125,6 +125,7 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
             currentRecordPendingCount ,currentlyPendingForThisCheckpoint, currentCheckpointId);
         output.collect(executionRecord);
         currentSplit = currentSplit.withProgress(currentSplit.getProgress() + 1);
+        currentSplits.set(0, currentSplit);
         emitProgressEvent();
     }
 
@@ -132,8 +133,10 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
         if (currentSplit != null) {
             //TODO we could consider if we need to sent the event every time although it does not look as a big overhead.
             //Cause it is not every record but only every snapshot.
-            context.sendSourceEventToCoordinator(new ProgressSnapshotEvent(currentCheckpointId,
-                currentSplit.splitId(), currentSplit.getProgress(), currentSplit.getEnumeratorId()));
+            ProgressSnapshotEvent progressEvent = new ProgressSnapshotEvent(currentCheckpointId,
+                currentSplit.splitId(), currentSplit.getProgress(), currentSplit.getEnumeratorId());
+            LOGGER.debug("Emitting progress event: {}", progressEvent);
+            context.sendSourceEventToCoordinator(progressEvent);
         }
 
     }

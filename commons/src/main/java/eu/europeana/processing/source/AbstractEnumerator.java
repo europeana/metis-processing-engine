@@ -151,6 +151,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   }
 
   private P updateProgress(P previousSplit, long progress) {
+    LOGGER.debug("Updating progress to: {}, for split: {}",progress, previousSplit);
     P current = (P) previousSplit.withProgress(progress);
     long progressIncrease = current.getProgress() - previousSplit.getProgress();
     emittedRecordCount += progressIncrease;
