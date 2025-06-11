@@ -11,20 +11,14 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbEnumerator.class);
 
 
-  protected AbstractDbEnumerator(SplitEnumeratorContext context,
-      ParameterTool parameterTool, S state) {
-    super(context, parameterTool, state);
-  }
-
-  protected void initEnumerator() {
-    super.initEnumerator();
-    recordsToBeProcessed = NOT_EVALUATED;
+  protected AbstractDbEnumerator(SplitEnumeratorContext context, ParameterTool parameterTool) {
+    super(context, parameterTool);
     LOGGER.info("Created enumerator with no fetched partitions");
   }
 
-  protected void restoreEnumeratorFromState(S state) {
-    super.restoreEnumeratorFromState(state);
-    recordsToBeProcessed = state.getRecordsToBeProcessed();
+
+  protected AbstractDbEnumerator(SplitEnumeratorContext context, ParameterTool parameterTool, S state) {
+    super(context, parameterTool, state);
     LOGGER.info(
         "Restored enumerator with finished: {} of: {} started, of {} records to be processed. Returned: {} partitions: {}",
         emittedRecordCount, startedRecordsCount, recordsToBeProcessed, returnedPartitions.size(), returnedPartitions);

@@ -26,31 +26,40 @@ public class HttpEnumerator extends AbstractEnumerator<HttpSourceSplit, HttpEnum
 
   private final String jobDirectoryPath;
   private final String archiveUrl;
-  private Path downloadedFile;
-  private ExtractionMode extractionMode;
+  private Path downloadedFile = null;
+  private ExtractionMode extractionMode = null;
   private Iterator<String> notStartedFilesIterator;
 
+
   /**
-   * Creates HttpEnumerator
+   * Creates HttpEnumerator when state restoration is not needed
    *
    * @param context - Flink engine SplitEnumeratorContext context
-   * @param state - state of the enumerator from the checkpoint
    * @param parameterTool - all the command line parameters of the job
    * @param jobDirectoryPath - path of shared temporary folder for downloading and extracting archives for this job.
    */
-  public HttpEnumerator(SplitEnumeratorContext<HttpSourceSplit> context, HttpEnumeratorState state,
-      ParameterTool parameterTool, String jobDirectoryPath) {
+  public HttpEnumerator(SplitEnumeratorContext<HttpSourceSplit> context, ParameterTool parameterTool, String jobDirectoryPath) {
+    super(context, parameterTool);
+    this.jobDirectoryPath = jobDirectoryPath;
+    this.archiveUrl = parameterTool.getRequired(JobParamName.HTTP_ARCHIVE_URL);
+    LOGGER.info("Created enumerator for the http task id: {}", taskId);
+  }
+
+  /**
+   * Creates HttpEnumerator based on saved state
+   *
+   * @param context - Flink engine SplitEnumeratorContext context
+   * @param parameterTool - all the command line parameters of the job
+   * @param jobDirectoryPath - path of shared temporary folder for downloading and extracting archives for this job.
+   * @param state - state of the enumerator from the checkpoint
+   */
+  public HttpEnumerator(SplitEnumeratorContext<HttpSourceSplit> context, ParameterTool parameterTool, String jobDirectoryPath,
+      HttpEnumeratorState state) {
     super(context, parameterTool, state);
     this.jobDirectoryPath = jobDirectoryPath;
     this.archiveUrl = parameterTool.getRequired(JobParamName.HTTP_ARCHIVE_URL);
-
-    if (state != null) {
-      downloadedFile = Optional.ofNullable(state.getDownloadedFile()).map(Path::of).orElse(null);
-      extractionMode = state.getExtractionMode();
-    } else {
-      downloadedFile = null;
-      extractionMode = null;
-    }
+    downloadedFile = Optional.ofNullable(state.getDownloadedFile()).map(Path::of).orElse(null);
+    extractionMode = state.getExtractionMode();
     LOGGER.info("Created enumerator for the http task id: {}. Previous state: {}", taskId, state);
   }
 

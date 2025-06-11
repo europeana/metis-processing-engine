@@ -5,8 +5,6 @@ import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.AbstractDbEnumerator;
-import java.util.LinkedList;
-import java.util.Queue;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
 import org.apache.flink.util.ParameterTool;
 import org.slf4j.Logger;
@@ -28,9 +26,17 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
   private final OAIBackgroundHeaderHarvester backgroundHeaderHarvester;
   private boolean headersHarvested;
 
+  /**
+   * Constructor used when state restoration is not needed;
+   *
+   * @param context context for enumerator
+   * @param parameterTool parameter tool
+   */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool, String jobUuid) {
-    this(context,parameterTool,null,jobUuid);
+    super(context, parameterTool);
+    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
   }
+
   /**
    * Constructor used when state restoration is needed;
    *
@@ -39,15 +45,10 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
    * @param state enumerator state container
    */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool,
-      OAIEnumeratorState state, String jobUuid) {
+      String jobUuid, OAIEnumeratorState state) {
     super(context, parameterTool, state);
-    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
-  }
-
-  @Override
-  protected void restoreEnumeratorFromState(OAIEnumeratorState state) {
-    super.restoreEnumeratorFromState(state);
     headersHarvested = state.isHeadersHarvested();
+    backgroundHeaderHarvester = new OAIBackgroundHeaderHarvester(this, parameterTool, jobUuid);
   }
 
   @Override

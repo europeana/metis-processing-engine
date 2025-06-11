@@ -52,7 +52,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
   void shouldStartBackgroundHeadersHarvestingIfNotHarvestedYet() throws IOException {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.countByDatasetIdAndExecutionId(DATASET, TASK)).thenReturn(0L));
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, null, jobUuid)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid)) {
 
       enumerator.start();
 
@@ -69,7 +69,7 @@ class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
                                                  .headersHarvested(true)
                                                  .incompletePartitions(emptyList())
                                                  .build();
-    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, state, jobUuid)) {
+    try (OAIHeadersSplitEnumerator enumerator = new OAIHeadersSplitEnumerator(context, parameterTool, jobUuid, state)) {
 
       enumerator.start();
 

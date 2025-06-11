@@ -46,13 +46,27 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
   TaskInfoRepository taskInfoRepo;
   protected DbConnectionProvider dbConnectionProvider;
 
-  protected long startedRecordsCount;
-  protected long emittedRecordCount;
+  protected long startedRecordsCount = 0;
+  protected long emittedRecordCount = 0;
   protected ProgressUpdater progressUpdater;
   protected final Map<String, P> returnedPartitions = new LinkedHashMap<>();
   protected final Map<String, P> executingPartitions = new LinkedHashMap<>();
   protected long recordsToBeProcessed = NOT_EVALUATED;
   protected Queue<Integer> waitingReaders = new LinkedList<>();
+
+  /**
+   * Constructor used when state restoration is needed;
+   *
+   * @param context context for enumerator
+   * @param parameterTool parameter tool
+   */
+  protected AbstractEnumerator(SplitEnumeratorContext<P> context, ParameterTool parameterTool) {
+    this.context = context;
+    this.parameterTool = parameterTool;
+    this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
+    this.chunkSize = parameterTool.getInt(JobParamName.CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
+  }
+
   /**
    * Constructor used when state restoration is needed;
    *
@@ -61,24 +75,8 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
    * @param parameterTool parameter tool
    */
   protected AbstractEnumerator(SplitEnumeratorContext<P> context, ParameterTool parameterTool, S state) {
-    this.context = context;
-    this.parameterTool = parameterTool;
-    this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
-    this.chunkSize = parameterTool.getInt(JobParamName.CHUNK_SIZE, DEFAULT_CHUNK_SIZE);
-    if (state != null) {
-      restoreEnumeratorFromState(state);
-    } else {
-      initEnumerator();
-    }
-  }
-
-  protected void initEnumerator() {
-    startedRecordsCount = 0;
-    emittedRecordCount = 0;
-    LOGGER.info("Created enumerator with no fetched partitions");
-  }
-
-  protected void restoreEnumeratorFromState(S state) {
+    this(context, parameterTool);
+    recordsToBeProcessed = state.getRecordsToBeProcessed();
     startedRecordsCount = state.getStartedRecordsCount();
     emittedRecordCount = state.getFinishedRecordCount();
     for (P split : state.getIncompletePartitions()) {

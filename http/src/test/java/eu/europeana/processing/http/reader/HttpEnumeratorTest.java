@@ -111,7 +111,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
 
   @Test
   void shouldAssignSplitsForRegularZip() throws IOException{
-    try (HttpEnumerator enumerator = createEnumerator(null)) {
+    try (HttpEnumerator enumerator = createEnumerator()) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -130,7 +130,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
         JobParamName.TASK_ID, "1"
     ));
 
-    try (HttpEnumerator enumerator = createEnumerator(null)) {
+    try (HttpEnumerator enumerator = createEnumerator()) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -153,7 +153,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
 
   @Test
   void shouldProperlyDetectWhenAllSplitsAreFinished()  throws IOException {
-    try (HttpEnumerator enumerator = createEnumerator(null)) {
+    try (HttpEnumerator enumerator = createEnumerator()) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
@@ -321,7 +321,14 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   private HttpEnumerator createEnumerator(HttpEnumeratorState state) {
     try (MockedStatic<UUID> mock = mockStatic(UUID.class)) {
       mock.when(UUID::randomUUID).thenReturn(enumeratorUuid);
-      return new HttpEnumerator(context, state, parameterTool, jobDirectory);
+      return new HttpEnumerator(context, parameterTool, jobDirectory, state);
+    }
+  }
+
+  private HttpEnumerator createEnumerator() {
+    try (MockedStatic<UUID> mock = mockStatic(UUID.class)) {
+      mock.when(UUID::randomUUID).thenReturn(enumeratorUuid);
+      return new HttpEnumerator(context, parameterTool, jobDirectory);
     }
   }
 

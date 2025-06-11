@@ -51,13 +51,13 @@ public class HttpSource implements Source<ExecutionRecordResult, HttpSourceSplit
   @Override
   public SplitEnumerator<HttpSourceSplit, HttpEnumeratorState> createEnumerator(
       SplitEnumeratorContext<HttpSourceSplit> enumContext) {
-    return new HttpEnumerator(enumContext, null, parameterTool, jobDirectoryPath);
+    return new HttpEnumerator(enumContext, parameterTool, jobDirectoryPath);
   }
 
   @Override
   public SplitEnumerator<HttpSourceSplit, HttpEnumeratorState> restoreEnumerator(
       SplitEnumeratorContext<HttpSourceSplit> enumContext, HttpEnumeratorState state) {
-    return new HttpEnumerator(enumContext, state, parameterTool, jobDirectoryPath);
+    return new HttpEnumerator(enumContext, parameterTool, jobDirectoryPath, state);
   }
 
   @Override
