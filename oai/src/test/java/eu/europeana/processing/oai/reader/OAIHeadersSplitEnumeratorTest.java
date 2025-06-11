@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class OAIHeadersSplitEnumeratorTest extends AbstractOAISourceTest {
 
   private static final int SUBTASK_ID = 7;
-  private String jobUuid= UUID.randomUUID().toString();
+  private final String jobUuid= UUID.randomUUID().toString();
 
   @Mock
   private SplitEnumeratorContext<DataPartition> context;

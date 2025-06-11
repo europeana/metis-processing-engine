@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Flink enumerator that provides splits for Metis jobs using as a source PostgresDB
- * @param <P> split type, that is used by the source implementation
+ * Base Flink enumerator base for different sources, implementing checkpointing failover.
+ * @param <P> split type that is used by the source implementation
  * @param <S> state used by an implementation of enumerator which is saved in snapshot
  */
 public abstract class AbstractEnumerator<P extends AbstractPartition,S extends AbstractEnumeratorState<P>> implements SplitEnumerator<P, S> {
@@ -171,7 +171,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
 
   private void handleProgressSnapshotEvent(ProgressSnapshotEvent event) {
     if (!event.getEnumeratorId().equals(enumeratorId)) {
-      LOGGER.info("Enumerator: {}, received an event from reader from different attempt: {}", enumeratorId, event);
+      LOGGER.info("Enumerator: {}, received a ProgressSnapshotEvent from reader from different attempt: {}", enumeratorId, event);
       return;
     }
 
@@ -182,7 +182,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
 
   private void handleSplitCompletedEvent(SplitCompletedEvent event) {
     if (!event.getEnumeratorId().equals(enumeratorId)) {
-      LOGGER.info("Enumerator: {}, received an event from reader from different attempt: {}", enumeratorId, event);
+      LOGGER.info("Enumerator: {}, received a SplitCompletedEvent from reader from different attempt: {}", enumeratorId, event);
       return;
     }
 

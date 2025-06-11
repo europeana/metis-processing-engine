@@ -25,8 +25,10 @@ public class ProgressUpdater implements Closeable {
   /**
    * Creates ProgressUpdater
    * @param parameterTool - all the command line parameters of the job
-   * @param completedFilesCount - number of files already completed. It is greater than 0 only if the
+   * @param completedFilesCount - Number of files already completed. It is greater than 0 only if the
    * source is restored from a checkpoint.
+   * @param dbConnectionProvider - db connection provider
+   *
    */
   public ProgressUpdater(DbConnectionProvider dbConnectionProvider, ParameterTool parameterTool, long completedFilesCount) {
     this.dbConnectionProvider = dbConnectionProvider;

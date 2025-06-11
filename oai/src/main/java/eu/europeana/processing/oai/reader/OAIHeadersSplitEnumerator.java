@@ -31,6 +31,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
    *
    * @param context context for enumerator
    * @param parameterTool parameter tool
+   * @param jobUuid - unique job id
    */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool, String jobUuid) {
     super(context, parameterTool);
@@ -42,6 +43,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
    *
    * @param context context for enumerator
    * @param parameterTool parameter tool
+   * @param jobUuid - unique job id
    * @param state enumerator state container
    */
   public OAIHeadersSplitEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool,

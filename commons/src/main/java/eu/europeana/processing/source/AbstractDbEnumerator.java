@@ -7,17 +7,21 @@ import org.apache.flink.util.ParameterTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Flink enumerator that provides splits for Metis jobs using as a source PostgresDB
+ * @param <S> state used by an implementation of enumerator which is saved in snapshot
+ */
 public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends AbstractEnumerator<DataPartition,S> {
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbEnumerator.class);
 
 
-  protected AbstractDbEnumerator(SplitEnumeratorContext context, ParameterTool parameterTool) {
+  protected AbstractDbEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool) {
     super(context, parameterTool);
     LOGGER.info("Created enumerator with no fetched partitions");
   }
 
 
-  protected AbstractDbEnumerator(SplitEnumeratorContext context, ParameterTool parameterTool, S state) {
+  protected AbstractDbEnumerator(SplitEnumeratorContext<DataPartition> context, ParameterTool parameterTool, S state) {
     super(context, parameterTool, state);
     LOGGER.info(
         "Restored enumerator with finished: {} of: {} started, of {} records to be processed. Returned: {} partitions: {}",

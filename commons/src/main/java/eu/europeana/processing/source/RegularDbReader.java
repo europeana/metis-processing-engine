@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * SourceReader implementation for regular - all but not harvesting jobs.
  */
-public class RegularDbReader extends DbReaderWithProgressHandling<ExecutionRecord> {
+public class RegularDbReader extends AbstractDbReader<ExecutionRecord> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RegularDbReader.class);
   private ExecutionRecordRepository executionRecordRepository;
 

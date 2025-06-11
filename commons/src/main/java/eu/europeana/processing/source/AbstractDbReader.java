@@ -24,7 +24,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R, DataPartition> {
+/**
+ * Base class for readers emitting records read directly from DB based on some query constraint defined in split (partition).
+ * @param <R> – The type of the record emitted by this source reader.
+ */
+public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartition> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbReader.class);
 
     private static final long INITIAL_CHECKPOINT_ID = -1;
     private final SourceReaderContext context;
@@ -42,13 +48,11 @@ public abstract class DbReaderWithProgressHandling<R> implements SourceReader<R,
 
     private List<R> polledRecords = null;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DbReaderWithProgressHandling.class);
-
     private List<DataPartition> currentSplits = new ArrayList<>();
     protected DbConnectionProvider dbConnectionProvider;
     protected DataPartition currentSplit;
 
-    protected DbReaderWithProgressHandling(
+    protected AbstractDbReader(
             SourceReaderContext context,
             ParameterTool parameterTool) {
         this.context = context;

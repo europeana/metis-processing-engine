@@ -13,6 +13,8 @@ import lombok.experimental.SuperBuilder;
 
 /**
  * State container for enumerator
+ *
+ * @param <P> type of the partition (SourceSplit) used by source
  */
 @Getter
 @Setter

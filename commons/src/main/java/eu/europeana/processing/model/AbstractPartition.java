@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.UUID;
 import org.apache.flink.api.connector.source.SourceSplit;
 
+/**
+ * Abstract interface for partitions (splits) used by abstract source implementation.
+ */
 public interface AbstractPartition extends SourceSplit, Serializable {
 
   long getProgress();

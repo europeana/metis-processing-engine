@@ -16,8 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The SplitEnumerator implementation for HttpSource. It downloads an archive file and provide splits containing lists of the
- * files from the archive and chosen extraction mode - depending on archive type. Depending on the archive type, the archive also
+ * The SplitEnumerator implementation for HttpSource. It downloads an archive file and provided splits containing lists of the
+ * files from the archive and chosen extraction mode - depending on the archive type. Depending on the archive type, the archive also
  * is or is not extracted to the shared temporary directory - more described in: {@link ArchiveFileNamesExtractor}
  */
 public class HttpEnumerator extends AbstractEnumerator<HttpSourceSplit, HttpEnumeratorState> {
@@ -85,6 +85,7 @@ public class HttpEnumerator extends AbstractEnumerator<HttpSourceSplit, HttpEnum
 
   @Override
   protected void createDbRepositories() {
+    //This class does not need repositories because it operates directly on the files
   }
 
   @Override

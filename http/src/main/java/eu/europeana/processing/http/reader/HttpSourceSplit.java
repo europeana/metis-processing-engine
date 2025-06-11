@@ -10,8 +10,6 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
-import org.apache.flink.api.connector.source.SourceSplit;
-
 
 /**
  * Implementation of SourceSplit for HttpSource containing chunk of names of the files to be extracted.

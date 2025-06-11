@@ -16,6 +16,9 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.util.ParameterTool;
 import org.apache.flink.core.io.SimpleVersionedSerializer;
 
+/**
+ * Source reading OAI headers from OAI sources.
+ */
 public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, OAIEnumeratorState>,
     ResultTypeQueryable<OaiRecordHeader> {
 
@@ -26,6 +29,10 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, 
 
   private final String jobUuid = UUID.randomUUID().toString();
 
+  /**
+   * Creates OAIHeaderSource
+   * @param parameterTool - job parameters
+   */
   public OAIHeadersSource(ParameterTool parameterTool) {
     this.parameterTool = parameterTool;
   }

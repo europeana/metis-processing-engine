@@ -1,12 +1,10 @@
 package eu.europeana.processing.model;
 
+import java.io.Serial;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import lombok.With;
-import org.apache.flink.api.connector.source.SourceSplit;
-
-import java.io.Serializable;
 
 /**
  * Class describing actual partition of data that is delivered to reader
@@ -15,6 +13,9 @@ import java.io.Serializable;
 @Value
 @AllArgsConstructor
 public class DataPartition implements AbstractPartition {
+
+    @Serial
+    private static final long serialVersionUID = 1;
 
     long offset;
     long limit;
