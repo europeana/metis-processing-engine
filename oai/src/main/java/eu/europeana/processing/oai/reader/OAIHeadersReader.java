@@ -24,11 +24,12 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
 
   /**
    * Creates OAIHeadersReader
+   *
    * @param context - Flink context
    * @param parameterTool - job parameters
    */
   public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool) {
-    super(context,parameterTool);
+    super(context, parameterTool);
     LOGGER.info("Created OAIHeadersReader");
   }
 

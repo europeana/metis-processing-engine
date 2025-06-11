@@ -22,6 +22,7 @@ import org.apache.flink.core.io.SimpleVersionedSerializer;
  * file is extracted on fly, or full if the file is initially extracted in the directory on the cluster.
  */
 public class HttpSource implements Source<ExecutionRecordResult, HttpSourceSplit, HttpEnumeratorState> {
+
   @Serial
   private static final long serialVersionUID = 1;
 
@@ -35,6 +36,7 @@ public class HttpSource implements Source<ExecutionRecordResult, HttpSourceSplit
 
   /**
    * Creates HttpSource
+   *
    * @param parameterTool - all the command line parameters of the job
    */
   public HttpSource(ParameterTool parameterTool) {

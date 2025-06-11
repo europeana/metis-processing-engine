@@ -17,6 +17,7 @@ import lombok.With;
 @Value
 @Builder
 public class HttpSourceSplit implements AbstractPartition {
+
   @Serial
   private static final long serialVersionUID = 1;
 

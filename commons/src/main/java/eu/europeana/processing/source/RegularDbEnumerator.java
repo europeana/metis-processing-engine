@@ -34,7 +34,7 @@ public class RegularDbEnumerator extends AbstractDbEnumerator<DbEnumeratorState>
    * @param state enumerator state container
    */
   public RegularDbEnumerator(SplitEnumeratorContext<DataPartition> context,
-      ParameterTool parameterTool,DbEnumeratorState state) {
+      ParameterTool parameterTool, DbEnumeratorState state) {
     super(context, parameterTool, state);
   }
 

@@ -15,11 +15,13 @@ import org.slf4j.LoggerFactory;
  * SourceReader implementation for regular - all but not harvesting jobs.
  */
 public class RegularDbReader extends AbstractDbReader<ExecutionRecord> {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(RegularDbReader.class);
   private ExecutionRecordRepository executionRecordRepository;
 
   /**
    * Creates RegularDbReader
+   *
    * @param context - Flink context
    * @param parameterTool - job parameters
    */

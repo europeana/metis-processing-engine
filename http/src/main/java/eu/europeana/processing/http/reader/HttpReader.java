@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The SourceReader implementation for HttpSource. It emits content of the files from the compressed archive.
- * Every file is emitted as separate record.
+ * The SourceReader implementation for HttpSource. It emits content of the files from the compressed archive. Every file is
+ * emitted as separate record.
  */
 public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourceSplit> {
 
@@ -45,6 +45,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   /**
    * Creates HttpReader
+   *
    * @param context - Flink engine SourceReaderContext context
    * @param parameterTool - all the command line parameters of the job
    */
@@ -56,7 +57,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
 
   @Override
   public void start() {
-    LOGGER.info("Started {}" , this.getClass().getSimpleName());
+    LOGGER.info("Started {}", this.getClass().getSimpleName());
   }
 
   @Override
@@ -87,7 +88,7 @@ public class HttpReader implements SourceReader<ExecutionRecordResult, HttpSourc
     context.sendSourceEventToCoordinator(
         new ProgressSnapshotEvent(-1, assignedSplit.splitId(), assignedSplit.getProgress(), assignedSplit.getEnumeratorId()));
 
-    if(!fileNameIterator.hasNext()){
+    if (!fileNameIterator.hasNext()) {
       wholeSplitEmitted();
     }
   }

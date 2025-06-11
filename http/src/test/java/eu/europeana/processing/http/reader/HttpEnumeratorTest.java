@@ -64,7 +64,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   private static final String TGZ_URL = "http://ftp.eanadev.org/uploads/ESounds_Odessa.tgz";
   private static final String TGZ_FILE_NAME = "ESounds_Odessa.tgz";
   private static final String FILE1_INSIDE_TGZ = "24-04-02_14_54_53/Item_19541240.xml";
-  private static final TaskInfo TASK_INFO = new TaskInfo(1L,0L,0L);
+  private static final TaskInfo TASK_INFO = new TaskInfo(1L, 0L, 0L);
 
 
   @Mock
@@ -83,7 +83,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   void setup() {
     progressUpdaterConstruction = Mockito.mockConstruction(ProgressUpdater.class);
     dbProviderConstruction = Mockito.mockConstruction(DbConnectionProvider.class);
-    taskInfoRepositoryConstruction = Mockito.mockConstruction(TaskInfoRepository.class,(repo,context)->
+    taskInfoRepositoryConstruction = Mockito.mockConstruction(TaskInfoRepository.class, (repo, context) ->
         when(repo.findById(anyLong())).thenReturn(Optional.of(TASK_INFO)));
     jobDirectory = tempDirectory.resolve("task-dir").toString();
     downLoadedFile = Path.of(jobDirectory).resolve(ZIP_FILE_NAME).toString();
@@ -110,7 +110,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   }
 
   @Test
-  void shouldAssignSplitsForRegularZip() throws IOException{
+  void shouldAssignSplitsForRegularZip() throws IOException {
     try (HttpEnumerator enumerator = createEnumerator()) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
@@ -152,15 +152,17 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   }
 
   @Test
-  void shouldProperlyDetectWhenAllSplitsAreFinished()  throws IOException {
+  void shouldProperlyDetectWhenAllSplitsAreFinished() throws IOException {
     try (HttpEnumerator enumerator = createEnumerator()) {
       enumerator.start();
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK0_ID, WORKER_HOST);
       enumerator.handleSplitRequest(SUBTASK1_ID, WORKER_HOST);
-      enumerator.handleSourceEvent(SUBTASK0_ID, new SplitCompletedEvent(expectedSplit1.splitId(), expectedSplit1.getLimit(), enumeratorUuid));
-      enumerator.handleSourceEvent(SUBTASK1_ID, new SplitCompletedEvent(expectedSplit2.splitId(), expectedSplit2.getLimit(), enumeratorUuid));
+      enumerator.handleSourceEvent(SUBTASK0_ID,
+          new SplitCompletedEvent(expectedSplit1.splitId(), expectedSplit1.getLimit(), enumeratorUuid));
+      enumerator.handleSourceEvent(SUBTASK1_ID,
+          new SplitCompletedEvent(expectedSplit2.splitId(), expectedSplit2.getLimit(), enumeratorUuid));
     }
 
     InOrder inOrder = inOrder(context);

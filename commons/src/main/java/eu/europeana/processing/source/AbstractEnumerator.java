@@ -25,10 +25,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base Flink enumerator base for different sources, implementing checkpointing failover.
+ *
  * @param <P> split type that is used by the source implementation
  * @param <S> state used by an implementation of enumerator which is saved in snapshot
  */
-public abstract class AbstractEnumerator<P extends AbstractPartition,S extends AbstractEnumeratorState<P>> implements SplitEnumerator<P, S> {
+public abstract class AbstractEnumerator<P extends AbstractPartition, S extends AbstractEnumeratorState<P>> implements
+    SplitEnumerator<P, S> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractEnumerator.class);
   private static final int DEFAULT_CHUNK_SIZE = 1000;
@@ -142,14 +144,14 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
     if (inExecutingMap != null) {
       split = updateProgress(inExecutingMap, split.getProgress());
     }
-    returnedPartitions.put(split.splitId(), updateProgress(returnedPartitions.get(split.splitId()),split.getProgress()));
+    returnedPartitions.put(split.splitId(), updateProgress(returnedPartitions.get(split.splitId()), split.getProgress()));
     LOGGER.info(
         "Added split: {} from subtask: {} back. Currently executing: {} splits, all returned splits: {}",
         split, subtaskId, executingPartitions.size(), returnedPartitions.size());
   }
 
   private P updateProgress(P previousSplit, long progress) {
-    LOGGER.debug("Updating progress to: {}, for split: {}",progress, previousSplit);
+    LOGGER.debug("Updating progress to: {}, for split: {}", progress, previousSplit);
     P current = (P) previousSplit.withProgress(progress);
     long progressIncrease = current.getProgress() - previousSplit.getProgress();
     emittedRecordCount += progressIncrease;
@@ -232,7 +234,6 @@ public abstract class AbstractEnumerator<P extends AbstractPartition,S extends A
       dbConnectionProvider.close();
     }
   }
-
 
 
   private List<P> getIncompletePartitionsSnapshot() {

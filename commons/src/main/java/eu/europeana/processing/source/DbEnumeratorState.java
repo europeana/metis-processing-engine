@@ -20,6 +20,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class DbEnumeratorState extends AbstractEnumeratorState<DataPartition> {
+
   @Serial
   private static final long serialVersionUID = 2;
 }

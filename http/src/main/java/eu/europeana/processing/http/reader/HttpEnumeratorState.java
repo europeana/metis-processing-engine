@@ -20,6 +20,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class HttpEnumeratorState extends AbstractEnumeratorState<HttpSourceSplit> {
+
   @Serial
   private static final long serialVersionUID = 1;
 

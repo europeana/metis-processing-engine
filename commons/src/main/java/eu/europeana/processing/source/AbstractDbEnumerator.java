@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Flink enumerator that provides splits for Metis jobs using as a source PostgresDB
+ *
  * @param <S> state used by an implementation of enumerator which is saved in snapshot
  */
-public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends AbstractEnumerator<DataPartition,S> {
+public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends AbstractEnumerator<DataPartition, S> {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDbEnumerator.class);
 
 
@@ -67,7 +69,7 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
 
   @Override
   public S snapshotState(long checkpointId) {
-    S state=super.snapshotState(checkpointId);
+    S state = super.snapshotState(checkpointId);
     state.setRecordsToBeProcessed(recordsToBeProcessed);
     return state;
   }

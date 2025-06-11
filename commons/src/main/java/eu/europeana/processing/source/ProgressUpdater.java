@@ -24,11 +24,11 @@ public class ProgressUpdater implements Closeable {
 
   /**
    * Creates ProgressUpdater
-   * @param parameterTool - all the command line parameters of the job
-   * @param completedFilesCount - Number of files already completed. It is greater than 0 only if the
-   * source is restored from a checkpoint.
-   * @param dbConnectionProvider - db connection provider
    *
+   * @param parameterTool - all the command line parameters of the job
+   * @param completedFilesCount - Number of files already completed. It is greater than 0 only if the source is restored from a
+   * checkpoint.
+   * @param dbConnectionProvider - db connection provider
    */
   public ProgressUpdater(DbConnectionProvider dbConnectionProvider, ParameterTool parameterTool, long completedFilesCount) {
     this.dbConnectionProvider = dbConnectionProvider;
@@ -40,8 +40,9 @@ public class ProgressUpdater implements Closeable {
 
 
   /**
-   * Stores count of emitted files. It is invoked during doing snapshot of enumerator state.
-   * This count that is later saved as progress into DB after the checkpoint is completed.
+   * Stores count of emitted files. It is invoked during doing snapshot of enumerator state. This count that is later saved as
+   * progress into DB after the checkpoint is completed.
+   *
    * @param shapshotedEmittedFilesCount - number of emitted files.
    */
   public void snapshotEmittedFilesCount(long shapshotedEmittedFilesCount) {
@@ -50,8 +51,8 @@ public class ProgressUpdater implements Closeable {
   }
 
   /**
-   * Saves previously stored count of emitted files in the DB. Invoked after the checkpoint is completed,
-   * what means that the emitted files are already stored in the DB.
+   * Saves previously stored count of emitted files in the DB. Invoked after the checkpoint is completed, what means that the
+   * emitted files are already stored in the DB.
    */
   public void saveProgressInDB() {
     if (snapshottedEmittedFilesCount != lastStoredFilesCount) {
@@ -63,14 +64,14 @@ public class ProgressUpdater implements Closeable {
       taskInfoRepo.update(taskInfo);
       lastStoredFilesCount = snapshottedEmittedFilesCount;
       LOGGER.info("Updated task progress in DB: {}", taskInfo);
-    }else{
+    } else {
       LOGGER.info("Need not update progress for: {}", taskId);
     }
   }
 
   public void close() {
-      dbConnectionProvider.close();
-      LOGGER.debug("Closed: {}", ProgressUpdater.class.getSimpleName());
+    dbConnectionProvider.close();
+    LOGGER.debug("Closed: {}", ProgressUpdater.class.getSimpleName());
   }
 
 }

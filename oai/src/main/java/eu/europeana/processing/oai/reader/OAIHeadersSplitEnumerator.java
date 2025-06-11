@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * SplitEnumerator implementation for OAI. It is based on AbstractDbEnumerator and uses similar Db like regularDbSource, with additional
- * index column. This enumerator, generally reads and emits records from DB, but also fills this DB in background thread
- * harvesting OAI headers from OAI source using OAIBackgroundHeaderHarvester class. State of main thread emitting headers from DB
- * is often stored in checkpoint, the same as in the RegularDBEnumerator The background header harvesting state could not be
- * stored cause of limitations of current metis-harvesting implementation. So the operation is repeated whole during failover. It
- * could be potentially changed in the future. We could make more granular fail-over using resumption token storing.
+ * SplitEnumerator implementation for OAI. It is based on AbstractDbEnumerator and uses similar Db like regularDbSource, with
+ * additional index column. This enumerator, generally reads and emits records from DB, but also fills this DB in background
+ * thread harvesting OAI headers from OAI source using OAIBackgroundHeaderHarvester class. State of main thread emitting headers
+ * from DB is often stored in checkpoint, the same as in the RegularDBEnumerator The background header harvesting state could not
+ * be stored cause of limitations of current metis-harvesting implementation. So the operation is repeated whole during failover.
+ * It could be potentially changed in the future. We could make more granular fail-over using resumption token storing.
  */
 public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumeratorState> {
 
@@ -58,7 +58,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
     super.start();
     if (!headersHarvested) {
       backgroundHeaderHarvester.start();
-    }else{
+    } else {
       LOGGER.info("Headers already harvested and saved in the DB. Finished: {} of {} all records.",
           emittedRecordCount, recordsToBeProcessed);
     }

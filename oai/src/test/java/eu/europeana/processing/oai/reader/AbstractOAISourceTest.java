@@ -15,10 +15,11 @@ import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
 public abstract class AbstractOAISourceTest {
+
   protected static final String DATASET = "dataset";
   protected static final String TASK = String.valueOf(11);
-  protected static final Instant DATESTAMP_A =Instant.parse("2024-12-10T00:00:00Z");
-  protected static final Instant DATESTAMP_B =Instant.parse("2024-12-01T00:00:00Z");
+  protected static final Instant DATESTAMP_A = Instant.parse("2024-12-10T00:00:00Z");
+  protected static final Instant DATESTAMP_B = Instant.parse("2024-12-01T00:00:00Z");
   static final String RECORD_ID_1 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_664______2WGTWS8_sr";
   static final OaiRecordHeader HEADER_1 = new OaiRecordHeader(RECORD_ID_1, false, DATESTAMP_A);
   static final String RECORD_ID_2 = "ecloud_e2e_tests_without_4_records_ecloud_e2e_tests_NLS____NLS2__RS_643______06VMZI9_sr";
@@ -35,7 +36,7 @@ public abstract class AbstractOAISourceTest {
   @BeforeEach
   final void setupCommon() {
     parameterTool = ParameterTool.fromMap(Map.of(DATASET_ID, DATASET, TASK_ID, TASK));
-    dbProviderConstruction= Mockito.mockConstruction(DbConnectionProvider.class);
+    dbProviderConstruction = Mockito.mockConstruction(DbConnectionProvider.class);
   }
 
   @AfterEach
