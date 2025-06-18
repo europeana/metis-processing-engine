@@ -8,6 +8,7 @@ import eu.europeana.processing.config.db.entity.ExecutionRecord;
 import eu.europeana.processing.config.db.entity.ExecutionRecordExceptionLog;
 import eu.europeana.processing.config.db.repositories.ExecutionRecordExceptionLogRepository;
 import eu.europeana.processing.config.db.repositories.ExecutionRecordRepository;
+import eu.europeana.processing.config.db.repositories.TaskInfoRepository;
 import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -39,6 +40,9 @@ public abstract class AbstractPerformanceIT {
 
   @Resource
   protected ExecutionRecordExceptionLogRepository<ExecutionRecordExceptionLog> executionRecordExceptionLogRepository;
+
+  @Resource
+  protected TaskInfoRepository taskInfoRepository;
 
   private static boolean firstTest = true;
 
@@ -87,6 +91,7 @@ public abstract class AbstractPerformanceIT {
     long expectedErrorCount = stepNumber != 2 ? 0: sourceProperties.getRecordCount() - sourceProperties.getValidRecordCount();
     Assertions.assertThat(executionRecordRepository.countByDatasetIdAndExecutionId(datasetId, taskId)).isEqualTo(expectedRecordCount);
     Assertions.assertThat(executionRecordExceptionLogRepository.countByDatasetIdAndExecutionId(datasetId, taskId)).isEqualTo(expectedErrorCount);
+    Assertions.assertThat(taskInfoRepository.getByTaskId(Long.parseLong(taskId)).getWriteCount()).isEqualTo(expectedRecordCount + expectedErrorCount);
   }
 
 }
