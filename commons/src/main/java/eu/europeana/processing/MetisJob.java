@@ -14,12 +14,15 @@ import java.time.Duration;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.util.ParameterTool;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 
 import java.util.Map;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Main abstract class used by all the jobs executed by Metis.</p>
@@ -32,9 +35,20 @@ import java.util.Random;
  */
 public abstract class MetisJob {
 
-    private static final int RESTART_ATTEMPTS = 3;
-    private static final int RESTART_DELAY_IN_SECONDS = 10;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetisJob.class);
 
+    ////////////////////////Failover strategy configuration/////////////////////////////////////////
+    //All these gives us over 30 minutes of restarting in case of total infrastructure error. This
+    // time is a bit random and depends on jitter and time of task starting.
+    private static final Duration INITIAL_RESTART_DELAY_IN_SECONDS = Duration.ofSeconds(10);
+    private static final Duration MAX_RESTART_DELAY_IN_SECONDS = Duration.ofMinutes(2);
+    public static final double BACK_OFF_MULTIPLIER = 2.0;
+    private static final int ATTEMPTS = 20;
+    public static final double JITTER_FACTOR = 0.1;
+    //After job works fine for configured time restart counter is reset.
+    private static final Duration RESET_BACKOFF_THRESHOLD = Duration.ofMinutes(10);
+
+    ////////////////////////Checkpointing configuration/////////////////////////////////////////////
     private static final long CHECKPOINT_INTERVAL_IN_MILLIS = 2000;
     private static final long MIN_PAUSE_BETWEEN_CHECKPOINTS = 1000;
 
@@ -59,9 +73,13 @@ public abstract class MetisJob {
     protected StreamExecutionEnvironment prepareEnvironment() {
 
         Configuration config = new Configuration();
-        config.set(RestartStrategyOptions.RESTART_STRATEGY, "fixed-delay");
-        config.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS, RESTART_ATTEMPTS);
-        config.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, Duration.ofSeconds(RESTART_DELAY_IN_SECONDS));
+        config.set(RestartStrategyOptions.RESTART_STRATEGY, "exponential-delay");
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF, INITIAL_RESTART_DELAY_IN_SECONDS);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF, MAX_RESTART_DELAY_IN_SECONDS);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER, BACK_OFF_MULTIPLIER);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_ATTEMPTS, ATTEMPTS);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD, RESET_BACKOFF_THRESHOLD);
+        config.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR, JITTER_FACTOR);
 
         final StreamExecutionEnvironment env =
                 StreamExecutionEnvironment.getExecutionEnvironment(config);
@@ -71,6 +89,7 @@ public abstract class MetisJob {
         env.getConfig().setGlobalJobParameters(tool);
         env.enableCheckpointing(CHECKPOINT_INTERVAL_IN_MILLIS);
         env.getCheckpointConfig().setMinPauseBetweenCheckpoints(MIN_PAUSE_BETWEEN_CHECKPOINTS);
+        env.getCheckpointConfig().setExternalizedCheckpointRetention(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION);
         return env;
     }
 
@@ -113,6 +132,7 @@ public abstract class MetisJob {
      */
     public void execute() throws Exception {
         prepareJob();
+        LOGGER.info("Execution plan: {}", flinkEnvironment.getExecutionPlan());
         flinkEnvironment.execute(enrichedJobName());
     }
 
