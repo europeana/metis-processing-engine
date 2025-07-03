@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
-import org.apache.flink.shaded.guava33.com.google.common.collect.Lists;
 import org.apache.flink.util.ParameterTool;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,19 +77,19 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
     expectedSplit1 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(Lists.newArrayList(FILE1, FILE2, FILE3))
+                                    .fileNames(newArrayList(FILE1, FILE2, FILE3))
                                     .firstFileIndex(0)
                                     .build();
     expectedSplit2 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(Lists.newArrayList(FILE4))
+                                    .fileNames(newArrayList(FILE4))
                                     .firstFileIndex(3)
                                     .build();
     expectedSplit2 = HttpSourceSplit.builder()
                                     .downloadedArchiveFile(downLoadedFile)
                                     .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)
-                                    .fileNames(Lists.newArrayList(FILE4))
+                                    .fileNames(newArrayList(FILE4))
                                     .firstFileIndex(3)
                                     .build();
   }
@@ -127,7 +126,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
                        .downloadedArchiveFile(downLoadedFile)
                        .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
                        .fileNames(
-                           Lists.newArrayList(
+                           newArrayList(
                                Path.of(jobDirectory).resolve(EXTRACTED_SUB_DIR_NAME).resolve(FILE1_INSIDE_TGZ)
                                    .toString()))
                        .firstFileIndex(0)

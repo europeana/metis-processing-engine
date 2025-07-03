@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.Future.State;
 import org.apache.flink.api.connector.source.ReaderOutput;
 import org.apache.flink.api.connector.source.SourceReaderContext;
-import org.apache.flink.shaded.guava33.com.google.common.collect.Lists;
 import org.apache.flink.util.ParameterTool;
 import org.apache.flink.core.io.InputStatus;
 import org.junit.jupiter.api.AfterEach;
@@ -95,7 +94,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
             HttpSourceSplit
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
-                .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(Lists.newArrayList(FILE1, FILE2))
+                .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(newArrayList(FILE1, FILE2))
                 .build())
     );
 
@@ -122,7 +121,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
                 .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY)
-                .fileNames(Lists.newArrayList(extractedFile1.toString(), extractedFile2.toString()))
+                .fileNames(newArrayList(extractedFile1.toString(), extractedFile2.toString()))
                 .build())
     );
 
@@ -148,7 +147,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
             HttpSourceSplit
                 .builder()
                 .downloadedArchiveFile(zipFile.toString())
-                .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY).fileNames(Lists.newArrayList(badFilePath.toString()))
+                .extractionMode(ExtractionMode.INITIAL_TO_DIRECTORY).fileNames(newArrayList(badFilePath.toString()))
                 .build())
     );
 
@@ -172,7 +171,7 @@ class HttpReaderTest extends AbstractUnpackingTest {
     HttpSourceSplit split = HttpSourceSplit
         .builder()
         .downloadedArchiveFile(zipFile.toString())
-        .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(Lists.newArrayList(FILE1, FILE2))
+        .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY).fileNames(newArrayList(FILE1, FILE2))
         .build();
 
     reader.pollNext(output);

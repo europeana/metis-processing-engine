@@ -79,10 +79,10 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.flink</groupId>
-      <artifactId>flink-shaded-guava</artifactId>
-      <version>${flink-shaded-guava.version}</version>
-      <scope>test</scope><!-- Adjust the version as needed -->
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>test-commons</artifactId>
+      <version>${parent.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

@@ -78,6 +78,18 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>test-commons</artifactId>
+      <version>${parent.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>${wiremock.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

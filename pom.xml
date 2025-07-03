@@ -25,6 +25,7 @@
     <mockito.version>5.15.2</mockito.version>
     <awaitability.version>4.2.0</awaitability.version>
     <assertj.version>3.24.2</assertj.version>
+    <wiremock.version>3.4.2</wiremock.version>
   </properties>
 
   <modules>
@@ -41,6 +42,7 @@
     <module>indexing</module>
     <module>http</module>
     <module>blocking</module>
+    <module>test-commons</module>
   </modules>
 
   <dependencyManagement>
