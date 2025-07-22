@@ -1,6 +1,7 @@
 package eu.europeana.processing.repository;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
 import eu.europeana.processing.model.ExecutionRecordResult;
@@ -9,7 +10,6 @@ import java.io.Serial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,6 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
 
 /**
  * Database repository responsible for <b>execution_record</b> table
@@ -67,9 +69,9 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
      * In case of conflict (try to insert the same record twice) the method does nothing.
      *
      * @param executionRecordResult instance to be saved in the database
-     * @throws IOException in case of any DB exception
+     * @throws FlinkWorkflowException in case of any DB exception
      */
-    public void save(ExecutionRecordResult executionRecordResult) throws IOException {
+    public void save(ExecutionRecordResult executionRecordResult) throws FlinkWorkflowException {
 
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
@@ -88,7 +90,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
                 LOGGER.info("Execution record already existed in the DB: {}", executionRecord.getExecutionRecordKey());
             }
         } catch (SQLException e) {
-            throw new IOException(e);
+            throw classify(e);
         }
     }
 
@@ -98,9 +100,9 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
      * @param datasetId dataset identifier
      * @param executionId execution identifier
      * @return number of elements in <b>execution_record</b> table for specified dataset and execution
-     * @throws IOException in case of any DB exception
+     * @throws FlinkWorkflowException in case of any DB exception
      */
-    public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws IOException {
+    public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
 
         ResultSet resultSet;
         try (Connection con = dbConnectionProvider.getConnection();
@@ -116,7 +118,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
                 return 0L;
             }
         } catch (SQLException e) {
-            throw new IOException(e);
+            throw classify(e);
         }
     }
 
@@ -127,14 +129,14 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
      * @param offset dataset offset
      * @param limit dataset limit
      * @return list of all {@link ExecutionRecord} fulfilling provided criteria
-     * @throws IOException in case of any DB exception
+     * @throws FlinkWorkflowException in case of any DB exception
      */
     //TODO to be changed, returned list may be really big
     public List<ExecutionRecord> getByDatasetIdAndExecutionIdAndOffsetAndLimit(
         String datasetId,
         String executionId,
         long offset,
-        long limit) throws IOException {
+        long limit)  throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(LIMIT)) {
 
@@ -161,7 +163,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
             }
             return result;
         } catch (SQLException e) {
-            throw new IOException(e);
+            throw classify(e);
         }
     }
 }

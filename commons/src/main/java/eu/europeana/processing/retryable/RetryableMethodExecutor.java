@@ -1,9 +1,11 @@
 package eu.europeana.processing.retryable;
 
+import eu.europeana.processing.exception.UnrecoverableException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.DynamicType.Unloaded;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
+import org.apache.flink.runtime.execution.SuppressRestartsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +63,8 @@ public class RetryableMethodExecutor {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new RetryInterruptedException(e);
+      } catch (UnrecoverableException e) {
+        throw new SuppressRestartsException(e);
       } catch (Exception e) {
         if (--maxAttempts > 0) {
           LOGGER.warn("{} - {} Retries Left {} ", errorMessage, e.getMessage(), maxAttempts, e);
@@ -147,6 +151,6 @@ public class RetryableMethodExecutor {
 
   public interface GenericCallable<V, E extends Throwable> {
 
-    V call() throws E, InterruptedException;
+    V call() throws E, InterruptedException, UnrecoverableException;
   }
 }

@@ -116,18 +116,18 @@ public class JobExecutor {
     int i = 0;
     while (true) {
       try {
-        try {
           return getProgress(jobId);
-        } catch (RestClientResponseException e) {
+      }
+      catch (RestClientResponseException e) {
           if (e.getStatusCode() == HttpStatus.NOT_FOUND &&
               e.getResponseBodyAsString().contains("org.apache.flink.runtime.rest.NotFoundException")) {
             throw new RuntimeException("There is no more job of the id: " + jobId + " on the server", e);
           }
           throw e;
         }
-      } catch (RestClientException e) {
-        LOGGER.warn("Exception while getting the job progress! Waiting for retry", e);
-        Thread.sleep(SLEEP_BETWEEN_RETRIES_FOR_PROGRESS_REQUEST);
+      catch (RestClientException e) {
+      LOGGER.warn("Exception while getting the job progress! Waiting for retry", e);
+      Thread.sleep(SLEEP_BETWEEN_RETRIES_FOR_PROGRESS_REQUEST);
         if (++i > MAX_RETRIES_FOR_PROGRESS_REQUEST) {
           throw e;
         }

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.http.reader.extractor.ExtractionMode;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.TaskInfo;
@@ -260,7 +261,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   }
 
   @Test
-  void shouldProperlyEvaluateProgressAndPassItToTheUpdater() throws IOException {
+  void shouldProperlyEvaluateProgressAndPassItToTheUpdater() throws IOException, FlinkWorkflowException {
     createCompleteDownloadedFile();
     HttpEnumeratorState state = HttpEnumeratorState.builder().downloadedFile(downLoadedFile)
                                                    .extractionMode(ExtractionMode.ON_FLY_IN_MEMORY)

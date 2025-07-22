@@ -1,5 +1,6 @@
 package eu.europeana.processing.source;
 
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.model.DataPartition;
 import java.io.IOException;
 import org.apache.flink.api.connector.source.SplitEnumeratorContext;
@@ -47,7 +48,7 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
     try {
       recordsToBeProcessed = countRecordsInDb();
       LOGGER.info("Finished, there is: {} records to be processed!", recordsToBeProcessed);
-    } catch (IOException e) {
+    } catch (FlinkWorkflowException e) {
       throw new RuntimeException(e);
     }
   }
@@ -65,7 +66,7 @@ public abstract class AbstractDbEnumerator<S extends DbEnumeratorState> extends 
     }
   }
 
-  protected abstract long countRecordsInDb() throws IOException;
+  protected abstract long countRecordsInDb() throws FlinkWorkflowException;
 
   @Override
   public S snapshotState(long checkpointId) {

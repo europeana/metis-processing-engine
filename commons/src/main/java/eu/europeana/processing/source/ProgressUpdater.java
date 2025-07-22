@@ -1,6 +1,7 @@
 package eu.europeana.processing.source;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.repository.TaskInfoRepository;
@@ -54,7 +55,7 @@ public class ProgressUpdater implements Closeable {
    * Saves previously stored count of emitted files in the DB. Invoked after the checkpoint is completed, what means that the
    * emitted files are already stored in the DB.
    */
-  public void saveProgressInDB() {
+  public void saveProgressInDB() throws FlinkWorkflowException {
     if (snapshottedEmittedFilesCount != lastStoredFilesCount) {
       TaskInfo taskInfo = new TaskInfo(taskId, 0, snapshottedEmittedFilesCount);
       //TODO The repository uses retries in case of failure, but because updating progress is not a key feature,

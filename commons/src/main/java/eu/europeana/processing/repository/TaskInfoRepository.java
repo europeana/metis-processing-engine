@@ -1,6 +1,7 @@
 package eu.europeana.processing.repository;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.retryable.Retryable;
 
@@ -11,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
+
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
 
 /**
  * Database repository responsible for <b>task_info</b> table.
@@ -47,8 +50,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
      * Saves the {@link TaskInfo} in <b>task_info</b> table
      *
      * @param taskInfo instance to be saved in the database
+     * @throws FlinkWorkflowException in case of database error
      */
-    public void save(TaskInfo taskInfo) {
+    public void save(TaskInfo taskInfo) throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                 "INSERT INTO \"batch-framework\".task_info (TASK_ID,COMMIT_COUNT,WRITE_COUNT) VALUES (?,?,?)")) {
@@ -59,7 +63,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw classify(e);
         }
     }
 
@@ -67,8 +71,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
      * Updates the {@link TaskInfo} in <b>task_info</b> table
      *
      * @param taskInfo instance to be updated in the database
+     * @throws FlinkWorkflowException in case of database error
      */
-    public void update(TaskInfo taskInfo) {
+    public void update(TaskInfo taskInfo) throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                      "update \"batch-framework\".task_info SET commit_count=?, write_count=? where task_id = ?")) {
@@ -79,7 +84,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw classify(e);
         }
     }
 
@@ -88,8 +93,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
      *
      * @param taskId task's identifier that should be used for counter increment
      * @param writeCountIncrement increment value
+     * @throws FlinkWorkflowException in case of database error
      */
-    public void incrementWriteCount(long taskId, long writeCountIncrement) {
+    public void incrementWriteCount(long taskId, long writeCountIncrement) throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              /*
              Be aware that approach only works in database supporting atomic updated such as postgresql
@@ -102,7 +108,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw classify(e);
         }
     }
 
@@ -111,8 +117,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
      *
      * @param taskId instance to be saved in the database
      * @return found {@link TaskInfo} instance wrapped in optional or empty optional
+     * @throws FlinkWorkflowException in case of database error
      */
-    public Optional<TaskInfo> findById(long taskId) {
+    public Optional<TaskInfo> findById(long taskId) throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                      "SELECT * FROM \"batch-framework\".task_info WHERE TASK_ID = ?")) {
@@ -130,7 +137,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
                 return Optional.empty();
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw classify(e);
         }
     }
 }

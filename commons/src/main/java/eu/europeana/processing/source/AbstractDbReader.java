@@ -1,6 +1,7 @@
 package eu.europeana.processing.source;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
@@ -19,7 +20,6 @@ import org.apache.flink.core.io.InputStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -145,7 +145,7 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
 
     }
 
-    private void fetchRecordsIfNeeded() throws IOException {
+    private void fetchRecordsIfNeeded() throws FlinkWorkflowException {
         currentSplit = currentSplits.getFirst();
         if (polledRecords == null) {
             LOGGER.debug("Fetching records from database");
@@ -157,7 +157,7 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
         }
     }
 
-    protected abstract List<R> fetchRecords() throws IOException;
+    protected abstract List<R> fetchRecords() throws FlinkWorkflowException;
 
     private boolean isPendingLimitReached() {
         if(currentRecordPendingCount >= maxRecordPending){
