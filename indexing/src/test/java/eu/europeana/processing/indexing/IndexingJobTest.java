@@ -102,7 +102,7 @@ class IndexingJobTest extends AbstractJobTest {
   private String[] prepareIndxingJobArgs() {
     return prepareArgs("--" + INDEXING_PRESERVETIMESTAMPS, "false",
         "--" + INDEXING_PERFORMREDIRECTS, "true",
-        "--" + INDEXING_MONGOINSTANCES, "mongo1.example.org,mongo2.example.org,mongo3.example.org",
+        "--" + INDEXING_MONGOINSTANCES, "mongo1.192.168.10.101.nip.io,mongo2.192.168.10.102.nip.io,mongo3.192.168.10.103.nip.io",
         "--" + INDEXING_MONGOPORTNUMBER, "10010",
         "--" + INDEXING_MONGODBNAME, "preview-test",
         "--" + INDEXING_MONGOREDIRECTDBNAME, "redirect-preview-test",
