@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -33,4 +35,7 @@ public abstract class AbstractUnpackingTest {
     return resultFile;
   }
 
+  protected ArrayList<String> newArrayList(String ... elements) {
+    return new ArrayList<>(List.of(elements));
+  }
 }

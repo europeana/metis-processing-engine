@@ -28,6 +28,12 @@
       <version>${flink-version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.flink</groupId>
+      <artifactId>flink-clients</artifactId>
+      <version>${flink-version}</version>
+      <scope>provided</scope>
+    </dependency>
 
 
 
@@ -64,6 +70,12 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>test-commons</artifactId>
+      <version>${parent.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

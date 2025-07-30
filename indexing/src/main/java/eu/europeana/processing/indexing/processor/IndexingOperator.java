@@ -46,11 +46,15 @@ public class IndexingOperator extends ProcessFunction<ExecutionRecord, Execution
         recordDate = new Date();
         preserveTimestamps = parameterTool.getBoolean(JobParamName.INDEXING_PRESERVETIMESTAMPS);
         performRedirect = parameterTool.getBoolean(JobParamName.INDEXING_PERFORMREDIRECTS);
-        indexer = new IndexerFactory(indexingSettings).getIndexer();
+        indexer = createIndexerFactory(indexingSettings).getIndexer();
     }
 
     private IndexingSettings prepareIndexingSetting(ParameterTool parameterTool) throws IndexingException {
        return new IndexingSettingsGenerator(parameterTool).generate();
+    }
+
+    protected IndexerFactory createIndexerFactory(IndexingSettings indexingSettings) {
+        return new IndexerFactory(indexingSettings);
     }
 
     @Override

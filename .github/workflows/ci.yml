@@ -5,9 +5,21 @@ on: push
 jobs:
 
   ci:
-    uses: europeana/metis-actions/.github/workflows/ci.yml@main
-    with:
-      sonar_organization: europeana
-      sonar_project_key: europeana_metis-processing-engine
-    secrets:
-      SONAR_TOKEN: ${{ secrets.METIS_SONAR_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set METIS_PROCESSING_HTTP_JOBS_DIR env var
+        run: |
+          echo "METIS_PROCESSING_HTTP_JOBS_DIR=$RUNNER_TEMP/http-jobs" >> $GITHUB_ENV
+          mkdir -p "$RUNNER_TEMP/http-jobs"
+
+      - name: Install media software
+        uses: europeana/metis-actions/actions/media-software-install-steps@main
+      - name: Build code and Sonar Analyze
+        uses: europeana/metis-actions/actions/build-analyze@main
+        with:
+          sonar_organization: europeana
+          sonar_project_key: europeana_metis-processing-engine
+          sonar_token: ${{ secrets.METIS_SONAR_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload all jars to target-jars
+        uses: europeana/metis-actions/actions/upload-target-jars@main
