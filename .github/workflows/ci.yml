@@ -7,6 +7,11 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
+      - name: Set METIS_PROCESSING_HTTP_JOBS_DIR env var
+        run: |
+          echo "METIS_PROCESSING_HTTP_JOBS_DIR=$RUNNER_TEMP/http-jobs" >> $GITHUB_ENV
+          mkdir -p "$RUNNER_TEMP/http-jobs"
+
       - name: Install media software
         uses: europeana/metis-actions/actions/media-software-install-steps@main
       - name: Build code and Sonar Analyze
