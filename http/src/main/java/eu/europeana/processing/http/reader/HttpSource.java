@@ -28,7 +28,7 @@ public class HttpSource implements Source<ExecutionRecordResult, HttpSourceSplit
 
   private static final String METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME = "METIS_PROCESSING_HTTP_JOBS_DIR";
   private static final String HTTP_JOBS_DIR =
-      Optional.ofNullable(System.getenv(METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME)).orElse("/http-jobs");
+      Optional.ofNullable(System.getenv(METIS_PROCESSING_HTTP_JOBS_DIR_ENV_NAME)).orElse(System.getProperty("java.io.tmpdir"));
 
   private final ParameterTool parameterTool;
   private final String jobDirectoryPath;
