@@ -1,6 +1,6 @@
 package eu.europeana.processing.exception;
 
-public class RecoverableException extends FlinkWorkflowException {
+public class RecoverableException extends FlinkWorkflowRuntimeException {
     public RecoverableException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 
 /**
  * Database repository responsible for <b>execution_record</b> table
@@ -90,7 +90,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
                 LOGGER.info("Execution record already existed in the DB: {}", executionRecord.getExecutionRecordKey());
             }
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -104,22 +104,21 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
      */
     public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
 
-        ResultSet resultSet;
+        long count = 0L;
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
-            resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return resultSet.getLong("elements");
-            } else {
-                return 0L;
+                count = resultSet.getLong("elements");
             }
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
+        return count;
     }
 
     /**
@@ -137,6 +136,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
         String executionId,
         long offset,
         long limit)  throws FlinkWorkflowException {
+        List<ExecutionRecord> result = new ArrayList<>();
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(LIMIT)) {
 
@@ -145,7 +145,6 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
             preparedStatement.setLong(3, offset);
             preparedStatement.setLong(4, limit);
 
-            List<ExecutionRecord> result = new ArrayList<>();
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 result.add(
@@ -161,9 +160,9 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
                                 .build()
                 );
             }
-            return result;
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package eu.europeana.processing.retryable;
 
-import eu.europeana.processing.exception.UnrecoverableException;
+import eu.europeana.processing.exception.UnrecoverableJobException;
+import eu.europeana.processing.exception.UnrecoverableRecordException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.DynamicType.Unloaded;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
@@ -63,7 +64,7 @@ public class RetryableMethodExecutor {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new RetryInterruptedException(e);
-      } catch (UnrecoverableException e) {
+      } catch (UnrecoverableJobException | UnrecoverableRecordException e) {
         throw new SuppressRestartsException(e);
       } catch (Exception e) {
         if (--maxAttempts > 0) {
@@ -151,6 +152,6 @@ public class RetryableMethodExecutor {
 
   public interface GenericCallable<V, E extends Throwable> {
 
-    V call() throws E, InterruptedException, UnrecoverableException;
+    V call() throws E, InterruptedException, UnrecoverableJobException, UnrecoverableRecordException;
   }
 }

@@ -1,7 +1,6 @@
 package eu.europeana.processing.exception.classifier;
 
 
-import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.exception.RecoverableException;
 import eu.europeana.processing.exception.UnrecoverableJobException;
 import eu.europeana.processing.exception.UnrecoverableRecordException;
@@ -12,10 +11,10 @@ public class DatabaseExceptionClassifier {
 
     private DatabaseExceptionClassifier() {}
 
-    public static FlinkWorkflowException classify(SQLException sqlException) {
+    public static void classifyAndThrow(SQLException sqlException) throws UnrecoverableRecordException {
         String sqlState = sqlException.getSQLState();
         if (sqlState == null || sqlState.length() < 2) {
-            return new UnrecoverableJobException("Unknown database error", sqlException);
+            throw new UnrecoverableJobException("Unknown database error", sqlException);
         }
 
 //        08	Connection Exception	ConnectionException
@@ -25,12 +24,12 @@ public class DatabaseExceptionClassifier {
 //        40	Transaction Rollback	TransactionException
 //        42	Syntax Error or Access Rule Violation	SqlSyntaxException
 
-        return switch (sqlState.substring(0, 2)) {
-            case "08" -> new RecoverableException("Connection error", sqlException);
-            case "22" -> new UnrecoverableRecordException("Invalid data format", sqlException);
-            case "23", "28", "40", "42" -> new UnrecoverableJobException("Database error (" + sqlException.getSQLState() + ")", sqlException);
-            default -> new UnrecoverableJobException("Database error", sqlException);
-        };
+        switch (sqlState.substring(0, 2)) {
+            case "08" -> throw new RecoverableException("Connection error", sqlException);
+            case "22" -> throw new UnrecoverableRecordException("Invalid data format", sqlException);
+            case "23", "28", "40", "42" -> throw new UnrecoverableJobException("Database error (" + sqlException.getSQLState() + ")", sqlException);
+            default -> throw new UnrecoverableJobException("Database error", sqlException);
+        }
     }
 
 }

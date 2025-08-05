@@ -1,6 +1,6 @@
 package eu.europeana.processing.oai.repository;
 
-import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 import static java.util.stream.Collectors.*;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
@@ -152,23 +152,21 @@ public class OAIHeadersRepository implements DbRepository {
    * @throws FlinkWorkflowException in case of any DB exception
    */
   public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
-
-    ResultSet resultSet;
+    long count = 0L;
     try (Connection con = dbConnectionProvider.getConnection();
         PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
       preparedStatement.setString(1, datasetId);
       preparedStatement.setString(2, executionId);
 
-      resultSet = preparedStatement.executeQuery();
+      ResultSet resultSet = preparedStatement.executeQuery();
 
       if (resultSet.next()) {
-        return resultSet.getLong("elements");
-      } else {
-        return 0L;
+        count = resultSet.getLong("elements");
       }
     } catch (SQLException e) {
-      throw classify(e);
+      classifyAndThrow(e);
     }
+    return count;
   }
 
   /**
@@ -186,6 +184,7 @@ public class OAIHeadersRepository implements DbRepository {
       String executionId,
       long offset,
       long limit) throws FlinkWorkflowException {
+    List<OaiRecordHeader> result = new ArrayList<>();
     try (Connection con = dbConnectionProvider.getConnection();
         PreparedStatement preparedStatement = con.prepareStatement(LIMIT)) {
 
@@ -194,7 +193,6 @@ public class OAIHeadersRepository implements DbRepository {
       preparedStatement.setLong(3, offset);
       preparedStatement.setLong(4, offset + limit);
 
-      List<OaiRecordHeader> result = new ArrayList<>();
       ResultSet resultSet = preparedStatement.executeQuery();
       while (resultSet.next()) {
         Instant datestamp = Optional.ofNullable(resultSet.getTimestamp("datestamp"))
@@ -204,9 +202,9 @@ public class OAIHeadersRepository implements DbRepository {
             resultSet.getBoolean("is_deleted"),
             datestamp));
       }
-      return result;
     } catch (SQLException e) {
-      throw classify(e);
+      classifyAndThrow(e);
     }
+    return result;
   }
 }

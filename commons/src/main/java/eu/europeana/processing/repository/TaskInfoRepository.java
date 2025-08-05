@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 
 /**
  * Database repository responsible for <b>task_info</b> table.
@@ -63,7 +63,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -84,7 +84,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -108,7 +108,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             preparedStatement.execute();
 
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -120,6 +120,7 @@ public class TaskInfoRepository implements DbRepository, Serializable {
      * @throws FlinkWorkflowException in case of database error
      */
     public Optional<TaskInfo> findById(long taskId) throws FlinkWorkflowException {
+        Optional<TaskInfo> foundTask = Optional.empty();
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                      "SELECT * FROM \"batch-framework\".task_info WHERE TASK_ID = ?")) {
@@ -128,16 +129,15 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return Optional.of(new TaskInfo(
+                foundTask = Optional.of(new TaskInfo(
                         resultSet.getLong("TASK_ID"),
                         resultSet.getLong("COMMIT_COUNT"),
                         resultSet.getLong("WRITE_COUNT")
                 ));
-            } else {
-                return Optional.empty();
             }
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
+        return foundTask;
     }
 }

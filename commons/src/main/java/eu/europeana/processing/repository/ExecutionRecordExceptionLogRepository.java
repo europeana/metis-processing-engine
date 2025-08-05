@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classify;
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 
 /**
  * Database repository responsible for <b>execution_record_exception_log</b> table
@@ -79,7 +79,7 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
                 LOGGER.info("Record error log already existed in the DB: {}", executionRecord.getExecutionRecordKey());
             }
         } catch (SQLException e) {
-            throw classify(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -92,21 +92,20 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
      */
     public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
 
-        ResultSet resultSet;
+        long count = 0L;
         try (PreparedStatement preparedStatement = dbConnectionProvider.getConnection().prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
-            resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return resultSet.getLong("elements");
-            } else {
-                return 0L;
+                count = resultSet.getLong("elements");
             }
         } catch(SQLException e){
-            throw classify(e);
+            classifyAndThrow(e);
         }
+        return count;
     }
 
 }
