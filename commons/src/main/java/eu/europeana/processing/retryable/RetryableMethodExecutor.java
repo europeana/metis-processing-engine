@@ -64,7 +64,7 @@ public class RetryableMethodExecutor {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
         throw new RetryInterruptedException(e);
-      } catch (UnrecoverableJobException | UnrecoverableRecordException e) {
+      } catch (UnrecoverableJobException e) {
         throw new SuppressRestartsException(e);
       } catch (Exception e) {
         if (--maxAttempts > 0) {
