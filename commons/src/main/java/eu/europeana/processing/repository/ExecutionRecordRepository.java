@@ -27,6 +27,10 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
     @Serial
     private static final long serialVersionUID = 1;
 
+    public static final String DATASET_ID_COL_NAME = "dataset_id";
+    public static final String EXECUTION_ID_COL_NAME = "execution_id";
+    public static final String RECORD_ID_COL_NAME = "record_id";
+
     private static final String NO_OF_ELEMENTS =
         """
             select count(*) as elements

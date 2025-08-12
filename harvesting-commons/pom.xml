@@ -40,6 +40,13 @@
       <artifactId>metis-transformation-service</artifactId>
       <version>${metis.version}</version>
     </dependency>
+    <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>test-commons</artifactId>
+      <version>${parent.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
+
 
 </project>
