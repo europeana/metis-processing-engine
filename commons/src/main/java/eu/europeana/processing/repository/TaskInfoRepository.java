@@ -25,6 +25,10 @@ public class TaskInfoRepository implements DbRepository, Serializable {
     @Serial
     private static final long serialVersionUID = 1;
 
+    public static final String TASK_ID_COL_NAME = "task_id";
+    public static final String COMMIT_COUNT_COL_NAME = "commit_count";
+    public static final String WRITE_COUNT_COL_NAME = "write_count";
+
     private final DbConnectionProvider dbConnectionProvider;
 
     /**
