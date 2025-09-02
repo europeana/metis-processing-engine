@@ -46,7 +46,7 @@ public class RetryableMethodExecutor {
     return OVERRIDE_ATTEMPT_COUNT != null || OVERRIDE_DELAY_BETWEEN_ATTEMPTS != null;
   }
 
-  public static <V, E extends Exception> V executeOnRest(String errorMessage, GenericCallable<V, E> callable) throws E {
+  public static <V, E extends Exception> V executeOnRest(String errorMessage, GenericCallable<V, E> callable) throws E, UnrecoverableRecordException {
     return execute(errorMessage, DEFAULT_REST_ATTEMPTS, DELAY_BETWEEN_REST_ATTEMPTS, callable);
   }
 
@@ -55,7 +55,7 @@ public class RetryableMethodExecutor {
   // of type E or RuntimeException, cause of callable type. Both are expected to be thrown by this method.
   public static <V, E extends Throwable> V execute(String errorMessage, int maxAttempts,
       int sleepTimeBetweenRetriesMs,
-      GenericCallable<V, E> callable) throws E {
+      GenericCallable<V, E> callable) throws E, UnrecoverableRecordException {
     maxAttempts = Optional.ofNullable(OVERRIDE_ATTEMPT_COUNT).orElse(maxAttempts);
     sleepTimeBetweenRetriesMs = Optional.ofNullable(OVERRIDE_DELAY_BETWEEN_ATTEMPTS).orElse(sleepTimeBetweenRetriesMs);
     while (true) {
@@ -66,6 +66,8 @@ public class RetryableMethodExecutor {
         throw new RetryInterruptedException(e);
       } catch (UnrecoverableJobException e) {
         throw new SuppressRestartsException(e);
+      } catch (UnrecoverableRecordException e) {
+        throw e;
       } catch (Exception e) {
         if (--maxAttempts > 0) {
           LOGGER.warn("{} - {} Retries Left {} ", errorMessage, e.getMessage(), maxAttempts, e);
