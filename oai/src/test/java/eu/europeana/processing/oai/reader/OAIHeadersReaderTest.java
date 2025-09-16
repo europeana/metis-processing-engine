@@ -1,12 +1,14 @@
 package eu.europeana.processing.oai.reader;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
+import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
+import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.util.List;
 import java.util.UUID;
 import org.apache.flink.api.connector.source.ReaderOutput;
@@ -35,7 +37,11 @@ class OAIHeadersReaderTest extends AbstractOAISourceTest {
     repositoryConstruction = Mockito.mockConstruction(OAIHeadersRepository.class, (repository, context)
         -> when(repository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(DATASET, TASK, OFFSET, LIMIT))
         .thenReturn(List.of(HEADER_1, HEADER_2)));
-    try (OAIHeadersReader reader = new OAIHeadersReader(context, parameterTool)) {
+    try (OAIHeadersReader reader = new OAIHeadersReader(
+        context,
+        parameterTool,
+        RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(new DbConnectionProvider(parameterTool)))
+    )) {
       reader.start();
       reader.addSplits(List.of(new DataPartition(OFFSET, LIMIT, 0, enumeratorUuid)));
 

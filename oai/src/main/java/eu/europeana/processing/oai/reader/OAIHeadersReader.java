@@ -3,7 +3,6 @@ package eu.europeana.processing.oai.reader;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.AbstractDbReader;
 import java.io.IOException;
 import org.apache.flink.api.connector.source.SourceReaderContext;
@@ -28,13 +27,10 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
    * @param context - Flink context
    * @param parameterTool - job parameters
    */
-  public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool) {
+  public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool, OAIHeadersRepository oaiHeadersRepository) {
     super(context, parameterTool);
+    this.repository = oaiHeadersRepository;
     LOGGER.info("Created OAIHeadersReader");
-  }
-
-  protected void createRepositories() {
-    repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(dbConnectionProvider));
   }
 
   protected List<OaiRecordHeader> fetchRecords() throws IOException {

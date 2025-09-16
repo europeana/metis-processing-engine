@@ -67,10 +67,7 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
     public void start() {
         LOGGER.info("Starting: {}", getClass().getSimpleName());
         dbConnectionProvider = new DbConnectionProvider(parameterTool);
-        createRepositories();
     }
-
-    protected abstract void createRepositories() ;
 
     @Override
     public InputStatus pollNext(ReaderOutput<R> output) throws Exception {

@@ -8,13 +8,24 @@ import org.apache.flink.streaming.api.functions.ProcessFunction.Context;
 import org.apache.flink.util.Collector;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class IdAssigningOperatorTest {
+
+  @Mock
+  private Collector<ExecutionRecordResult> mockOut;
+
+  @Mock
+  private Context mockContext;
 
   @Test
   void shouldCorrectlyGenerateEuropeanaIdentifier() throws EuropeanaIdException {
+    //given
     IdAssigningOperator idAssigningOperator = new IdAssigningOperator();
 
     ExecutionRecordResult input = ExecutionRecordResult
@@ -32,10 +43,10 @@ class IdAssigningOperatorTest {
             .build())
         .build();
 
-    Collector<ExecutionRecordResult> mockOut = Mockito.mock(Collector.class);
+    //when
+    idAssigningOperator.processElement(input, mockContext, mockOut);
 
-    idAssigningOperator.processElement(input, Mockito.mock(Context.class), mockOut);
-
+    //then
     ArgumentCaptor<ExecutionRecordResult> captor = ArgumentCaptor.forClass(ExecutionRecordResult.class);
     Mockito.verify(mockOut, Mockito.times(1)).collect(captor.capture());
 
@@ -52,6 +63,7 @@ class IdAssigningOperatorTest {
 
   @Test
   void shouldThrowExceptionForEmptyRecord() {
+    //given
     IdAssigningOperator idAssigningOperator = new IdAssigningOperator();
 
     ExecutionRecordResult input = ExecutionRecordResult
@@ -69,15 +81,15 @@ class IdAssigningOperatorTest {
             .build())
         .build();
 
-    Collector<ExecutionRecordResult> mockOut = Mockito.mock(Collector.class);
-
+    //then
     Assertions.assertThrows(EuropeanaIdException.class,
-        () -> idAssigningOperator.processElement(input, Mockito.mock(Context.class), mockOut)
+        () -> idAssigningOperator.processElement(input, mockContext, mockOut)
     );
   }
 
   @Test
   void shouldThrowExceptionForRecordWithoutRdfAbout() {
+    //given
     IdAssigningOperator idAssigningOperator = new IdAssigningOperator();
 
     ExecutionRecordResult input = ExecutionRecordResult
@@ -95,10 +107,9 @@ class IdAssigningOperatorTest {
             .build())
         .build();
 
-    Collector<ExecutionRecordResult> mockOut = Mockito.mock(Collector.class);
-
+    //then
     Assertions.assertThrows(EuropeanaIdException.class,
-        () -> idAssigningOperator.processElement(input, Mockito.mock(Context.class), mockOut)
+        () -> idAssigningOperator.processElement(input, mockContext, mockOut)
     );
   }
 

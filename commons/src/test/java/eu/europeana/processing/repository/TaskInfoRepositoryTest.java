@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions;
 import org.assertj.db.type.AssertDbConnection;
 import org.assertj.db.type.AssertDbConnectionFactory;
 import org.assertj.db.type.Request.Builder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -25,12 +24,6 @@ class TaskInfoRepositoryTest extends RepositoryTest {
     prepareRequests();
   }
 
-  @AfterAll
-  static void after() {
-    postgres.stop();
-  }
-
-
   @Test
   void shouldSaveCorrectTaskInfo() {
     TaskInfoRepository taskInfoRepository = prepareRepository();
@@ -42,18 +35,21 @@ class TaskInfoRepositoryTest extends RepositoryTest {
     assertThat(
         request.parameters(1).build()
     ).hasNumberOfRows(1)
+     .row(0).value(TaskInfoRepository.TASK_ID_COL_NAME).isEqualTo(1)
      .row(0).value(TaskInfoRepository.COMMIT_COUNT_COL_NAME).isEqualTo(12)
      .row(0).value(TaskInfoRepository.WRITE_COUNT_COL_NAME).isEqualTo(14);
 
     assertThat(
         request.parameters(2).build()
     ).hasNumberOfRows(1)
+     .row(0).value(TaskInfoRepository.TASK_ID_COL_NAME).isEqualTo(2)
      .row(0).value(TaskInfoRepository.COMMIT_COUNT_COL_NAME).isEqualTo(0)
      .row(0).value(TaskInfoRepository.WRITE_COUNT_COL_NAME).isEqualTo(10);
 
     assertThat(
         request.parameters(3).build()
     ).hasNumberOfRows(1)
+     .row(0).value(TaskInfoRepository.TASK_ID_COL_NAME).isEqualTo(3)
      .row(0).value(TaskInfoRepository.COMMIT_COUNT_COL_NAME).isEqualTo(20)
      .row(0).value(TaskInfoRepository.WRITE_COUNT_COL_NAME).isEqualTo(30);
   }

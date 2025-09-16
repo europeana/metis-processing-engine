@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class RegularDbReader extends AbstractDbReader<ExecutionRecord> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RegularDbReader.class);
-  private ExecutionRecordRepository executionRecordRepository;
+  private final ExecutionRecordRepository executionRecordRepository;
 
   /**
    * Creates RegularDbReader
@@ -25,18 +25,10 @@ public class RegularDbReader extends AbstractDbReader<ExecutionRecord> {
    * @param context - Flink context
    * @param parameterTool - job parameters
    */
-  public RegularDbReader(SourceReaderContext context, ParameterTool parameterTool) {
+  public RegularDbReader(SourceReaderContext context, ParameterTool parameterTool, ExecutionRecordRepository executionRecordRepository) {
     super(context, parameterTool);
+    this.executionRecordRepository = executionRecordRepository;
     LOGGER.info("Created RegularDbReader");
-  }
-
-  protected void createRepositories() {
-    //TODO Using retry proxy is maybe not optimal strategy in this case. This source implements asynchronous interface, so
-    // we could do this retries in poolNext() method by returning InputStatus.NOTHING_AVAILABLE, wait a bit and notify
-    // completable future to poll source again. Or simple wait a bit in pollNext() but only once per one retry.
-    // In such cases we would less block checkpointing mechanism, which should work smoothly in case of infrastructure problems
-    // and potential job restarts. And when we do not block we could do more retries or longer pauses.
-    executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
   }
 
   protected List<ExecutionRecord> fetchRecords() throws IOException {

@@ -90,7 +90,10 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
   public void start() {
     LOGGER.info("Starting enumerator");
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
-    progressUpdater = new ProgressUpdater(dbConnectionProvider, parameterTool, emittedRecordCount);
+    progressUpdater = new ProgressUpdater(
+        new TaskInfoRepository(dbConnectionProvider),
+        parameterTool,
+        emittedRecordCount);
     createDbRepositories();
     taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     validateTaskExists();

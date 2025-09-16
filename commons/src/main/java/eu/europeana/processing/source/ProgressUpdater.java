@@ -17,7 +17,6 @@ public class ProgressUpdater implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressUpdater.class);
   private final long taskId;
-  private final DbConnectionProvider dbConnectionProvider;
   private final TaskInfoRepository taskInfoRepo;
   private long lastStoredFilesCount;
   private long snapshottedEmittedFilesCount = -1;
@@ -28,13 +27,12 @@ public class ProgressUpdater implements Closeable {
    * @param parameterTool - all the command line parameters of the job
    * @param completedFilesCount - Number of files already completed. It is greater than 0 only if the source is restored from a
    * checkpoint.
-   * @param dbConnectionProvider - db connection provider
+   * @param taskInfoRepository - repository for TaskInfo table
    */
-  public ProgressUpdater(DbConnectionProvider dbConnectionProvider, ParameterTool parameterTool, long completedFilesCount) {
-    this.dbConnectionProvider = dbConnectionProvider;
+  public ProgressUpdater(TaskInfoRepository taskInfoRepository, ParameterTool parameterTool, long completedFilesCount) {
+    taskInfoRepo = taskInfoRepository;
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     lastStoredFilesCount = completedFilesCount;
-    taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     LOGGER.debug("Created ProgressUpdater");
   }
 
@@ -70,7 +68,6 @@ public class ProgressUpdater implements Closeable {
   }
 
   public void close() {
-    dbConnectionProvider.close();
     LOGGER.debug("Closed: {}", ProgressUpdater.class.getSimpleName());
   }
 
