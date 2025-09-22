@@ -1,6 +1,7 @@
 package eu.europeana.processing.source;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.AbstractPartition;
 import eu.europeana.processing.repository.TaskInfoRepository;
@@ -93,7 +94,11 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
     progressUpdater = new ProgressUpdater(dbConnectionProvider, parameterTool, emittedRecordCount);
     createDbRepositories();
     taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
-    validateTaskExists();
+    try {
+      validateTaskExists();
+    } catch (FlinkWorkflowException e) {
+      throw new SuppressRestartsException(e);
+    }
   }
 
   protected abstract void createDbRepositories();
@@ -217,7 +222,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
   protected abstract S createState();
 
   @Override
-  public void notifyCheckpointComplete(long checkpointId) {
+  public void notifyCheckpointComplete(long checkpointId) throws FlinkWorkflowException {
     LOGGER.debug("Task: {}, checkpoint: {} completed. Updating progress...", taskId, checkpointId);
     progressUpdater.saveProgressInDB();
   }
@@ -243,9 +248,13 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
     return incompletePartitions;
   }
 
-  private void validateTaskExists() {
-    if (taskInfoRepo.findById(taskId).isEmpty()) {
-      throw new SuppressRestartsException(new Exception("Task not found in the database. It should never happen."));
+  private void validateTaskExists() throws FlinkWorkflowException {
+    try {
+      if (taskInfoRepo.findById(taskId).isEmpty()) {
+        throw new SuppressRestartsException(new Exception("Task not found in the database. It should never happen."));
+      }
+    } catch (FlinkWorkflowException e){
+      throw e;
     }
   }
 

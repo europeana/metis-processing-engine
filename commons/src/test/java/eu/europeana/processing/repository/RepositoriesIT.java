@@ -2,6 +2,7 @@ package eu.europeana.processing.repository;
 
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordKey;
@@ -30,7 +31,7 @@ class RepositoriesIT {
   private ExecutionRecordExceptionLogRepository errorRepository = new ExecutionRecordExceptionLogRepository(dbConnectionProvider);
 
   @Test
-  void shouldProperlyLogIfTheRecordAlreadyExistedInTheDb() throws IOException {
+  void shouldProperlyLogIfTheRecordAlreadyExistedInTheDb() throws IOException, FlinkWorkflowException {
     ExecutionRecordResult result = ExecutionRecordResult.from(
         ExecutionRecord
             .builder()
@@ -54,7 +55,7 @@ class RepositoriesIT {
   }
 
   @Test
-  void shouldProperlyLogIfTheErrorLogAlreadyExistedInTheDb() {
+  void shouldProperlyLogIfTheErrorLogAlreadyExistedInTheDb() throws FlinkWorkflowException {
     ExecutionRecordResult result = ExecutionRecordResult
         .builder()
         .executionRecord(

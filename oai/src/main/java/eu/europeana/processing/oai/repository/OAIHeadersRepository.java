@@ -1,9 +1,11 @@
 package eu.europeana.processing.oai.repository;
 
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 import static java.util.stream.Collectors.*;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.repository.DbRepository;
 import eu.europeana.processing.retryable.Retryable;
 import java.io.IOException;
@@ -147,26 +149,24 @@ public class OAIHeadersRepository implements DbRepository {
    * @param datasetId dataset identifier
    * @param executionId execution identifier
    * @return number of elements in <b>execution_record_external_identifier</b> table for specified dataset and execution
-   * @throws IOException in case of any DB exception
+   * @throws FlinkWorkflowException in case of any DB exception
    */
-  public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws IOException {
-
-    ResultSet resultSet;
+  public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
+    long count = 0L;
     try (Connection con = dbConnectionProvider.getConnection();
         PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
       preparedStatement.setString(1, datasetId);
       preparedStatement.setString(2, executionId);
 
-      resultSet = preparedStatement.executeQuery();
+      ResultSet resultSet = preparedStatement.executeQuery();
 
       if (resultSet.next()) {
-        return resultSet.getLong("elements");
-      } else {
-        return 0L;
+        count = resultSet.getLong("elements");
       }
     } catch (SQLException e) {
-      throw new IOException(e);
+      classifyAndThrow(e);
     }
+    return count;
   }
 
   /**
@@ -177,13 +177,14 @@ public class OAIHeadersRepository implements DbRepository {
    * @param offset dataset offset
    * @param limit dataset limit
    * @return list of all {@link OaiRecordHeader} fulfilling provided criteria
-   * @throws IOException in case of any DB exception
+   * @throws FlinkWorkflowException in case of any DB exception
    */
   public List<OaiRecordHeader> getByDatasetIdAndExecutionIdAndOffsetAndLimit(
       String datasetId,
       String executionId,
       long offset,
-      long limit) throws IOException {
+      long limit) throws FlinkWorkflowException {
+    List<OaiRecordHeader> result = new ArrayList<>();
     try (Connection con = dbConnectionProvider.getConnection();
         PreparedStatement preparedStatement = con.prepareStatement(LIMIT)) {
 
@@ -192,7 +193,6 @@ public class OAIHeadersRepository implements DbRepository {
       preparedStatement.setLong(3, offset);
       preparedStatement.setLong(4, offset + limit);
 
-      List<OaiRecordHeader> result = new ArrayList<>();
       ResultSet resultSet = preparedStatement.executeQuery();
       while (resultSet.next()) {
         Instant datestamp = Optional.ofNullable(resultSet.getTimestamp("datestamp"))
@@ -202,9 +202,9 @@ public class OAIHeadersRepository implements DbRepository {
             resultSet.getBoolean("is_deleted"),
             datestamp));
       }
-      return result;
     } catch (SQLException e) {
-      throw new IOException(e);
+      classifyAndThrow(e);
     }
+    return result;
   }
 }

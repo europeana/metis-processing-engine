@@ -13,6 +13,7 @@ import eu.europeana.metis.harvesting.oaipmh.OaiHarvester;
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.blocking.BlockingService;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.oai.repository.BatchHeaderSaver;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
@@ -118,7 +119,7 @@ public class OAIBackgroundHeaderHarvester {
     }
   }
 
-  private int countHeadersFromPreviousExecutions() throws IOException {
+  private int countHeadersFromPreviousExecutions() throws FlinkWorkflowException {
     int headersCount = (int) repository.countByDatasetIdAndExecutionId(dataset, execution);
     LOGGER.info("Counted: {} OAI headers already in DB.", headersCount);
     if(headersCount > 0) {

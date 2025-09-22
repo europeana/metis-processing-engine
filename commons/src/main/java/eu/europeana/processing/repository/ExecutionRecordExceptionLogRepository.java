@@ -1,6 +1,7 @@
 package eu.europeana.processing.repository;
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.retryable.Retryable;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.model.ExecutionRecordResult;
@@ -8,12 +9,13 @@ import java.io.Serial;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import static eu.europeana.processing.exception.classifier.DatabaseExceptionClassifier.classifyAndThrow;
 
 /**
  * Database repository responsible for <b>execution_record_exception_log</b> table
@@ -56,8 +58,9 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
      *  In case of conflict (try to insert the same record twice) the method does nothing.
      *
      * @param executionRecordResult instance to be saved in the database
+     * @throws FlinkWorkflowException in case of any DB exception
      */
-    public void save(ExecutionRecordResult executionRecordResult) {
+    public void save(ExecutionRecordResult executionRecordResult) throws FlinkWorkflowException {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                      "INSERT INTO \"batch-framework\".execution_record_exception_log (DATASET_ID,EXECUTION_ID,EXECUTION_NAME, RECORD_ID, exception)"
@@ -76,7 +79,7 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
                 LOGGER.info("Record error log already existed in the DB: {}", executionRecord.getExecutionRecordKey());
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            classifyAndThrow(e);
         }
     }
 
@@ -85,25 +88,24 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
      * @param datasetId dataset identifier
      * @param executionId execution identifier
      * @return number of elements in <b>execution_record_exception_log</b> table for specified dataset and execution
-     * @throws IOException
+     * @throws FlinkWorkflowException in case of any DB exception
      */
-    public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws IOException {
+    public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
 
-        ResultSet resultSet;
+        long count = 0L;
         try (PreparedStatement preparedStatement = dbConnectionProvider.getConnection().prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
-            resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return resultSet.getLong("elements");
-            } else {
-                return 0L;
+                count = resultSet.getLong("elements");
             }
         } catch(SQLException e){
-            throw new IOException(e);
+            classifyAndThrow(e);
         }
+        return count;
     }
 
 }

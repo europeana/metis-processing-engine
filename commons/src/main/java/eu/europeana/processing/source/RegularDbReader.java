@@ -1,10 +1,11 @@
 package eu.europeana.processing.source;
 
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.ExecutionRecord;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
 import eu.europeana.processing.retryable.RetryableMethodExecutor;
-import java.io.IOException;
+
 import java.util.List;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.util.ParameterTool;
@@ -39,7 +40,7 @@ public class RegularDbReader extends AbstractDbReader<ExecutionRecord> {
     executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
   }
 
-  protected List<ExecutionRecord> fetchRecords() throws IOException {
+  protected List<ExecutionRecord> fetchRecords() throws FlinkWorkflowException {
     return executionRecordRepository.getByDatasetIdAndExecutionIdAndOffsetAndLimit(
         parameterTool.getRequired(JobParamName.DATASET_ID),
         parameterTool.getRequired(JobParamName.EXECUTION_ID),

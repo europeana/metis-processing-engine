@@ -120,7 +120,7 @@ public class JobExecutor {
           return getProgress(jobId);
         } catch (RestClientResponseException e) {
           if (e.getStatusCode() == HttpStatus.NOT_FOUND &&
-              e.getResponseBodyAsString().contains("org.apache.flink.runtime.rest.NotFoundException")) {
+                  e.getResponseBodyAsString().contains("org.apache.flink.runtime.rest.NotFoundException")) {
             throw new RuntimeException("There is no more job of the id: " + jobId + " on the server", e);
           }
           throw e;

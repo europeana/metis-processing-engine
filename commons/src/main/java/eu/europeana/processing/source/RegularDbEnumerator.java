@@ -1,5 +1,6 @@
 package eu.europeana.processing.source;
 
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
@@ -48,7 +49,7 @@ public class RegularDbEnumerator extends AbstractDbEnumerator<DbEnumeratorState>
     return new DbEnumeratorState();
   }
 
-  protected long countRecordsInDb() throws IOException {
+  protected long countRecordsInDb() throws FlinkWorkflowException {
     return executionRecordRepository.countByDatasetIdAndExecutionId(
         parameterTool.getRequired(JobParamName.DATASET_ID),
         parameterTool.getRequired(JobParamName.EXECUTION_ID));

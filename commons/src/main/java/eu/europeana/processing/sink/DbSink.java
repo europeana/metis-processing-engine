@@ -2,6 +2,7 @@ package eu.europeana.processing.sink;
 
 
 import eu.europeana.processing.DbConnectionProvider;
+import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.model.ExecutionRecordResult;
 import eu.europeana.processing.repository.ExecutionRecordExceptionLogRepository;
 import eu.europeana.processing.repository.ExecutionRecordRepository;
@@ -66,11 +67,19 @@ public class DbSink implements Sink<ExecutionRecordResult> {
         }
 
         private void storeProcessedRecord(ExecutionRecordResult executionRecordResult) throws IOException {
-            executionRecordRepository.save(executionRecordResult);
+            try {
+                executionRecordRepository.save(executionRecordResult);
+            } catch (FlinkWorkflowException e) {
+                throw new IOException(e);
+            }
         }
 
-        private void storeExecutionRecordException(ExecutionRecordResult executionRecordResult) {
-            executionRecordExceptionLogRepository.save(executionRecordResult);
+        private void storeExecutionRecordException(ExecutionRecordResult executionRecordResult) throws IOException {
+            try {
+                executionRecordExceptionLogRepository.save(executionRecordResult);
+            } catch (FlinkWorkflowException e) {
+                throw new IOException(e);
+            }
         }
 
         // TODO: Consider adding buffer for records and then batch add to DB
