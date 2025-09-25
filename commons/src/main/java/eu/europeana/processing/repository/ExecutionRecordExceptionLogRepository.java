@@ -90,7 +90,8 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
     public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws IOException {
 
         ResultSet resultSet;
-        try (PreparedStatement preparedStatement = dbConnectionProvider.getConnection().prepareStatement(NO_OF_ELEMENTS)) {
+        try (Connection con = dbConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
@@ -101,8 +102,8 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
             } else {
                 return 0L;
             }
-        } catch(SQLException e){
-            throw new IOException(e);
+        } catch (SQLException e) {
+          throw new IOException(e);
         }
     }
 

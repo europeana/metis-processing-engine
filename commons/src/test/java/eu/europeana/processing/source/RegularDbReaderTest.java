@@ -42,39 +42,51 @@ class RegularDbReaderTest extends RepositoryTest {
   }
 
   @Test
-  void shouldSignalNoMoreSplits() throws Exception {
+  void shoudlSignalEndOfInputWhenThereIsNoMoreSplits() throws Exception {
+    //given
+    ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
+
     try (RegularDbReader reader = new RegularDbReader(null, ParameterTool.fromArgs(
         new String[]{
             "-" + JobParamName.DATASOURCE_URL, postgres.getJdbcUrl(),
             "-" + JobParamName.DATASOURCE_USERNAME, "test",
             "-" + JobParamName.DATASOURCE_PASSWORD, "test"
         }
-    ), null)) {
+    ), mock)) {
+      //when
       reader.notifyNoMoreSplits();
       InputStatus inputStatus = reader.pollNext(null);
+      //then
       Assertions.assertThat(inputStatus).isEqualTo(InputStatus.END_OF_INPUT);
     }
   }
 
   @Test
   void shouldSendSplitRequestAndEmitZeroRecordsBecauseThereAreNoSplits() throws Exception {
+    //given
+    ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
+
     try (RegularDbReader reader = new RegularDbReader(mockContext, ParameterTool.fromArgs(
         new String[]{
             "-" + JobParamName.DATASOURCE_URL, postgres.getJdbcUrl(),
             "-" + JobParamName.DATASOURCE_USERNAME, "test",
             "-" + JobParamName.DATASOURCE_PASSWORD, "test"
         }
-    ), null)) {
-      reader.pollNext(readerOutput);
+    ), mock)) {
+      //when
+      InputStatus inputStatus = reader.pollNext(readerOutput);
 
+      //then
       Mockito.verify(readerOutput, Mockito.times(0)).collect(Mockito.any());
       Mockito.verify(mockContext, Mockito.times(1)).sendSplitRequest();
+      Assertions.assertThat(inputStatus).isEqualTo(InputStatus.NOTHING_AVAILABLE);
     }
   }
 
   @Test
   void shouldSendSplitRequestAndEmitOneRecordFromSplitContainingOneRecord() throws Exception {
 
+    //given
     ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
 
     Mockito.doReturn(Collections.singletonList(
@@ -94,16 +106,20 @@ class RegularDbReaderTest extends RepositoryTest {
             "-" + JobParamName.EXECUTION_ID, "executionId",
         }
     ), mock)) {
+      //when
       reader.addSplits(List.of(new DataPartition(0, 1, 0, null)));
-      reader.pollNext(readerOutput);
+      InputStatus inputStatus = reader.pollNext(readerOutput);
 
+      //then
       Mockito.verify(readerOutput, Mockito.times(1)).collect(Mockito.any());
       Mockito.verify(mockContext, Mockito.times(1)).sendSplitRequest();
+      Assertions.assertThat(inputStatus).isEqualTo(InputStatus.NOTHING_AVAILABLE);
     }
   }
 
   @Test
   void shouldSendOnlyOneSplitRequestAndEmitTwoRecordFromSplitContainingTwoRecords() throws Exception {
+    //given
     ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
 
     Mockito.doReturn(Arrays.asList(
@@ -127,19 +143,23 @@ class RegularDbReaderTest extends RepositoryTest {
             "-" + JobParamName.EXECUTION_ID, "executionId",
         }
     ), mock)) {
+      //when
       reader.addSplits(List.of(
           new DataPartition(0, 5, 0, null)
       ));
       reader.pollNext(readerOutput);
-      reader.pollNext(readerOutput);
+      InputStatus inputStatus = reader.pollNext(readerOutput);
 
+      //then
       Mockito.verify(mockContext, Mockito.times(1)).sendSplitRequest();
       Mockito.verify(readerOutput, Mockito.times(2)).collect(Mockito.any());
+      Assertions.assertThat(inputStatus).isEqualTo(InputStatus.NOTHING_AVAILABLE);
     }
   }
 
   @Test
   void shouldSendOnlyOneSplitRequestAndEmitTwoRecordFromSplitContainingTwoRecords_1() throws Exception {
+    //given
     ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
 
     Mockito.doReturn(Arrays.asList(
@@ -163,20 +183,24 @@ class RegularDbReaderTest extends RepositoryTest {
             "-" + JobParamName.EXECUTION_ID, "executionId"
         }
     ), mock)) {
+      //when
       reader.addSplits(List.of(
           new DataPartition(0, 5, 0, null)
       ));
       reader.pollNext(readerOutput);
       reader.pollNext(readerOutput);
-      reader.pollNext(readerOutput);
+      InputStatus inputStatus = reader.pollNext(readerOutput);
 
+      //then
       Mockito.verify(mockContext, Mockito.times(1)).sendSplitRequest();
       Mockito.verify(readerOutput, Mockito.times(2)).collect(Mockito.any());
+      Assertions.assertThat(inputStatus).isEqualTo(InputStatus.MORE_AVAILABLE);
     }
   }
 
   @Test
   void shouldBlockTheReaderAfterReachingPendingLimit() throws Exception {
+    //given
     ExecutionRecordRepository mock = Mockito.mock(ExecutionRecordRepository.class);
 
     Mockito.doReturn(Arrays.asList(
@@ -201,10 +225,12 @@ class RegularDbReaderTest extends RepositoryTest {
             "-" + JobParamName.MAX_RECORD_PENDING, "1"
         }
     ), mock)) {
+      //when
       reader.addSplits(List.of(
           new DataPartition(0, 5, 0, null)
       ));
       InputStatus inputStatus = reader.pollNext(readerOutput);
+      //then
       Assertions.assertThat(inputStatus).isEqualTo(InputStatus.NOTHING_AVAILABLE);
 
       CompletableFuture<Void> available = reader.isAvailable();

@@ -19,7 +19,7 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersReader.class);
 
-  private OAIHeadersRepository repository;
+  private final OAIHeadersRepository repository;
 
   /**
    * Creates OAIHeadersReader

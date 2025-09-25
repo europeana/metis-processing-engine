@@ -91,7 +91,7 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
     LOGGER.info("Starting enumerator");
     dbConnectionProvider = new DbConnectionProvider(parameterTool);
     progressUpdater = new ProgressUpdater(
-        new TaskInfoRepository(dbConnectionProvider),
+        RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider)),
         parameterTool,
         emittedRecordCount);
     createDbRepositories();

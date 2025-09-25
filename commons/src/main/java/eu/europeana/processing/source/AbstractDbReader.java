@@ -1,6 +1,5 @@
 package eu.europeana.processing.source;
 
-import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.job.JobParam;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
@@ -49,7 +48,6 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
     private List<R> polledRecords = null;
 
     private List<DataPartition> currentSplits = new ArrayList<>();
-    protected DbConnectionProvider dbConnectionProvider;
     protected DataPartition currentSplit;
 
     protected AbstractDbReader(
@@ -66,7 +64,6 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
     @Override
     public void start() {
         LOGGER.info("Starting: {}", getClass().getSimpleName());
-        dbConnectionProvider = new DbConnectionProvider(parameterTool);
     }
 
     @Override
@@ -205,9 +202,6 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
 
     @Override
     public void close() {
-        if (dbConnectionProvider != null) {
-            dbConnectionProvider.close();
-        }
     }
 
     private void updatePendingRecordsState(long completedCheckpointId) {

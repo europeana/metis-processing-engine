@@ -108,7 +108,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
 
         ResultSet resultSet;
         try (Connection con = dbConnectionProvider.getConnection();
-             PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
+            PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
@@ -120,7 +120,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
                 return 0L;
             }
         } catch (SQLException e) {
-            throw new IOException(e);
+          throw new IOException(e);
         }
     }
 
