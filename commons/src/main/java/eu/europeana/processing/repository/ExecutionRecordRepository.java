@@ -168,4 +168,11 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
             throw new IOException(e);
         }
     }
+
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }

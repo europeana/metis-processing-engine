@@ -10,9 +10,12 @@ import org.apache.flink.util.ParameterTool;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DbConnectionProvider implements Serializable, AutoCloseable {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(DbConnectionProvider.class);
     @Serial
     private static final long serialVersionUID = 1;
 
@@ -25,6 +28,7 @@ public class DbConnectionProvider implements Serializable, AutoCloseable {
         config.setJdbcUrl(parameterTool.getRequired(JobParamName.DATASOURCE_URL));
         config.setUsername(parameterTool.get(JobParamName.DATASOURCE_USERNAME));
         config.setPassword(parameterTool.get(JobParamName.DATASOURCE_PASSWORD));
+        config.addDataSourceProperty("ApplicationName", "metis-processing-engine");
         config.setMaximumPoolSize(1);
         dataSource = new HikariDataSource(config);
     }
@@ -35,6 +39,7 @@ public class DbConnectionProvider implements Serializable, AutoCloseable {
 
     @Override
     public void close() {
-        dataSource.close();
+      LOGGER.debug("Closing DB connection provider");
+      dataSource.close();
     }
 }

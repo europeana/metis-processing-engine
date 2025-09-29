@@ -41,4 +41,10 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
         currentSplit.getLimit());
   }
 
+  @Override
+  public void close() {
+    super.close();
+    repository.shutdown();
+  }
+
 }

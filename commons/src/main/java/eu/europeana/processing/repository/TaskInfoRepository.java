@@ -137,4 +137,11 @@ public class TaskInfoRepository implements DbRepository, Serializable {
             throw new RuntimeException(e);
         }
     }
+
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }

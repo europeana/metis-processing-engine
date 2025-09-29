@@ -107,4 +107,10 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
         }
     }
 
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }
