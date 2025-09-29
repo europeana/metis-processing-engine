@@ -39,7 +39,11 @@ public class DbConnectionProvider implements Serializable, AutoCloseable {
 
     @Override
     public void close() {
-      LOGGER.debug("Closing DB connection provider");
-      dataSource.close();
+      if (!dataSource.isClosed()) {
+        LOGGER.debug("Closing DB connection provider");
+        dataSource.close();
+      } else {
+        LOGGER.debug("ConnectionProvider already closed");
+      }
     }
 }

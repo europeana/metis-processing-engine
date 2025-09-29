@@ -37,9 +37,10 @@ public class DbSink implements Sink<ExecutionRecordResult> {
         private final transient ExecutionRecordExceptionLogRepository executionRecordExceptionLogRepository;
 
         public DbSinkWriter(ParameterTool tool) {
-            executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(new DbConnectionProvider(tool)));
+          DbConnectionProvider dbConnectionProvider = new DbConnectionProvider(tool);
+          executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
             executionRecordExceptionLogRepository =
-                    RetryableMethodExecutor.createRetryProxy(new ExecutionRecordExceptionLogRepository(new DbConnectionProvider(tool)));
+                    RetryableMethodExecutor.createRetryProxy(new ExecutionRecordExceptionLogRepository(dbConnectionProvider));
             LOGGER.debug("DbSinkWriter initialized");
         }
 
