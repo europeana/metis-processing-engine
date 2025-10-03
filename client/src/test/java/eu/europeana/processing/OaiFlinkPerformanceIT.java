@@ -1,12 +1,18 @@
 package eu.europeana.processing;
 
 import eu.europeana.cloud.flink.client.JobExecutor;
+import eu.europeana.cloud.flink.client.application.ApplicationClusterJobExecutor;
 import eu.europeana.cloud.flink.client.entities.SubmitJobRequest;
+import eu.europeana.cloud.flink.client.session.SessionClusterJobExecutor;
+import eu.europeana.processing.config.ClusterMode;
 import eu.europeana.processing.config.FlinkConfigurationProperties;
 import eu.europeana.processing.config.JarIdsProperties;
 import eu.europeana.processing.config.JobsConfigurationProperties;
 import eu.europeana.processing.job.JobParamValue;
+import io.kubernetes.client.openapi.ApiException;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,9 +119,7 @@ class OaiFlinkPerformanceIT extends AbstractPerformanceIT {
 
   void executeStep(int stepNumber, String jarId, String jobClass, Map<String, String> specialParameters)
       throws Exception {
-    JobExecutor executor = new JobExecutor(flinkConfigurationProperties.getJobManagerUrl(),
-        flinkConfigurationProperties.getJobManagerUser(),
-        flinkConfigurationProperties.getJobManagerPassword(), jarId);
+    JobExecutor executor = createExecutor(jarId);
     beforeEach(stepNumber);
     String datasetId = testProperties.getDatasetId();
     String taskId = String.valueOf(stepNumber);
@@ -138,6 +142,17 @@ class OaiFlinkPerformanceIT extends AbstractPerformanceIT {
     startWatch = StopWatch.createStarted();
     executor.execute(request);
     validateResult(stepNumber);
+  }
+
+  private JobExecutor createExecutor(String jarId) throws IOException, ApiException {
+    if (flinkConfigurationProperties.getClusterMode() == ClusterMode.APPLICATION) {
+      return new ApplicationClusterJobExecutor(flinkConfigurationProperties.getOpenshiftProject(),
+          Path.of(flinkConfigurationProperties.getConfigTemplateDir()));
+    } else {
+      return new SessionClusterJobExecutor(flinkConfigurationProperties.getJobManagerUrl(),
+          flinkConfigurationProperties.getJobManagerUser(),
+          flinkConfigurationProperties.getJobManagerPassword(), jarId);
+    }
   }
 
 }
