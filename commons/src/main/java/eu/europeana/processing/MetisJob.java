@@ -98,10 +98,10 @@ public abstract class MetisJob {
     }
 
     protected void generateTaskIdIfNeeded() {
-        try (DbConnectionProvider dbConnectionProvider = new DbConnectionProvider(tool)) {
-            TaskInfoRepository taskInfoRepository =
-                RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
+      TaskInfoRepository taskInfoRepository =
+          RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(new DbConnectionProvider(tool)));
 
+        try {
             if (tool.get(JobParamName.TASK_ID) == null) {
                 long taskId = taskIdGenerator.nextLong();
                 taskInfoRepository.save(new TaskInfo(taskId, 0L, 0L));
@@ -114,6 +114,8 @@ public abstract class MetisJob {
             }
         }catch (Exception e){
             throw new RuntimeException("Error while generating task id!", e);
+        } finally {
+          taskInfoRepository.shutdown();
         }
     }
 

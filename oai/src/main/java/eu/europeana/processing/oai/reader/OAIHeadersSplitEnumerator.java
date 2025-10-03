@@ -1,5 +1,6 @@
 package eu.europeana.processing.oai.reader;
 
+import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
@@ -67,7 +68,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
 
   @Override
   protected void createDbRepositories() {
-    repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(dbConnectionProvider));
+    repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(new DbConnectionProvider(parameterTool)));
   }
 
   @Override
@@ -81,6 +82,7 @@ public class OAIHeadersSplitEnumerator extends AbstractDbEnumerator<OAIEnumerato
   public void close() throws IOException {
     try {
       backgroundHeaderHarvester.close();
+      repository.shutdown();
     } catch (InterruptedException e) {
       LOGGER.warn("InterruptedException during OAIBackgroundHeaderHarvester closing!", e);
       Thread.currentThread().interrupt();

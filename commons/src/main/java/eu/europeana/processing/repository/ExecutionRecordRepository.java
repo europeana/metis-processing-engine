@@ -29,6 +29,10 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
     @Serial
     private static final long serialVersionUID = 1;
 
+    public static final String DATASET_ID_COL_NAME = "dataset_id";
+    public static final String EXECUTION_ID_COL_NAME = "execution_id";
+    public static final String RECORD_ID_COL_NAME = "record_id";
+
     private static final String NO_OF_ELEMENTS =
         """
             select count(*) as elements
@@ -106,7 +110,7 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
 
         long count = 0L;
         try (Connection con = dbConnectionProvider.getConnection();
-             PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
+            PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
@@ -165,4 +169,11 @@ public class ExecutionRecordRepository implements DbRepository, Serializable {
         }
         return result;
     }
+
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }

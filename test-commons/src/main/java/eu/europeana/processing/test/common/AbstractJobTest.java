@@ -2,7 +2,6 @@ package eu.europeana.processing.test.common;
 
 import static org.assertj.db.api.Assertions.assertThat;
 
-import eu.europeana.processing.job.JobParamName;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,19 +55,19 @@ public abstract class AbstractJobTest {
     paremeters.add("--taskId");
     paremeters.add(String.valueOf(stepNumber()));
 
-    paremeters.add("--" + JobParamName.DATASOURCE_URL);
+    paremeters.add("--datasource.url");
     paremeters.add(postgres.getJdbcUrl());
-    paremeters.add("--" + JobParamName.DATASOURCE_USERNAME);
+    paremeters.add("--datasource.username");
     paremeters.add(postgres.getUsername());
-    paremeters.add("--" + JobParamName.DATASOURCE_PASSWORD);
+    paremeters.add("--datasource.password");
     paremeters.add(postgres.getPassword());
-    paremeters.add("--" + JobParamName.CHUNK_SIZE);
+    paremeters.add("--chunkSize");
     paremeters.add("100");
-    paremeters.add("--" + JobParamName.READER_PARALLELISM);
+    paremeters.add("--READER_PARALLELISM");
     paremeters.add("1");
-    paremeters.add("--" + JobParamName.OPERATOR_PARALLELISM);
+    paremeters.add("--OPERATOR_PARALLELISM");
     paremeters.add("1");
-    paremeters.add("--" + JobParamName.SINK_PARALLELISM);
+    paremeters.add("--SINK_PARALLELISM");
     paremeters.add("1");
 
     paremeters.addAll(Arrays.asList(specificParameters));

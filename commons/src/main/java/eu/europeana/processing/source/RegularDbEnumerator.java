@@ -1,5 +1,6 @@
 package eu.europeana.processing.source;
 
+import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.DataPartition;
@@ -40,7 +41,7 @@ public class RegularDbEnumerator extends AbstractDbEnumerator<DbEnumeratorState>
   }
 
   protected void createDbRepositories() {
-    executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(dbConnectionProvider));
+    executionRecordRepository = RetryableMethodExecutor.createRetryProxy(new ExecutionRecordRepository(new DbConnectionProvider(parameterTool)));
   }
 
 
@@ -56,4 +57,9 @@ public class RegularDbEnumerator extends AbstractDbEnumerator<DbEnumeratorState>
   }
 
 
+  @Override
+  public void close() throws IOException {
+    super.close();
+    executionRecordRepository.shutdown();
+  }
 }

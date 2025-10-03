@@ -1,7 +1,10 @@
 package eu.europeana.processing.oai.reader;
 
 import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
+import eu.europeana.processing.DbConnectionProvider;
 import eu.europeana.processing.model.DataPartition;
+import eu.europeana.processing.oai.repository.OAIHeadersRepository;
+import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.ObjectStreamVersionedSerializer;
 import java.io.Serial;
 import java.util.UUID;
@@ -56,7 +59,10 @@ public class OAIHeadersSource implements Source<OaiRecordHeader, DataPartition, 
 
   @Override
   public SourceReader<OaiRecordHeader, DataPartition> createReader(SourceReaderContext readerContext) {
-    return new OAIHeadersReader(readerContext, parameterTool);
+    return new OAIHeadersReader(
+        readerContext,
+        parameterTool,
+        RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(new DbConnectionProvider(parameterTool))));
   }
 
   @Override

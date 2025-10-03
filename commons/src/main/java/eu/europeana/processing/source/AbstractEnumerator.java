@@ -47,7 +47,6 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
 
 
   TaskInfoRepository taskInfoRepo;
-  protected DbConnectionProvider dbConnectionProvider;
 
   protected long startedRecordsCount = 0;
   protected long emittedRecordCount = 0;
@@ -90,10 +89,12 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
   @Override
   public void start() {
     LOGGER.info("Starting enumerator");
-    dbConnectionProvider = new DbConnectionProvider(parameterTool);
-    progressUpdater = new ProgressUpdater(dbConnectionProvider, parameterTool, emittedRecordCount);
+    taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(new DbConnectionProvider(parameterTool)));
+    progressUpdater = new ProgressUpdater(
+        taskInfoRepo,
+        parameterTool,
+        emittedRecordCount);
     createDbRepositories();
-    taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     try {
       validateTaskExists();
     } catch (FlinkWorkflowException e) {
@@ -235,9 +236,8 @@ public abstract class AbstractEnumerator<P extends AbstractPartition, S extends 
 
   @Override
   public void close() throws IOException {
-    if (dbConnectionProvider != null) {
-      dbConnectionProvider.close();
-    }
+    LOGGER.info("Closing enumerator.");
+    taskInfoRepo.shutdown();
   }
 
 

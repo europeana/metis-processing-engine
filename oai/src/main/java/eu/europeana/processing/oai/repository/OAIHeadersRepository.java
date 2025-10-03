@@ -207,4 +207,11 @@ public class OAIHeadersRepository implements DbRepository {
     }
     return result;
   }
+
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }

@@ -93,7 +93,8 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
     public long countByDatasetIdAndExecutionId(String datasetId, String executionId) throws FlinkWorkflowException {
 
         long count = 0L;
-        try (PreparedStatement preparedStatement = dbConnectionProvider.getConnection().prepareStatement(NO_OF_ELEMENTS)) {
+        try (Connection con = dbConnectionProvider.getConnection();
+            PreparedStatement preparedStatement = con.prepareStatement(NO_OF_ELEMENTS)) {
             preparedStatement.setString(1, datasetId);
             preparedStatement.setString(2, executionId);
 
@@ -108,4 +109,10 @@ public class ExecutionRecordExceptionLogRepository implements DbRepository, Seri
         return count;
     }
 
+  @Override
+  public void shutdown() {
+    if (dbConnectionProvider != null) {
+      dbConnectionProvider.close();
+    }
+  }
 }

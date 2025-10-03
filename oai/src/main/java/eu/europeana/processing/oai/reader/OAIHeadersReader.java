@@ -4,7 +4,6 @@ import eu.europeana.metis.harvesting.oaipmh.OaiRecordHeader;
 import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.oai.repository.OAIHeadersRepository;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import eu.europeana.processing.source.AbstractDbReader;
 import org.apache.flink.api.connector.source.SourceReaderContext;
 import org.apache.flink.util.ParameterTool;
@@ -20,7 +19,7 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OAIHeadersReader.class);
 
-  private OAIHeadersRepository repository;
+  private final OAIHeadersRepository repository;
 
   /**
    * Creates OAIHeadersReader
@@ -28,13 +27,10 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
    * @param context - Flink context
    * @param parameterTool - job parameters
    */
-  public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool) {
+  public OAIHeadersReader(SourceReaderContext context, ParameterTool parameterTool, OAIHeadersRepository oaiHeadersRepository) {
     super(context, parameterTool);
+    this.repository = oaiHeadersRepository;
     LOGGER.info("Created OAIHeadersReader");
-  }
-
-  protected void createRepositories() {
-    repository = RetryableMethodExecutor.createRetryProxy(new OAIHeadersRepository(dbConnectionProvider));
   }
 
   protected List<OaiRecordHeader> fetchRecords() throws FlinkWorkflowException {
@@ -43,6 +39,12 @@ public class OAIHeadersReader extends AbstractDbReader<OaiRecordHeader> {
         parameterTool.getRequired(JobParamName.TASK_ID),
         currentSplit.getOffset(),
         currentSplit.getLimit());
+  }
+
+  @Override
+  public void close() {
+    super.close();
+    repository.shutdown();
   }
 
 }

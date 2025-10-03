@@ -1,11 +1,10 @@
 package eu.europeana.processing.source;
 
-import eu.europeana.processing.DbConnectionProvider;
+
 import eu.europeana.processing.exception.FlinkWorkflowException;
 import eu.europeana.processing.job.JobParamName;
 import eu.europeana.processing.model.TaskInfo;
 import eu.europeana.processing.repository.TaskInfoRepository;
-import eu.europeana.processing.retryable.RetryableMethodExecutor;
 import java.io.Closeable;
 import org.apache.flink.util.ParameterTool;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ public class ProgressUpdater implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressUpdater.class);
   private final long taskId;
-  private final DbConnectionProvider dbConnectionProvider;
   private final TaskInfoRepository taskInfoRepo;
   private long lastStoredFilesCount;
   private long snapshottedEmittedFilesCount = -1;
@@ -29,13 +27,12 @@ public class ProgressUpdater implements Closeable {
    * @param parameterTool - all the command line parameters of the job
    * @param completedFilesCount - Number of files already completed. It is greater than 0 only if the source is restored from a
    * checkpoint.
-   * @param dbConnectionProvider - db connection provider
+   * @param taskInfoRepository - repository for TaskInfo table
    */
-  public ProgressUpdater(DbConnectionProvider dbConnectionProvider, ParameterTool parameterTool, long completedFilesCount) {
-    this.dbConnectionProvider = dbConnectionProvider;
+  public ProgressUpdater(TaskInfoRepository taskInfoRepository, ParameterTool parameterTool, long completedFilesCount) {
+    taskInfoRepo = taskInfoRepository;
     this.taskId = parameterTool.getLong(JobParamName.TASK_ID);
     lastStoredFilesCount = completedFilesCount;
-    taskInfoRepo = RetryableMethodExecutor.createRetryProxy(new TaskInfoRepository(dbConnectionProvider));
     LOGGER.debug("Created ProgressUpdater");
   }
 
@@ -71,7 +68,6 @@ public class ProgressUpdater implements Closeable {
   }
 
   public void close() {
-    dbConnectionProvider.close();
     LOGGER.debug("Closed: {}", ProgressUpdater.class.getSimpleName());
   }
 
