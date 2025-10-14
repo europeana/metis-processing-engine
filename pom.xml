@@ -26,11 +26,13 @@
     <awaitability.version>4.2.0</awaitability.version>
     <assertj.version>3.24.2</assertj.version>
     <wiremock.version>3.4.2</wiremock.version>
+    <version.spring-boot>3.2.3</version.spring-boot>
   </properties>
 
   <modules>
     <module>docker/metis-processing-engine-flink/shared-libs</module>
     <module>commons</module>
+    <module>common</module>
     <module>harvesting-commons</module>
     <module>media</module>
     <module>client</module>
@@ -43,6 +45,7 @@
     <module>http</module>
     <module>blocking</module>
     <module>test-commons</module>
+    <module>rest</module>
   </modules>
 
   <dependencyManagement>
@@ -81,4 +84,17 @@
       </snapshots>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>artifactory.eanadev.org</id>
+      <name>artifactory.eanadev.org-releases</name>
+      <url>https://artifactory.eanadev.org/artifactory/libs-release-local</url>
+    </repository>
+    <snapshotRepository>
+      <id>artifactory.eanadev.org</id>
+      <name>artifactory.eanadev.org-snapshots</name>
+      <url>https://artifactory.eanadev.org/artifactory/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

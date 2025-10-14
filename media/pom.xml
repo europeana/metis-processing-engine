@@ -80,6 +80,7 @@
   </dependencies>
 
   <build>
+    <finalName>metis-processing-engine-media</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>

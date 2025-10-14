@@ -11,7 +11,6 @@
 
   <artifactId>metis-processing-engine-validation</artifactId>
 
-
   <dependencies>
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
@@ -35,16 +34,18 @@
     </dependency>
 
     <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>metis-processing-engine-commons</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
       <version>2.22.1</version>
     </dependency>
 
-    <dependency>
-      <groupId>eu.europeana.metis-processing-engine</groupId>
-      <artifactId>metis-processing-engine-commons</artifactId>
-      <version>${parent.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>test-commons</artifactId>
@@ -91,6 +92,7 @@
   </dependencies>
 
   <build>
+    <finalName>metis-processing-engine-validation</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>

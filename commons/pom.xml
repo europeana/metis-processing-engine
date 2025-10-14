@@ -15,6 +15,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>eu.europeana.metis-processing-engine</groupId>
+      <artifactId>metis-processing-engine-common</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.30</version>

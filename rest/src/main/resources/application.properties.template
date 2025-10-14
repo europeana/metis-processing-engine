@@ -1,0 +1,70 @@
+# ===============================
+# = SERVER CONFIGURATION
+# ===============================
+server.port=8080
+spring.application.name=metis-processing-engine-rest
+
+# ===============================
+# = DATASOURCE CONFIGURATION
+# ===============================
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# ===============================
+# = CONNECTION POOL (HikariCP)
+# ===============================
+spring.datasource.hikari.maximum-pool-size=10
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.idle-timeout=30000
+spring.datasource.hikari.connection-timeout=20000
+spring.datasource.hikari.max-lifetime=1800000
+spring.datasource.hikari.pool-name=MetisProcessingEnginePool
+
+# ===============================
+# = JPA / HIBERNATE CONFIGURATION
+# ===============================
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.default_schema=batch-framework
+
+# ===============================
+# = LOGGING
+# ===============================
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+
+
+# ===============================
+# = APPLICATION
+# ===============================
+
+app.k8sClusterLocation=
+app.k8sClusterAccessKey=
+app.k8sClusterNamespace=europeana-processing-engine-acceptance
+
+app.oai-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-oai:1.0-SNAPSHOT
+app.validation-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-validation:1.0-SNAPSHOT
+app.transformation-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-transformation:1.0-SNAPSHOT
+app.normalization-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-normalization:1.0-SNAPSHOT
+app.enrichment-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-enrichment:1.0-SNAPSHOT
+app.media-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-media:1.0-SNAPSHOT
+app.indexing-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-indexing:1.0-SNAPSHOT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

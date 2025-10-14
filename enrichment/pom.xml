@@ -93,6 +93,7 @@
   </dependencies>
 
   <build>
+    <finalName>metis-processing-engine-enrichment</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
