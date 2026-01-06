@@ -1,0 +1,90 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flink-job-manager
+  namespace: europeana-processing-engine-acceptance
+spec:
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: job-manager
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: flink-sa
+      imagePullSecrets:
+        - name: docker-registry-secret
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext: {}
+      containers:
+        - resources:
+            limits:
+              cpu: '2'
+              memory: 4Gi
+            requests:
+              cpu: '1'
+              memory: 4Gi
+          terminationMessagePath: /dev/termination-log
+          name: job-manager
+          livenessProbe:
+            tcpSocket:
+              port: 6123
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 3
+          ports:
+            - name: rpc
+              containerPort: 6123
+              protocol: TCP
+            - name: blob-server
+              containerPort: 6124
+              protocol: TCP
+            - name: webui
+              containerPort: 8081
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: flink-log-properties-volume
+              mountPath: /opt/flink/conf/log4j-console.properties
+              subPath: log4j-console.properties
+            - name: flink-config-volume
+              mountPath: /opt/flink/conf/config.yaml
+              subPath: config.yaml
+            - name: log-volume
+              mountPath: /opt/flink/log
+            - name: web-upload
+              mountPath: /web-upload
+            - name: working-directory
+              mountPath: /working-directory
+            - name: dumps
+              mountPath: /dumps
+            - name: http-jobs
+              mountPath: /http-jobs
+          terminationMessagePolicy: File
+          image: 'registry.paas.psnc.pl/ecloud-poc/flink-oai-job:v1'
+      volumes:
+        - name: flink-log-properties-volume
+          configMap:
+            name: log4j-console-properties
+            defaultMode: 511
+        - name: flink-config-volume
+          secret:
+            secretName: flink-config-secret-template-to-replace
+            defaultMode: 511
+        - name: log-volume
+          emptyDir: {}
+        - name: working-directory
+          emptyDir: {}
+        - name: web-upload
+          emptyDir: {}
+        - name: dumps
+          emptyDir: {}
+        - name: http-jobs
+          emptyDir: {}
+
+
+

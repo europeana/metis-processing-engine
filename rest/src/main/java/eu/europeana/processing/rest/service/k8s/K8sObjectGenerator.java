@@ -8,7 +8,7 @@ import static eu.europeana.processing.job.JobParamName.TASK_ID;
 import com.zaxxer.hikari.HikariConfig;
 import eu.europeana.processing.model.JobName;
 import eu.europeana.processing.model.TaskInfo;
-import eu.europeana.processing.rest.config.AppConfig;
+import eu.europeana.processing.rest.config.ApplicationConfiguration;
 import eu.europeana.processing.rest.tool.K8sObjectNameGenerator;
 import io.kubernetes.client.openapi.models.V1Deployment;
 import io.kubernetes.client.openapi.models.V1Job;
@@ -32,18 +32,20 @@ import org.springframework.stereotype.Service;
 public class K8sObjectGenerator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(K8sObjectGenerator.class);
+  private static final String SECRET_NAME_PLACEHOLDER = "flink-config-secret-template-to-replace";
+
 
   protected HikariConfig dbConfig;
-  private final AppConfig appConfig;
+  private final ApplicationConfiguration applicationConfiguration;
 
   /**
    * Constructor
    *
-   * @param appConfig {@link AppConfig}
+   * @param applicationConfiguration {@link ApplicationConfiguration}
    * @param dbConfig {@link HikariConfig}
    */
-  public K8sObjectGenerator(AppConfig appConfig, HikariConfig dbConfig) {
-    this.appConfig = appConfig;
+  public K8sObjectGenerator(ApplicationConfiguration applicationConfiguration, HikariConfig dbConfig) {
+    this.applicationConfiguration = applicationConfiguration;
     this.dbConfig = dbConfig;
   }
 
@@ -60,7 +62,7 @@ public class K8sObjectGenerator {
         .kind("Secret")
         .metadata(new V1ObjectMeta()
             .name(K8sObjectNameGenerator.generateConfigSecretName(taskInfo))
-            .namespace(appConfig.k8sClusterNamespace()))
+            .namespace(applicationConfiguration.k8sClusterNamespace()))
         .type("Opaque")
         .stringData(Map.of("config.yaml", config));
   }
@@ -111,21 +113,21 @@ public class K8sObjectGenerator {
     String imageName = "default";
 
     if (taskInfo.getTaskName().equalsIgnoreCase(JobName.OAI_HARVEST)) {
-      imageName = appConfig.oaiImage();
+      imageName = applicationConfiguration.oaiImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.HTTP_HARVEST)) {
-      imageName = appConfig.httpImage();
-    } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_EXTERNAL)) {
-      imageName = appConfig.validationImage();
+      imageName = applicationConfiguration.httpImage();
+    } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_EXTERNAL) || taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_INTERNAL)) {
+      imageName = applicationConfiguration.validationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.TRANSFORMATION)) {
-      imageName = appConfig.transformationImage();
+      imageName = applicationConfiguration.transformationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.NORMALIZATION)) {
-      imageName = appConfig.normalizationImage();
+      imageName = applicationConfiguration.normalizationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.ENRICHMENT)) {
-      imageName = appConfig.enrichmentImage();
+      imageName = applicationConfiguration.enrichmentImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.MEDIA)) {
-      imageName = appConfig.mediaImage();
+      imageName = applicationConfiguration.mediaImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.INDEXING)) {
-      imageName = appConfig.indexingImage();
+      imageName = applicationConfiguration.indexingImage();
     }
 
     jobDefinition.getSpec().getTemplate().getSpec().getContainers().get(0).setImage(imageName);
@@ -135,21 +137,21 @@ public class K8sObjectGenerator {
     String imageName = "default";
 
     if (taskInfo.getTaskName().equalsIgnoreCase(JobName.OAI_HARVEST)) {
-      imageName = appConfig.oaiImage();
+      imageName = applicationConfiguration.oaiImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.HTTP_HARVEST)) {
-      imageName = appConfig.httpImage();
-    } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_EXTERNAL)) {
-      imageName = appConfig.validationImage();
+      imageName = applicationConfiguration.httpImage();
+    } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_EXTERNAL) || taskInfo.getTaskName().equalsIgnoreCase(JobName.VALIDATION_INTERNAL)) {
+      imageName = applicationConfiguration.validationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.TRANSFORMATION)) {
-      imageName = appConfig.transformationImage();
+      imageName = applicationConfiguration.transformationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.NORMALIZATION)) {
-      imageName = appConfig.normalizationImage();
+      imageName = applicationConfiguration.normalizationImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.ENRICHMENT)) {
-      imageName = appConfig.enrichmentImage();
+      imageName = applicationConfiguration.enrichmentImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.MEDIA)) {
-      imageName = appConfig.mediaImage();
+      imageName = applicationConfiguration.mediaImage();
     } else if (taskInfo.getTaskName().equalsIgnoreCase(JobName.INDEXING)) {
-      imageName = appConfig.indexingImage();
+      imageName = applicationConfiguration.indexingImage();
     }
 
     deploymentDefinition.getSpec().getTemplate().getSpec().getContainers().get(0).setImage(imageName);
@@ -169,7 +171,7 @@ public class K8sObjectGenerator {
   }
 
   public V1Deployment generateConfigurationForDeployment(String config, TaskInfo taskInfo) {
-    config = config.replace("flink-config-secret-template-to-replace", K8sObjectNameGenerator.generateConfigSecretName(taskInfo));
+    config = config.replace(SECRET_NAME_PLACEHOLDER, K8sObjectNameGenerator.generateConfigSecretName(taskInfo));
     V1Deployment deployment = Yaml.loadAs(config, V1Deployment.class);
     setupImageName(deployment, taskInfo);
     deployment.getMetadata().setName(K8sObjectNameGenerator.generateDeploymentName(taskInfo));

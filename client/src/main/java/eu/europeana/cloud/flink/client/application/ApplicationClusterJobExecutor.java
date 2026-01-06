@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class ApplicationClusterJobExecutor implements JobExecutor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationClusterJobExecutor.class);
+  private static final String CLUSTER_ID_PLACEHOLDER = "cluster-id-template-to-replace";
+
   private final CoreV1Api api;
   private final BatchV1Api batchApi;
   private final ApiClient client;
@@ -108,7 +110,7 @@ public class ApplicationClusterJobExecutor implements JobExecutor {
 
   private void deployConfiguration(String jobId) throws IOException, ApiException {
     String configContent = Files.readString(configTemplateDir.resolve("config.yaml"));
-    configContent = configContent.replace("cluster-id-template-to-replace", createJobName(jobId) + "-cluster");
+    configContent = configContent.replace(CLUSTER_ID_PLACEHOLDER, createJobName(jobId) + "-cluster");
     V1Secret secret = new V1Secret()
         .apiVersion("v1")
         .kind("Secret")

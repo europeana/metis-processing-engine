@@ -5,7 +5,8 @@ import eu.europeana.processing.rest.dto.JobSubmissionDto;
 import eu.europeana.processing.rest.exception.ApplicationException;
 import eu.europeana.processing.rest.repository.TaskInfoRepository;
 import eu.europeana.processing.rest.service.k8s.FlinkJobSubmitter;
-import java.util.Random;
+import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,11 +50,11 @@ public class JobSubmissionService {
 
 
   private TaskInfo createNewTaskDefinition(JobSubmissionDto jobSubmissionDto) {
-    final Random taskIdGenerator = new Random();
     return TaskInfo.builder()
-                   .taskId(taskIdGenerator.nextLong())
+                   .taskId(ThreadLocalRandom.current().nextLong())
                    .parameters(jobSubmissionDto.parameters())
                    .taskName(jobSubmissionDto.jobName())
+                   .startTime(new Date())
                    .build();
   }
 

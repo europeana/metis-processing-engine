@@ -64,7 +64,7 @@ class HttpEnumeratorTest extends AbstractUnpackingTest {
   private static final String TGZ_URL = "http://ftp.eanadev.org/uploads/ESounds_Odessa.tgz";
   private static final String TGZ_FILE_NAME = "ESounds_Odessa.tgz";
   private static final String FILE1_INSIDE_TGZ = "24-04-02_14_54_53/Item_19541240.xml";
-  private static final TaskInfo TASK_INFO = new TaskInfo(1L, 0L, 0L);
+  private static final TaskInfo TASK_INFO = new TaskInfo(1L, "name", null, null, null, 0L, 0L);
 
 
   @Mock

@@ -1,7 +1,7 @@
 package eu.europeana.processing.rest.service.k8s;
 
 import eu.europeana.processing.model.TaskInfo;
-import eu.europeana.processing.rest.config.AppConfig;
+import eu.europeana.processing.rest.config.ApplicationConfiguration;
 import eu.europeana.processing.rest.tool.K8sObjectNameGenerator;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
@@ -19,17 +19,17 @@ public class K8sObjectRetriever {
   private static final Logger LOGGER = LoggerFactory.getLogger(K8sObjectRetriever.class);
 
   private final BatchV1Api batchApi;
-  private final AppConfig appConfig;
+  private final ApplicationConfiguration applicationConfiguration;
 
   /**
    * Constructor
    *
    * @param batchApi {@link BatchV1Api}
-   * @param appConfig {@link AppConfig}
+   * @param applicationConfiguration {@link ApplicationConfiguration}
    */
-  public K8sObjectRetriever(BatchV1Api batchApi, AppConfig appConfig) {
+  public K8sObjectRetriever(BatchV1Api batchApi, ApplicationConfiguration applicationConfiguration) {
     this.batchApi = batchApi;
-    this.appConfig = appConfig;
+    this.applicationConfiguration = applicationConfiguration;
   }
 
   /**
@@ -40,7 +40,7 @@ public class K8sObjectRetriever {
    */
   public V1Job retrieveJob(TaskInfo taskInfo) throws ApiException {
     LOGGER.debug("Getting job object for given task");
-    return batchApi.readNamespacedJob(K8sObjectNameGenerator.generateJobName(taskInfo), appConfig.k8sClusterNamespace())
+    return batchApi.readNamespacedJob(K8sObjectNameGenerator.generateJobName(taskInfo), applicationConfiguration.k8sClusterNamespace())
                    .execute();
   }
 }

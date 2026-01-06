@@ -1,75 +1,35 @@
 package eu.europeana.processing.rest.config;
 
-import io.kubernetes.client.openapi.ApiClient;
-import io.kubernetes.client.openapi.apis.AppsV1Api;
-import io.kubernetes.client.openapi.apis.BatchV1Api;
-import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.util.Config;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Spring configuration for application
+ * Application configuration
+ *
+ * @param k8sClusterLocation location onf k8s cluster that will be used for flink jobs
+ * @param k8sClusterAccessKey access key to the k8s cluster
+ * @param k8sClusterNamespace namespace on k8s where Flink jobs will be deployed
+ * @param oaiImage docker image name for oai job
+ * @param httpImage docker image name for http job
+ * @param validationImage docker image name for validation job
+ * @param transformationImage docker image name for transformation job
+ * @param normalizationImage docker image name for normalization job
+ * @param enrichmentImage docker image name for enrichment job
+ * @param mediaImage docker image name for media job
+ * @param indexingImage docker image name for indexing job
  */
-@org.springframework.context.annotation.Configuration
-@EnableConfigurationProperties({
-    AppConfig.class})
-@EnableScheduling
-public class ApplicationConfiguration {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfiguration.class);
-
-  /**
-   * Client for kubernetes
-   *
-   * @param appConfig {@link AppConfig}
-   * @return {@link CoreV1Api}
-   */
-  @Bean
-  public CoreV1Api api(AppConfig appConfig) {
-
-    LOGGER.info("Initializing CoreV1Api");
-
-    ApiClient client = Config.fromToken(
-        appConfig.k8sClusterLocation(),
-        appConfig.k8sClusterAccessKey()
-    );
-
-    return new CoreV1Api(client);
-  }
-
-  /**
-   * Client for kubernetes
-   *
-   * @param appConfig {@link AppConfig}
-   * @return {@link AppsV1Api}
-   */
-  @Bean
-  public AppsV1Api appsApi(AppConfig appConfig) {
-    LOGGER.info("Initializing AppsV1Api");
-    ApiClient client = Config.fromToken(
-        appConfig.k8sClusterLocation(),
-        appConfig.k8sClusterAccessKey()
-    );
-    return new AppsV1Api(client);
-  }
-
-  /**
-   * Client for kubernetes
-   *
-   * @param appConfig {@link AppConfig}
-   * @return {@link BatchV1Api}
-   */
-  @Bean
-  public BatchV1Api batchApi(AppConfig appConfig) {
-    LOGGER.info("Initializing BatchV1Api");
-    ApiClient client = Config.fromToken(
-        appConfig.k8sClusterLocation(),
-        appConfig.k8sClusterAccessKey()
-    );
-    return new BatchV1Api(client);
-  }
+@ConfigurationProperties(prefix = "app")
+public record ApplicationConfiguration(
+    String k8sClusterLocation,
+    String k8sClusterAccessKey,
+    String k8sClusterNamespace,
+    String oaiImage,
+    String httpImage,
+    String validationImage,
+    String transformationImage,
+    String normalizationImage,
+    String enrichmentImage,
+    String mediaImage,
+    String indexingImage,
+    boolean jobCleaningServiceEnabled
+) {
 }

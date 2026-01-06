@@ -26,7 +26,7 @@
     <awaitability.version>4.2.0</awaitability.version>
     <assertj.version>3.24.2</assertj.version>
     <wiremock.version>3.4.2</wiremock.version>
-    <version.spring-boot>3.2.3</version.spring-boot>
+    <spring-boot.version>3.2.3</spring-boot.version>
   </properties>
 
   <modules>

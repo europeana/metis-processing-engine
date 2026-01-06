@@ -54,7 +54,7 @@ public class ProgressUpdater implements Closeable {
    */
   public void saveProgressInDB() throws FlinkWorkflowException {
     if (snapshottedEmittedFilesCount != lastStoredFilesCount) {
-      TaskInfo taskInfo = new TaskInfo(taskId, 0, snapshottedEmittedFilesCount);
+      TaskInfo taskInfo = new TaskInfo(taskId, "task_name", null, null, null, 0, snapshottedEmittedFilesCount);
       //TODO The repository uses retries in case of failure, but because updating progress is not a key feature,
       // without it the task should finish its work properly. Beside that we could omit some updates of progress
       // as long as we store last progress, when the task is whole complete.

@@ -29,9 +29,9 @@ class TaskInfoRepositoryTest extends RepositoryTest {
   void shouldSaveCorrectTaskInfo() throws FlinkWorkflowException {
     TaskInfoRepository taskInfoRepository = prepareRepository();
 
-    taskInfoRepository.save(new TaskInfo(1, 12, 14));
-    taskInfoRepository.save(new TaskInfo(2, 0, 10));
-    taskInfoRepository.save(new TaskInfo(3, 20, 30));
+    taskInfoRepository.save(new TaskInfo(1, "name", null, null, null, 12, 14));
+    taskInfoRepository.save(new TaskInfo(2, "name", null, null, null, 0, 10));
+    taskInfoRepository.save(new TaskInfo(3, "name", null, null, null, 20, 30));
 
     assertThat(
         request.parameters(1).build()
@@ -60,8 +60,8 @@ class TaskInfoRepositoryTest extends RepositoryTest {
   void shouldUpdateCorrectTaskInfo() throws FlinkWorkflowException {
     TaskInfoRepository taskInfoRepository = prepareRepository();
 
-    taskInfoRepository.save(new TaskInfo(10, 12, 12));
-    taskInfoRepository.update(new TaskInfo(10, 12, 14));
+    taskInfoRepository.save(new TaskInfo(10, "name", null, null, null, 12, 12));
+    taskInfoRepository.update(new TaskInfo(10, "name", null, null, null, 12, 14));
 
     assertThat(
         request.parameters(10).build()
@@ -74,7 +74,7 @@ class TaskInfoRepositoryTest extends RepositoryTest {
   void shouldFindTaskById() throws FlinkWorkflowException {
     TaskInfoRepository taskInfoRepository = prepareRepository();
 
-    taskInfoRepository.save(new TaskInfo(20, 12, 12));
+    taskInfoRepository.save(new TaskInfo(20, "name", null, null, null, 12, 12));
 
     Assertions.assertThat(taskInfoRepository.findById(20)).isPresent();
     Assertions.assertThat(taskInfoRepository.findById(30)).isNotPresent();

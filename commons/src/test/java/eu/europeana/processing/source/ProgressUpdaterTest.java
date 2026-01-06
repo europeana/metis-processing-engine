@@ -27,9 +27,9 @@ class ProgressUpdaterTest {
 
       Mockito.verify(taskInfoRepository, Mockito.times(1)).update(captor.capture());
       TaskInfo emitted = captor.getValue();
-      Assertions.assertEquals(12, emitted.taskId());
-      Assertions.assertEquals(0, emitted.commitCount());
-      Assertions.assertEquals(-1, emitted.writeCount());
+      Assertions.assertEquals(12, emitted.getTaskId());
+      Assertions.assertEquals(0, emitted.getCommitCount());
+      Assertions.assertEquals(-1, emitted.getWriteCount());
     }
   }
 
@@ -50,9 +50,9 @@ class ProgressUpdaterTest {
 
       Mockito.verify(taskInfoRepository, Mockito.times(1)).update(captor.capture());
       TaskInfo emitted = captor.getValue();
-      Assertions.assertEquals(12, emitted.taskId());
-      Assertions.assertEquals(0, emitted.commitCount());
-      Assertions.assertEquals(100, emitted.writeCount());
+      Assertions.assertEquals(12, emitted.getTaskId());
+      Assertions.assertEquals(0, emitted.getCommitCount());
+      Assertions.assertEquals(100, emitted.getWriteCount());
     }
   }
 

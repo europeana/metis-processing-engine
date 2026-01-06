@@ -60,9 +60,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                 "INSERT INTO \"batch-framework\".task_info (TASK_ID,COMMIT_COUNT,WRITE_COUNT) VALUES (?,?,?)")) {
-            preparedStatement.setLong(1, taskInfo.taskId());
-            preparedStatement.setLong(2, taskInfo.commitCount());
-            preparedStatement.setLong(3, taskInfo.writeCount());
+            preparedStatement.setLong(1, taskInfo.getTaskId());
+            preparedStatement.setLong(2, taskInfo.getCommitCount());
+            preparedStatement.setLong(3, taskInfo.getWriteCount());
 
             preparedStatement.execute();
 
@@ -81,9 +81,9 @@ public class TaskInfoRepository implements DbRepository, Serializable {
         try (Connection con = dbConnectionProvider.getConnection();
              PreparedStatement preparedStatement = con.prepareStatement(
                      "update \"batch-framework\".task_info SET commit_count=?, write_count=? where task_id = ?")) {
-            preparedStatement.setLong(1, taskInfo.commitCount());
-            preparedStatement.setLong(2, taskInfo.writeCount());
-            preparedStatement.setLong(3, taskInfo.taskId());
+            preparedStatement.setLong(1, taskInfo.getCommitCount());
+            preparedStatement.setLong(2, taskInfo.getWriteCount());
+            preparedStatement.setLong(3, taskInfo.getTaskId());
 
             preparedStatement.execute();
 
@@ -134,9 +134,13 @@ public class TaskInfoRepository implements DbRepository, Serializable {
 
             if (resultSet.next()) {
                 foundTask = Optional.of(new TaskInfo(
-                        resultSet.getLong("TASK_ID"),
-                        resultSet.getLong("COMMIT_COUNT"),
-                        resultSet.getLong("WRITE_COUNT")
+                    resultSet.getLong("TASK_ID"),
+                    resultSet.getString("TASK_NAME"),
+                    null,
+                    resultSet.getTimestamp("START_TIME"),
+                    resultSet.getTimestamp("END_TIME"),
+                    resultSet.getLong("COMMIT_COUNT"),
+                    resultSet.getLong("WRITE_COUNT")
                 ));
             }
         } catch (SQLException e) {

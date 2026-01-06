@@ -12,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -65,17 +67,28 @@ public class JobController {
 
   /**
    * Endpoint for getting job details.
-   *
-   * @param taskName task name
+   *`
    * @param jobId job id
    * @return {@link JobDetailsDto}
    * @throws ApplicationException in case of issues while reading job details
    */
-  @GetMapping(value = "/{task-name}/{jobId}", produces = "application/json")
+  @GetMapping(value = "/{jobId}", produces = "application/json")
   @Operation(summary = "Get job details", description = "Returns job details for given ID")
-  public JobDetailsDto getJobDetails(@PathVariable("task-name") String taskName, @PathVariable("jobId") String jobId)
+  public JobDetailsDto getJobDetails(@PathVariable("jobId") String jobId)
       throws ApplicationException {
 
-    return jobService.getTaskInfo(jobId, taskName);
+    return jobService.getTaskInfo(jobId);
+  }
+
+  /**
+   * Removes all objects related with given task from cluster.
+   * It does it regardless of task status;
+   *
+   * @param taskId task identifiers to be used for removal
+   */
+  @DeleteMapping(value = "/{taskId}")
+  @Operation(summary = "Remove task from k8s cluster")
+  public void removeTaskFromCluster(@PathVariable("taskId") String taskId){
+    jobService.removeAllK8sObjectsRelatedWithTask(taskId);
   }
 }

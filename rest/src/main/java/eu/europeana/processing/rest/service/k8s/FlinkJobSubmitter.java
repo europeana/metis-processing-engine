@@ -16,6 +16,9 @@ public class FlinkJobSubmitter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FlinkJobSubmitter.class);
 
+  private static final String JOB_MANAGER_ADDRESS_PLACEHOLDER = "<flink-job-manager>";
+  private static final String CLUSTER_ID_PLACEHOLDER = "cluster-id-template-to-replace";
+
   private final K8sObjectApplier k8sObjectApplier;
   private final K8sObjectGenerator k8sObjectGenerator;
 
@@ -42,7 +45,7 @@ public class FlinkJobSubmitter {
     submitConfiguration(taskInfo);
     submitJobManagerJob(taskInfo);
     submitJobManagerService(taskInfo);
-    submitTaskManagerDeployment(taskInfo);
+    submitTaskManager(taskInfo);
     LOGGER.info("Flink Job submitted {}", taskInfo);
   }
 
@@ -53,11 +56,11 @@ public class FlinkJobSubmitter {
     String jobConfiguration = yamlFileProvider.provideFLinkClusterConfiguration();
     //
     jobConfiguration = jobConfiguration.replace(
-        "<flink-job-manager>",
+        JOB_MANAGER_ADDRESS_PLACEHOLDER,
         K8sObjectNameGenerator.generateServiceName(taskInfo));
 
     jobConfiguration = jobConfiguration.replace(
-        "cluster-id-template-to-replace",
+        CLUSTER_ID_PLACEHOLDER,
         K8sObjectNameGenerator.generateJobName(taskInfo));
     //
     k8sObjectApplier.deploySecret(
@@ -83,7 +86,7 @@ public class FlinkJobSubmitter {
     );
   }
 
-  private void submitTaskManagerDeployment(TaskInfo taskInfo) throws ApplicationException {
+  private void submitTaskManager(TaskInfo taskInfo) throws ApplicationException {
     LOGGER.debug("Submitting Task manager deployment");
     YamlFileProvider yamlFileProvider = new YamlFileProvider();
     String jobConfiguration = yamlFileProvider.provideFlinkTaskManagerConfiguration();

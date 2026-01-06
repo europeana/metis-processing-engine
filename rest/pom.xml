@@ -51,13 +51,13 @@
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-common</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
   </dependencies>
@@ -69,7 +69,7 @@
         <artifactId>spring-boot-dependencies</artifactId>
         <scope>import</scope>
         <type>pom</type>
-        <version>${version.spring-boot}</version>
+        <version>${spring-boot.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -87,7 +87,7 @@
           </execution>
         </executions>
         <groupId>org.springframework.boot</groupId>
-        <version>${version.spring-boot}</version>
+        <version>${spring-boot.version}</version>
       </plugin>
     </plugins>
   </build>

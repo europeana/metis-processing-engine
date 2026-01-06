@@ -1,6 +1,6 @@
 package eu.europeana.processing.rest.service;
 
-import eu.europeana.processing.rest.config.AppConfig;
+import eu.europeana.processing.rest.config.ApplicationConfiguration;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
@@ -27,7 +27,7 @@ public class JobCleaningService {
   private final CoreV1Api api;
   private final AppsV1Api appsApi;
   private final BatchV1Api batchApi;
-  private final AppConfig appConfig;
+  private final ApplicationConfiguration applicationConfiguration;
 
   /**
    * Service constructor
@@ -35,21 +35,29 @@ public class JobCleaningService {
    * @param api {@link CoreV1Api}
    * @param appsApi {@link AppsV1Api}
    * @param batchApi {@link BatchV1Api}
-   * @param appConfig {@link AppConfig}
+   * @param applicationConfiguration {@link ApplicationConfiguration}
    */
-  public JobCleaningService(CoreV1Api api, AppsV1Api appsApi, BatchV1Api batchApi, AppConfig appConfig) {
+  public JobCleaningService(CoreV1Api api, AppsV1Api appsApi, BatchV1Api batchApi, ApplicationConfiguration applicationConfiguration) {
     this.api = api;
     this.appsApi = appsApi;
     this.batchApi = batchApi;
-    this.appConfig = appConfig;
+    this.applicationConfiguration = applicationConfiguration;
   }
 
   /**
    * Scans all the jobs and removed that can be removed
    */
-  @Scheduled(fixedRate = 60000)
-  public void cleanJobs() {
+  @Scheduled(fixedRate = 600000)
+  public void executeCleaning() {
 
+    if (applicationConfiguration.jobCleaningServiceEnabled()) {
+      cleanJobs();
+    } else {
+      LOGGER.warn("Cleaning skipped because it is not enabled");
+    }
+  }
+
+  private void cleanJobs(){
     try {
       List<V1Job> v1Jobs = readAllJobs();
       LOGGER.info("Cleaning jobs at cluster");
@@ -75,7 +83,7 @@ public class JobCleaningService {
     try {
       batchApi.deleteNamespacedJob(
           job.getMetadata().getLabels().get("job-name"),
-          appConfig.k8sClusterNamespace()).execute();
+          applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove job for {}", job.getMetadata().getLabels().get("job-name"), e);
     }
@@ -85,7 +93,7 @@ public class JobCleaningService {
     try {
       api.deleteNamespacedService(
           job.getMetadata().getLabels().get("job-name") + "service",
-          appConfig.k8sClusterNamespace()).execute();
+          applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove service for {}", job.getMetadata().getName(), e);
     }
@@ -95,7 +103,7 @@ public class JobCleaningService {
     try {
       appsApi.deleteNamespacedDeployment(
           job.getMetadata().getLabels().get("job-name") + "-task-manager",
-          appConfig.k8sClusterNamespace()).execute();
+          applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove job deployment for '{}'", job.getMetadata().getName(), e);
     }
@@ -105,7 +113,7 @@ public class JobCleaningService {
     try {
       api.deleteNamespacedSecret(
           job.getMetadata().getLabels().get("job-name") + "-service",
-          appConfig.k8sClusterNamespace()).execute();
+          applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove secret for '{}'", job.getMetadata().getName(), e);
     }
@@ -120,7 +128,7 @@ public class JobCleaningService {
   }
 
   private List<V1Job> readAllJobs() throws ApiException {
-    APIlistNamespacedJobRequest apIlistNamespacedJobRequest = batchApi.listNamespacedJob(appConfig.k8sClusterNamespace());
-    return apIlistNamespacedJobRequest.execute().getItems();
+    APIlistNamespacedJobRequest apiListNamespacedJobRequest = batchApi.listNamespacedJob(applicationConfiguration.k8sClusterNamespace());
+    return apiListNamespacedJobRequest.execute().getItems();
   }
 }

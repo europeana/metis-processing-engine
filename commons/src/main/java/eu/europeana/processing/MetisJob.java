@@ -104,12 +104,12 @@ public abstract class MetisJob {
         try {
             if (tool.get(JobParamName.TASK_ID) == null) {
                 long taskId = taskIdGenerator.nextLong();
-                taskInfoRepository.save(new TaskInfo(taskId, 0L, 0L));
+                taskInfoRepository.save(new TaskInfo(taskId, "", null, null, null, 0L, 0L));
                 tool = tool.mergeWith(ParameterTool.fromMap(Map.of(JobParamName.TASK_ID, taskId + "")));
             } else {
                 long taskId = tool.getLong(JobParamName.TASK_ID);
                 if (taskInfoRepository.findById(taskId).isEmpty()) {
-                    taskInfoRepository.save(new TaskInfo(taskId, 0L, 0L));
+                    taskInfoRepository.save(new TaskInfo(taskId, "", null, null, null, 0L, 0L));
                 }
             }
         }catch (Exception e){

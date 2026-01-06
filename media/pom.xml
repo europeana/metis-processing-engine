@@ -17,7 +17,7 @@
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>flink-node-shared-libs</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -40,7 +40,7 @@
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>metis-processing-engine-commons</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
@@ -74,7 +74,7 @@
     <dependency>
       <groupId>eu.europeana.metis-processing-engine</groupId>
       <artifactId>test-commons</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
