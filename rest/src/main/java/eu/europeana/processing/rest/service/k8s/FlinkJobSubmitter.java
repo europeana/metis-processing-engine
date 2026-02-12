@@ -21,6 +21,7 @@ public class FlinkJobSubmitter {
 
   private final K8sObjectApplier k8sObjectApplier;
   private final K8sObjectGenerator k8sObjectGenerator;
+  private final YamlFileProvider yamlFileProvider;
 
   /**
    * Service constructor
@@ -28,9 +29,11 @@ public class FlinkJobSubmitter {
    * @param k8sObjectApplier {@link K8sObjectApplier}
    * @param k8sObjectGenerator {@link K8sObjectGenerator}
    */
-  public FlinkJobSubmitter(K8sObjectApplier k8sObjectApplier, K8sObjectGenerator k8sObjectGenerator) {
+  public FlinkJobSubmitter(K8sObjectApplier k8sObjectApplier, K8sObjectGenerator k8sObjectGenerator,
+      YamlFileProvider yamlFileProvider) {
     this.k8sObjectApplier = k8sObjectApplier;
     this.k8sObjectGenerator = k8sObjectGenerator;
+    this.yamlFileProvider = yamlFileProvider;
   }
 
   /**
@@ -52,7 +55,6 @@ public class FlinkJobSubmitter {
   private void submitConfiguration(TaskInfo taskInfo) throws ApplicationException {
 
     LOGGER.debug("Submitting Flink Job configuration for {}", taskInfo);
-    YamlFileProvider yamlFileProvider = new YamlFileProvider();
     String jobConfiguration = yamlFileProvider.provideFLinkClusterConfiguration();
     //
     jobConfiguration = jobConfiguration.replace(
@@ -70,7 +72,6 @@ public class FlinkJobSubmitter {
 
   private void submitJobManagerJob(TaskInfo taskInfo) throws ApplicationException {
     LOGGER.debug("Submitting Job manager");
-    YamlFileProvider yamlFileProvider = new YamlFileProvider();
     String jobConfiguration = yamlFileProvider.provideFlinkJobConfiguration();
     k8sObjectApplier.deployJob(
         k8sObjectGenerator.generateConfigurationForJobAndTask(jobConfiguration, taskInfo)
@@ -79,7 +80,6 @@ public class FlinkJobSubmitter {
 
   private void submitJobManagerService(TaskInfo taskInfo) throws ApplicationException {
     LOGGER.debug("Submitting Job manager service");
-    YamlFileProvider yamlFileProvider = new YamlFileProvider();
     String jobConfiguration = yamlFileProvider.provideFlinkJobService();
     k8sObjectApplier.deployService(
         k8sObjectGenerator.generateConfigurationForService(jobConfiguration, taskInfo)
@@ -88,7 +88,6 @@ public class FlinkJobSubmitter {
 
   private void submitTaskManager(TaskInfo taskInfo) throws ApplicationException {
     LOGGER.debug("Submitting Task manager deployment");
-    YamlFileProvider yamlFileProvider = new YamlFileProvider();
     String jobConfiguration = yamlFileProvider.provideFlinkTaskManagerConfiguration();
     k8sObjectApplier.deployDeployment(
         k8sObjectGenerator.generateConfigurationForDeployment(jobConfiguration, taskInfo)

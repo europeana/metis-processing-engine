@@ -22,7 +22,7 @@ public class JobCleaningService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JobCleaningService.class);
 
-  private static final long DAYS_TO_KEEP_JOBS = 0;
+  private static final long DAYS_TO_KEEP_JOBS = 1;
 
   private final CoreV1Api api;
   private final AppsV1Api appsApi;
@@ -47,7 +47,7 @@ public class JobCleaningService {
   /**
    * Scans all the jobs and removed that can be removed
    */
-  @Scheduled(fixedRate = 600000)
+  @Scheduled(fixedRate = 600_000)
   public void executeCleaning() {
 
     if (applicationConfiguration.jobCleaningServiceEnabled()) {
@@ -92,7 +92,7 @@ public class JobCleaningService {
   private void removeService(V1Job job) {
     try {
       api.deleteNamespacedService(
-          job.getMetadata().getLabels().get("job-name") + "service",
+          job.getMetadata().getLabels().get("job-name") + "-service",
           applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove service for {}", job.getMetadata().getName(), e);
@@ -112,7 +112,7 @@ public class JobCleaningService {
   private void removeSecret(V1Job job) {
     try {
       api.deleteNamespacedSecret(
-          job.getMetadata().getLabels().get("job-name") + "-service",
+          job.getMetadata().getLabels().get("job-name") + "-config",
           applicationConfiguration.k8sClusterNamespace()).execute();
     } catch (ApiException e) {
       LOGGER.error("Failed to remove secret for '{}'", job.getMetadata().getName(), e);
@@ -120,11 +120,19 @@ public class JobCleaningService {
   }
 
   private boolean eligibleToBeRemoved(V1Job job) {
-    return job.getStatus() !=null &&
-        job.getStatus().getFailed() != null &&
-        job.getStatus().getFailed() > 0 &&
-        job.getStatus().getStartTime() != null &&
-        job.getStatus().getStartTime().plusDays(DAYS_TO_KEEP_JOBS).isBefore(OffsetDateTime.now());
+    return job.getStatus() != null &&
+        (
+            job.getStatus().getSucceeded() != null &&
+                job.getStatus().getSucceeded() > 0 &&
+                job.getStatus().getStartTime() != null &&
+                job.getStatus().getStartTime().plusDays(DAYS_TO_KEEP_JOBS).isBefore(OffsetDateTime.now())
+        )
+        ||
+        (
+            job.getStatus().getFailed() != null &&
+                job.getStatus().getStartTime() != null &&
+                job.getStatus().getStartTime().plusDays(DAYS_TO_KEEP_JOBS).isBefore(OffsetDateTime.now())
+        );
   }
 
   private List<V1Job> readAllJobs() throws ApiException {

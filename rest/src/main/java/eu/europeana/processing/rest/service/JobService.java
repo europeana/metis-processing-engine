@@ -33,7 +33,6 @@ public class JobService {
     this.k8sObjectApplier = k8sObjectApplier;
   }
 
-
   public JobDetailsDto getTaskInfo(String taskId) throws ApplicationException {
     try {
       TaskInfo taskInfo = taskInfoRepository.findById(taskId).orElseThrow();

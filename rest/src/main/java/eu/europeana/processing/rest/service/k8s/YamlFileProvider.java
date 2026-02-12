@@ -1,23 +1,27 @@
 package eu.europeana.processing.rest.service.k8s;
 
+import eu.europeana.processing.rest.config.ApplicationConfiguration;
 import eu.europeana.processing.rest.exception.ApplicationException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.IOUtils;
-import org.springframework.data.repository.init.ResourceReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.springframework.stereotype.Service;
 
 /**
  * Provides yaml files from the configuration location
  */
+@Service
 public class YamlFileProvider {
 
+  private static final String FLINK_CONFIG_FILE_NAME = "/config.yaml";
+  private static final String SERVICE_CONFIG_FILE_NAME = "/service.yaml";
+  private static final String JOB_CONFIG_FILE_NAME = "/job.yaml";
+  private static final String TASK_MANGER_CONFIG_FLE_NAME = "/task-manager.yaml";
+  private final ApplicationConfiguration applicationConfiguration;
 
-  private static final String FLINK_CONFIG_LOCATION = "/k8s/config.yaml";
-  private static final String SERVICE_CONFIG_LOCATION = "/k8s/service.yaml";
-  private static final String JOB_CONFIG_LOCATION = "/k8s/job.yaml";
-  private static final String TASK_MANGER_CONFIG_LOCATION = "/k8s/task-manager.yaml";
-
+  public YamlFileProvider(ApplicationConfiguration applicationConfiguration) {
+    this.applicationConfiguration = applicationConfiguration;
+  }
   /**
    * Provides flink config
    *
@@ -27,8 +31,8 @@ public class YamlFileProvider {
   public String provideFLinkClusterConfiguration() throws ApplicationException {
 
     try {
-      InputStream is = ResourceReader.class.getResourceAsStream(FLINK_CONFIG_LOCATION);
-      return IOUtils.toString(is, StandardCharsets.UTF_8);
+      Path path = Path.of(applicationConfiguration.jobsConfigurationLocation() + FLINK_CONFIG_FILE_NAME);
+      return Files.readString(path);
     } catch (IOException e) {
       throw new ApplicationException(e);
     }
@@ -40,8 +44,9 @@ public class YamlFileProvider {
    * @throws ApplicationException exception
    */
   public String provideFlinkJobService() throws ApplicationException {
-    try(InputStream is = ResourceReader.class.getResourceAsStream(SERVICE_CONFIG_LOCATION)) {
-      return IOUtils.toString(is, StandardCharsets.UTF_8);
+    try {
+      Path path = Path.of(applicationConfiguration.jobsConfigurationLocation() + SERVICE_CONFIG_FILE_NAME);
+      return Files.readString(path);
     } catch (IOException e) {
       throw new ApplicationException(e);
     }
@@ -54,8 +59,8 @@ public class YamlFileProvider {
    */
   public String provideFlinkJobConfiguration() throws ApplicationException {
     try {
-      InputStream is = ResourceReader.class.getResourceAsStream(JOB_CONFIG_LOCATION);
-      return IOUtils.toString(is, StandardCharsets.UTF_8);
+      Path path = Path.of(applicationConfiguration.jobsConfigurationLocation() + JOB_CONFIG_FILE_NAME);
+      return Files.readString(path);
     } catch (IOException e) {
       throw new ApplicationException(e);
     }
@@ -68,8 +73,8 @@ public class YamlFileProvider {
    */
   public String provideFlinkTaskManagerConfiguration() throws ApplicationException {
     try {
-      InputStream is = ResourceReader.class.getResourceAsStream(TASK_MANGER_CONFIG_LOCATION);
-      return IOUtils.toString(is, StandardCharsets.UTF_8);
+      Path path = Path.of(applicationConfiguration.jobsConfigurationLocation() + TASK_MANGER_CONFIG_FLE_NAME);
+      return Files.readString(path);
     } catch (IOException e) {
       throw new ApplicationException(e);
     }

@@ -5,6 +5,9 @@ import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.util.Config;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -33,12 +36,17 @@ public class ApplicationSpringContextConfiguration {
 
     LOGGER.info("Initializing CoreV1Api");
 
-    ApiClient client = Config.fromToken(
-        applicationConfiguration.k8sClusterLocation(),
-        applicationConfiguration.k8sClusterAccessKey()
-    );
+    try {
+      ApiClient client = Config.fromToken(
+          applicationConfiguration.k8sClusterLocation(),
+          Files.readString(Path.of(applicationConfiguration.k8sClusterAccessKeyFileLocation())).trim()
+      );
+      return new CoreV1Api(client);
 
-    return new CoreV1Api(client);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
   /**
@@ -50,11 +58,17 @@ public class ApplicationSpringContextConfiguration {
   @Bean
   public AppsV1Api appsApi(ApplicationConfiguration applicationConfiguration) {
     LOGGER.info("Initializing AppsV1Api");
-    ApiClient client = Config.fromToken(
-        applicationConfiguration.k8sClusterLocation(),
-        applicationConfiguration.k8sClusterAccessKey()
-    );
-    return new AppsV1Api(client);
+
+    try {
+      ApiClient client = Config.fromToken(
+          applicationConfiguration.k8sClusterLocation(),
+          Files.readString(Path.of(applicationConfiguration.k8sClusterAccessKeyFileLocation())).trim()
+      );
+      return new AppsV1Api(client);
+
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -66,10 +80,16 @@ public class ApplicationSpringContextConfiguration {
   @Bean
   public BatchV1Api batchApi(ApplicationConfiguration applicationConfiguration) {
     LOGGER.info("Initializing BatchV1Api");
-    ApiClient client = Config.fromToken(
-        applicationConfiguration.k8sClusterLocation(),
-        applicationConfiguration.k8sClusterAccessKey()
-    );
-    return new BatchV1Api(client);
+
+    try {
+      ApiClient client = Config.fromToken(
+          applicationConfiguration.k8sClusterLocation(),
+          Files.readString(Path.of(applicationConfiguration.k8sClusterAccessKeyFileLocation())).trim()
+      );
+      return new BatchV1Api(client);
+
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

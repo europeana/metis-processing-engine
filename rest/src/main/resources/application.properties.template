@@ -43,8 +43,10 @@ logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
 # ===============================
 
 app.k8sClusterLocation=
-app.k8sClusterAccessKey=
-app.k8sClusterNamespace=europeana-processing-engine-acceptance
+app.k8sClusterAccessKeyFileLocation=
+app.k8sClusterNamespace=
+app.jobsConfigurationLocation=
+app.jobCleaningServiceEnabled=false
 
 app.oai-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-oai:1.0-SNAPSHOT
 app.validation-image=registry.paas.psnc.pl/ecloud-poc/metis-processing-engine-validation:1.0-SNAPSHOT
