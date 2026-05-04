@@ -32,6 +32,29 @@ public final class K8sObjectNameGenerator {
   }
 
   /**
+   * Generates job name for given task
+   * @param taskInfo {@link TaskInfo}
+   * @return job name
+   */
+  public static String generateJobNameForJobManager(TaskInfo taskInfo) {
+    return taskInfo.getTaskName()
+                   .toLowerCase(Locale.getDefault())
+                   .replace("_", "-") + "-job-manager-job-" + taskInfo.getTaskId();
+
+  }
+
+  /**
+   * Generates job name for given task
+   * @param taskInfo {@link TaskInfo}
+   * @return job name
+   */
+  public static String generateJobNameForTaskManager(TaskInfo taskInfo) {
+    return taskInfo.getTaskName()
+                   .toLowerCase(Locale.getDefault())
+                   .replace("_", "-") + "-task-mananger-job-" + taskInfo.getTaskId();
+  }
+
+  /**
    * Generates secret name for given task
    * @param taskInfo {@link TaskInfo}
    * @return secret name

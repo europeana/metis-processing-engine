@@ -73,12 +73,27 @@ public class K8sObjectGenerator {
    * @param taskInfo task definition
    * @return {@link V1Job}
    */
-  public V1Job generateConfigurationForJobAndTask(String config, TaskInfo taskInfo) {
+  public V1Job generateConfigurationForJobManagerJobAndTask(String config, TaskInfo taskInfo) {
     V1Job jobDefinition = Yaml.loadAs(config, V1Job.class);
     setupConfigVolumeName(taskInfo, jobDefinition);
-    setupJobName(jobDefinition, taskInfo);
+    setupJobManagerJobName(jobDefinition, taskInfo);
     setupImageName(jobDefinition, taskInfo);
     setupJobParameters(jobDefinition, taskInfo);
+    LOGGER.info("Generated Job Definition: {}", jobDefinition);
+    return jobDefinition;
+  }
+
+  /**
+   * Generates k8s job specific for given task
+   * @param config content of the configuration file
+   * @param taskInfo task definition
+   * @return {@link V1Job}
+   */
+  public V1Job generateConfigurationForTaskManagerJobAndTask(String config, TaskInfo taskInfo) {
+    V1Job jobDefinition = Yaml.loadAs(config, V1Job.class);
+    setupConfigVolumeName(taskInfo, jobDefinition);
+    setupTaskManagerJobName(jobDefinition, taskInfo);
+    setupImageName(jobDefinition, taskInfo);
     LOGGER.info("Generated Job Definition: {}", jobDefinition);
     return jobDefinition;
   }
@@ -157,8 +172,12 @@ public class K8sObjectGenerator {
     deploymentDefinition.getSpec().getTemplate().getSpec().getContainers().get(0).setImage(imageName);
   }
 
-  private void setupJobName(V1Job jobDefinition, TaskInfo taskInfo) {
-    jobDefinition.getMetadata().setName(K8sObjectNameGenerator.generateJobName(taskInfo));
+  private void setupJobManagerJobName(V1Job jobDefinition, TaskInfo taskInfo) {
+    jobDefinition.getMetadata().setName(K8sObjectNameGenerator.generateJobNameForJobManager(taskInfo));
+  }
+
+  private void setupTaskManagerJobName(V1Job jobDefinition, TaskInfo taskInfo) {
+    jobDefinition.getMetadata().setName(K8sObjectNameGenerator.generateJobNameForTaskManager(taskInfo));
   }
 
   private void setupConfigVolumeName(TaskInfo taskInfo, V1Job jobDefinition) {
@@ -180,7 +199,7 @@ public class K8sObjectGenerator {
 
   public V1Service generateConfigurationForService(String config, TaskInfo taskInfo) {
     V1Service service = Yaml.loadAs(config, V1Service.class);
-    service.getSpec().setSelector(Map.of("job-name", K8sObjectNameGenerator.generateJobName(taskInfo)));
+    service.getSpec().setSelector(Map.of("job-name", K8sObjectNameGenerator.generateJobNameForJobManager(taskInfo)));
     service.getMetadata().setName(K8sObjectNameGenerator.generateServiceName(taskInfo));
     return service;
   }

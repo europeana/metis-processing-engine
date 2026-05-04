@@ -188,8 +188,8 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
 
     @Override
     public void addSplits(List<DataPartition> splits) {
-        LOGGER.debug("Adding splits: {}", splits);
-        currentSplits = new LinkedList<>(splits);
+        LOGGER.info("Adding splits: {}", splits);
+        currentSplits.addAll(splits);
         readerAvailable.complete(null);
     }
 

@@ -48,7 +48,7 @@ public class FlinkJobSubmitter {
     submitConfiguration(taskInfo);
     submitJobManagerJob(taskInfo);
     submitJobManagerService(taskInfo);
-    submitTaskManager(taskInfo);
+    submitTaskManagerJob(taskInfo);
     LOGGER.info("Flink Job submitted {}", taskInfo);
   }
 
@@ -74,7 +74,7 @@ public class FlinkJobSubmitter {
     LOGGER.debug("Submitting Job manager");
     String jobConfiguration = yamlFileProvider.provideFlinkJobConfiguration();
     k8sObjectApplier.deployJob(
-        k8sObjectGenerator.generateConfigurationForJobAndTask(jobConfiguration, taskInfo)
+        k8sObjectGenerator.generateConfigurationForJobManagerJobAndTask(jobConfiguration, taskInfo)
     );
   }
 
@@ -86,11 +86,9 @@ public class FlinkJobSubmitter {
     );
   }
 
-  private void submitTaskManager(TaskInfo taskInfo) throws ApplicationException {
-    LOGGER.debug("Submitting Task manager deployment");
+  private void submitTaskManagerJob(TaskInfo taskInfo) throws ApplicationException {
+    LOGGER.debug("Submitting Task manager job");
     String jobConfiguration = yamlFileProvider.provideFlinkTaskManagerConfiguration();
-    k8sObjectApplier.deployDeployment(
-        k8sObjectGenerator.generateConfigurationForDeployment(jobConfiguration, taskInfo)
-    );
+    k8sObjectApplier.deployJob(k8sObjectGenerator.generateConfigurationForTaskManagerJobAndTask(jobConfiguration, taskInfo));
   }
 }
