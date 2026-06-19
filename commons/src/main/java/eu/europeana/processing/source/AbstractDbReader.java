@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.flink.api.connector.source.ReaderOutput;
@@ -175,7 +174,7 @@ public abstract class AbstractDbReader<R> implements SourceReader<R, DataPartiti
     public List<DataPartition> snapshotState(long checkpointId) {
         LOGGER.info("Storing snapshot for checkpoint with id: {}, snapshot: {}", checkpointId, currentSplit);
         this.currentCheckpointId = checkpointId;
-        return Optional.ofNullable(currentSplit).stream().toList();
+        return new ArrayList<>(currentSplits);
     }
 
     @Override
